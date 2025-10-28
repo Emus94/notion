@@ -1,4 +1,89 @@
-<a class="weatherwidget-io" href="https://forecast7.com/pl/54d2618d64/pruszcz-gdanski/" data-label_1="PRUSZCZ GDAŃSKI" data-label_2="WEATHER" data-font="Courier New" data-icons="Climacons Animated" data-mode="Forecast" data-days="3" data-theme="original" data-accent="rgba(213, 130, 130, 0.02)" >PRUSZCZ GDAŃSKI WEATHER</a>
-<script>
-!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
-</script>
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strona Główna - Narzędzia</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .link-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+        }
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .link-card h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .link-card p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .weather-section {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 2px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Narzędzia i Aplikacje</h1>
+        <div class="links">
+            <a href="azure-label.html" class="link-card">
+                <h2>🏷️ Azure Label</h2>
+                <p>Narzędzie do etykietowania obrazów</p>
+            </a>
+            <a href="data.html" class="link-card">
+                <h2>🕐 Zegar</h2>
+                <p>Wyświetlanie czasu i daty</p>
+            </a>
+            <a href="powitanie.html" class="link-card">
+                <h2>👋 Powitanie</h2>
+                <p>Powitanie z datą</p>
+            </a>
+        </div>
+
+        <div class="weather-section">
+            <h2 style="text-align: center; margin-bottom: 20px; color: #333;">🌤️ Pogoda</h2>
+            <a class="weatherwidget-io" href="https://forecast7.com/pl/54d2618d64/pruszcz-gdanski/" data-label_1="PRUSZCZ GDAŃSKI" data-label_2="WEATHER" data-font="Courier New" data-icons="Climacons Animated" data-mode="Forecast" data-days="3" data-theme="original" data-accent="rgba(213, 130, 130, 0.02)" >PRUSZCZ GDAŃSKI WEATHER</a>
+            <script>
+            !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+            </script>
+        </div>
+    </div>
+</body>
+</html>

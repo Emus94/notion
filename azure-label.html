@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Label Clone - Narzędzie do Etykietowania</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            background: #f5f5f5;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+
+        .sidebar h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .canvas-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            position: relative;
+        }
+
+        #imageCanvas {
+            border: 2px solid #ddd;
+            max-width: 100%;
+            cursor: crosshair;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .right-panel {
+            background: #f5f5f5;
+            padding: 20px;
+            border-left: 1px solid #ddd;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .right-panel h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #0078d4;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #005a9e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .file-input-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            display: none;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px;
+            background: #0078d4;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            background: #005a9e;
+        }
+
+        .label-input-section {
+            margin-top: 20px;
+        }
+
+        .label-input-section input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .label-input-section input:focus {
+            outline: none;
+            border-color: #0078d4;
+        }
+
+        .label-list {
+            margin-top: 15px;
+        }
+
+        .label-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .label-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .label-item.active {
+            background: #e3f2fd;
+            box-shadow: 0 2px 8px rgba(0, 120, 212, 0.3);
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: #333;
+            transform: scale(1.2);
+        }
+
+        .annotations-list {
+            margin-top: 10px;
+        }
+
+        .annotation-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            border-left: 4px solid;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .annotation-info {
+            flex: 1;
+        }
+
+        .annotation-label {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .annotation-coords {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .stats {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .instructions h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #856404;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+
+        .no-image-message {
+            text-align: center;
+            color: #999;
+            font-size: 18px;
+            padding: 40px;
+        }
+
+        .export-section {
+            margin-top: 20px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar, .right-panel {
+                border: none;
+                border-top: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏷️ Azure Label Clone</h1>
+            <div class="header-buttons">
+                <button class="btn btn-success" onclick="exportAnnotations()">
+                    📥 Eksportuj JSON
+                </button>
+                <button class="btn btn-secondary" onclick="clearAll()">
+                    🗑️ Wyczyść wszystko
+                </button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Lewy panel -->
+            <div class="sidebar">
+                <h2>📁 Obraz</h2>
+                <div class="file-input-wrapper">
+                    <input type="file" id="imageInput" accept="image/*" onchange="loadImage(event)">
+                    <label for="imageInput" class="file-input-label">
+                        📂 Wybierz obraz
+                    </label>
+                </div>
+
+                <div class="instructions">
+                    <h3>Instrukcje:</h3>
+                    <ul>
+                        <li>Wczytaj obraz</li>
+                        <li>Dodaj etykiety</li>
+                        <li>Wybierz etykietę</li>
+                        <li>Rysuj prostokąty na obrazie</li>
+                        <li>Eksportuj dane</li>
+                    </ul>
+                </div>
+
+                <h2>🎨 Etykiety</h2>
+                <div class="label-input-section">
+                    <input type="text" id="labelInput" placeholder="Nazwa etykiety (np. 'kot', 'pies')">
+                    <div class="color-picker" id="colorPicker"></div>
+                    <button class="btn btn-primary" onclick="addLabel()" style="width: 100%;">
+                        ➕ Dodaj etykietę
+                    </button>
+                </div>
+
+                <div class="label-list" id="labelList"></div>
+            </div>
+
+            <!-- Środkowy panel - Canvas -->
+            <div class="canvas-container">
+                <canvas id="imageCanvas"></canvas>
+                <div id="noImageMessage" class="no-image-message">
+                    👆 Wczytaj obraz, aby rozpocząć etykietowanie
+                </div>
+            </div>
+
+            <!-- Prawy panel -->
+            <div class="right-panel">
+                <h2>📊 Statystyki</h2>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Etykiety:</span>
+                        <span class="stat-value" id="statsLabels">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Adnotacje:</span>
+                        <span class="stat-value" id="statsAnnotations">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Obraz:</span>
+                        <span class="stat-value" id="statsImage">Brak</span>
+                    </div>
+                </div>
+
+                <h2>📝 Adnotacje</h2>
+                <div class="annotations-list" id="annotationsList">
+                    <p style="color: #999; text-align: center; padding: 20px;">
+                        Brak adnotacji
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Globalne zmienne
+        const canvas = document.getElementById('imageCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentImage = null;
+        let labels = [];
+        let annotations = [];
+        let selectedLabel = null;
+        let isDrawing = false;
+        let startX, startY;
+        let currentColor = '#FF6B6B';
+
+        // Kolory dostępne dla etykiet
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
+
+        // Inicjalizacja kolorów
+        function initColorPicker() {
+            const colorPicker = document.getElementById('colorPicker');
+            colorPicker.innerHTML = '';
+            colors.forEach(color => {
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'color-option';
+                colorDiv.style.backgroundColor = color;
+                if (color === currentColor) {
+                    colorDiv.classList.add('active');
+                }
+                colorDiv.onclick = () => selectColor(color);
+                colorPicker.appendChild(colorDiv);
+            });
+        }
+
+        function selectColor(color) {
+            currentColor = color;
+            document.querySelectorAll('.color-option').forEach(el => {
+                el.classList.remove('active');
+                if (el.style.backgroundColor === color) {
+                    el.classList.add('active');
+                }
+            });
+        }
+
+        // Wczytywanie obrazu
+        function loadImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    currentImage = img;
+
+                    // Dopasowanie rozmiaru canvas
+                    const maxWidth = 800;
+                    const maxHeight = 600;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        height = (height * maxWidth) / width;
+                        width = maxWidth;
+                    }
+                    if (height > maxHeight) {
+                        width = (width * maxHeight) / height;
+                        height = maxHeight;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvas.style.display = 'block';
+                    document.getElementById('noImageMessage').style.display = 'none';
+
+                    redrawCanvas();
+                    updateStats();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Dodawanie etykiety
+        function addLabel() {
+            const input = document.getElementById('labelInput');
+            const labelName = input.value.trim();
+
+            if (!labelName) {
+                alert('Wprowadź nazwę etykiety!');
+                return;
+            }
+
+            if (labels.find(l => l.name === labelName)) {
+                alert('Etykieta o tej nazwie już istnieje!');
+                return;
+            }
+
+            const label = {
+                id: Date.now(),
+                name: labelName,
+                color: currentColor
+            };
+
+            labels.push(label);
+            input.value = '';
+            renderLabels();
+            updateStats();
+        }
+
+        // Renderowanie listy etykiet
+        function renderLabels() {
+            const labelList = document.getElementById('labelList');
+            labelList.innerHTML = '';
+
+            labels.forEach(label => {
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'label-item' + (selectedLabel?.id === label.id ? ' active' : '');
+                labelDiv.style.borderLeftColor = label.color;
+                labelDiv.innerHTML = `
+                    <span>${label.name}</span>
+                    <button class="btn btn-danger" onclick="deleteLabel(${label.id})" title="Usuń">❌</button>
+                `;
+                labelDiv.onclick = (e) => {
+                    if (e.target.tagName !== 'BUTTON') {
+                        selectLabel(label.id);
+                    }
+                };
+                labelList.appendChild(labelDiv);
+            });
+        }
+
+        // Wybór etykiety
+        function selectLabel(labelId) {
+            selectedLabel = labels.find(l => l.id === labelId);
+            renderLabels();
+        }
+
+        // Usuwanie etykiety
+        function deleteLabel(labelId) {
+            if (confirm('Czy na pewno chcesz usunąć tę etykietę? Wszystkie powiązane adnotacje zostaną usunięte.')) {
+                labels = labels.filter(l => l.id !== labelId);
+                annotations = annotations.filter(a => a.labelId !== labelId);
+                if (selectedLabel?.id === labelId) {
+                    selectedLabel = null;
+                }
+                renderLabels();
+                renderAnnotations();
+                redrawCanvas();
+                updateStats();
+            }
+        }
+
+        // Rysowanie na canvas
+        canvas.addEventListener('mousedown', (e) => {
+            if (!currentImage || !selectedLabel) {
+                if (!currentImage) {
+                    alert('Najpierw wczytaj obraz!');
+                } else {
+                    alert('Najpierw wybierz etykietę!');
+                }
+                return;
+            }
+
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            startX = e.clientX - rect.left;
+            startY = e.clientY - rect.top;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+
+            redrawCanvas();
+
+            // Rysowanie tymczasowego prostokąta
+            ctx.strokeStyle = selectedLabel.color;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (!isDrawing) return;
+            isDrawing = false;
+
+            const rect = canvas.getBoundingClientRect();
+            const endX = e.clientX - rect.left;
+            const endY = e.clientY - rect.top;
+
+            const width = endX - startX;
+            const height = endY - startY;
+
+            // Sprawdzenie minimalnego rozmiaru
+            if (Math.abs(width) < 10 || Math.abs(height) < 10) {
+                redrawCanvas();
+                return;
+            }
+
+            // Normalizacja współrzędnych
+            const annotation = {
+                id: Date.now(),
+                labelId: selectedLabel.id,
+                labelName: selectedLabel.name,
+                color: selectedLabel.color,
+                x: Math.min(startX, endX),
+                y: Math.min(startY, endY),
+                width: Math.abs(width),
+                height: Math.abs(height)
+            };
+
+            annotations.push(annotation);
+            redrawCanvas();
+            renderAnnotations();
+            updateStats();
+        });
+
+        // Przerysowanie canvas
+        function redrawCanvas() {
+            if (!currentImage) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+
+            // Rysowanie wszystkich adnotacji
+            annotations.forEach(ann => {
+                ctx.strokeStyle = ann.color;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(ann.x, ann.y, ann.width, ann.height);
+
+                // Etykieta
+                ctx.fillStyle = ann.color;
+                ctx.fillRect(ann.x, ann.y - 25, ctx.measureText(ann.labelName).width + 10, 25);
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText(ann.labelName, ann.x + 5, ann.y - 8);
+            });
+        }
+
+        // Renderowanie listy adnotacji
+        function renderAnnotations() {
+            const annotationsList = document.getElementById('annotationsList');
+
+            if (annotations.length === 0) {
+                annotationsList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Brak adnotacji</p>';
+                return;
+            }
+
+            annotationsList.innerHTML = '';
+            annotations.forEach(ann => {
+                const annDiv = document.createElement('div');
+                annDiv.className = 'annotation-item';
+                annDiv.style.borderLeftColor = ann.color;
+                annDiv.innerHTML = `
+                    <div class="annotation-info">
+                        <div class="annotation-label">${ann.labelName}</div>
+                        <div class="annotation-coords">
+                            x: ${Math.round(ann.x)}, y: ${Math.round(ann.y)},
+                            w: ${Math.round(ann.width)}, h: ${Math.round(ann.height)}
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteAnnotation(${ann.id})">❌</button>
+                `;
+                annotationsList.appendChild(annDiv);
+            });
+        }
+
+        // Usuwanie adnotacji
+        function deleteAnnotation(annId) {
+            annotations = annotations.filter(a => a.id !== annId);
+            redrawCanvas();
+            renderAnnotations();
+            updateStats();
+        }
+
+        // Aktualizacja statystyk
+        function updateStats() {
+            document.getElementById('statsLabels').textContent = labels.length;
+            document.getElementById('statsAnnotations').textContent = annotations.length;
+            document.getElementById('statsImage').textContent = currentImage ? 'Wczytany' : 'Brak';
+        }
+
+        // Eksport do JSON
+        function exportAnnotations() {
+            if (annotations.length === 0) {
+                alert('Brak adnotacji do eksportu!');
+                return;
+            }
+
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                imageInfo: {
+                    width: canvas.width,
+                    height: canvas.height
+                },
+                labels: labels,
+                annotations: annotations
+            };
+
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `annotations_${Date.now()}.json`;
+            link.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        // Czyszczenie wszystkiego
+        function clearAll() {
+            if (confirm('Czy na pewno chcesz wyczyścić wszystkie dane?')) {
+                labels = [];
+                annotations = [];
+                selectedLabel = null;
+                currentImage = null;
+                canvas.style.display = 'none';
+                document.getElementById('noImageMessage').style.display = 'block';
+                document.getElementById('imageInput').value = '';
+                renderLabels();
+                renderAnnotations();
+                updateStats();
+            }
+        }
+
+        // Inicjalizacja
+        initColorPicker();
+        updateStats();
+    </script>
+</body>
+</html>
