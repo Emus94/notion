@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Przypomnienia</string>
+    <string name="add">Dodaj przypomnienie</string>
+    <string name="delete">Usuń</string>
+    <string name="save">Zapisz</string>
+    <string name="empty_hint">Brak przypomnień. Dotknij +, aby dodać.</string>
+    <string name="label_hint">Treść przypomnienia</string>
+    <string name="pick_date">Data</string>
+    <string name="pick_time">Godzina</string>
+    <string name="snooze">Drzemka (5 min)</string>
+    <string name="dismiss">Wyłącz alarm</string>
+    <string name="alarm_ringing">Przypomnienie</string>
+    <string name="err_past">Wybierz czas w przyszłości</string>
+    <string name="saved">Zapisano</string>
+    <string name="untitled">(bez nazwy)</string>
+    <string name="done">Zakończone</string>
+</resources>

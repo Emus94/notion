@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.ReminderAlarm" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#1D3557</item>
+        <item name="colorPrimaryDark">#0D1B2A</item>
+        <item name="colorAccent">#E63946</item>
+    </style>
+
+    <style name="Theme.ReminderAlarm.Fullscreen" parent="Theme.ReminderAlarm">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+</resources>
