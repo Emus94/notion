@@ -61,27 +61,34 @@ class AlarmSoundService : Service() {
 
     private fun startRinging(vibrateOnly: Boolean) {
         if (!vibrateOnly) {
-            // Pick the alarm tone (fallback to ringtone/notification).
-            val uri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM)
+            // User-picked tone first, then system default, then any fallback.
+            val uri = AlarmScreenSettings.getSoundUri(this)
+                ?: RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM)
                 ?: RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE)
                 ?: RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_NOTIFICATION)
 
-            ringtone = RingtoneManager.getRingtone(this, uri).apply {
+            // Apply target volume to the alarm stream before starting playback.
+            val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            val maxVol = am.getStreamMaxVolume(AudioManager.STREAM_ALARM).coerceAtLeast(1)
+            val userVolumePct = AlarmScreenSettings.getVolume(this)
+            if (userVolumePct >= 0) {
+                val target = (maxVol * userVolumePct / 100).coerceIn(0, maxVol)
+                runCatching {
+                    am.setStreamVolume(AudioManager.STREAM_ALARM, target, 0)
+                }
+            } else if (am.getStreamVolume(AudioManager.STREAM_ALARM) == 0) {
+                runCatching {
+                    am.setStreamVolume(AudioManager.STREAM_ALARM, maxVol / 2, 0)
+                }
+            }
+
+            ringtone = RingtoneManager.getRingtone(this, uri)?.apply {
                 audioAttributes = AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     isLooping = true
-                }
-                // Make sure alarm volume isn't zero.
-                val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                if (am.getStreamVolume(AudioManager.STREAM_ALARM) == 0) {
-                    am.setStreamVolume(
-                        AudioManager.STREAM_ALARM,
-                        am.getStreamMaxVolume(AudioManager.STREAM_ALARM) / 2,
-                        0
-                    )
                 }
                 play()
             }

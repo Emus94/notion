@@ -3,12 +3,16 @@ package com.example.reminderalarm
 import android.app.AlertDialog
 import android.app.KeyguardManager
 import android.content.Context
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
+import android.view.View
 import android.view.WindowManager
 import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -21,12 +25,15 @@ class AlarmActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAlarmBinding
     private var reminderId: Long = -1L
+    private var isPreview: Boolean = false
 
     companion object {
+        const val EXTRA_PREVIEW = "preview"
+
         /**
          * Static reference to the currently shown AlarmActivity so the
          * service can finish it on auto-snooze. Only set while the
-         * activity is alive.
+         * activity is alive and not in preview mode.
          */
         @Volatile
         var current: AlarmActivity? = null
@@ -34,7 +41,9 @@ class AlarmActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        current = this
+
+        isPreview = intent.getBooleanExtra(EXTRA_PREVIEW, false)
+        if (!isPreview) current = this
 
         // Show over lockscreen and turn screen on.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -65,30 +74,114 @@ class AlarmActivity : AppCompatActivity() {
         binding = ActivityAlarmBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        populateContent()
+        applyUserLayout()
+
+        binding.btnDismiss.setOnClickListener {
+            if (isPreview) finish() else dismiss()
+        }
+        binding.btnSnooze.setOnClickListener {
+            if (isPreview) finish() else showSnoozeDialog()
+        }
+    }
+
+    private fun populateContent() {
+        val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+        if (isPreview) {
+            binding.alarmHeader.text = getString(R.string.preview_header)
+            binding.alarmLabel.text = getString(R.string.preview_label)
+            binding.alarmNotes.text = getString(R.string.preview_notes)
+            binding.alarmNotes.visibility = View.VISIBLE
+            binding.alarmTime.text = timeFmt.format(Date())
+            return
+        }
+
         reminderId = intent.getLongExtra(AlarmScheduler.EXTRA_ID, -1L)
         val reminder = ReminderStore.byId(this, reminderId)
 
         binding.alarmLabel.text = reminder?.label?.takeIf { it.isNotBlank() }
             ?: getString(R.string.app_name)
-        val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
         binding.alarmTime.text = timeFmt.format(
             Date(reminder?.triggerAtMillis ?: System.currentTimeMillis())
         )
 
         val notes = reminder?.notes.orEmpty()
         if (notes.isBlank()) {
-            binding.alarmNotes.visibility = android.view.View.GONE
+            binding.alarmNotes.visibility = View.GONE
         } else {
-            binding.alarmNotes.visibility = android.view.View.VISIBLE
+            binding.alarmNotes.visibility = View.VISIBLE
             binding.alarmNotes.text = notes
         }
+    }
 
-        binding.btnDismiss.setOnClickListener { dismiss() }
-        binding.btnSnooze.setOnClickListener { showSnoozeDialog() }
+    /**
+     * Applies the user-selected background color, text colors (derived
+     * from luminance) and layout preset. Reorders the three content
+     * elements directly in the root LinearLayout so the preset changes
+     * what shows up first on screen.
+     */
+    private fun applyUserLayout() {
+        val bg = AlarmScreenSettings.getBackgroundColor(this)
+        binding.alarmRoot.setBackgroundColor(bg)
+
+        val lightText = ColorUtils.calculateLuminance(bg) < 0.5
+        val textColor = if (lightText) Color.WHITE else Color.BLACK
+        val subtleColor = if (lightText) 0xFFB8D0E7.toInt() else 0xFF555555.toInt()
+
+        binding.alarmHeader.setTextColor(subtleColor)
+        binding.alarmTime.setTextColor(textColor)
+        binding.alarmLabel.setTextColor(textColor)
+        binding.alarmNotes.setTextColor(subtleColor)
+
+        val preset = AlarmScreenSettings.getLayout(this)
+        val root = binding.alarmRoot
+
+        // Remove the three reorderable elements so we can re-add them
+        // in the desired order right after the header.
+        root.removeView(binding.alarmTime)
+        root.removeView(binding.alarmLabel)
+        root.removeView(binding.alarmNotes)
+        val afterHeader = root.indexOfChild(binding.alarmHeader) + 1
+
+        val order: List<TextView> = when (preset) {
+            AlarmScreenSettings.Layout.TIME_FOCUS ->
+                listOf(binding.alarmTime, binding.alarmLabel, binding.alarmNotes)
+            AlarmScreenSettings.Layout.TASK_FOCUS ->
+                listOf(binding.alarmLabel, binding.alarmNotes, binding.alarmTime)
+            AlarmScreenSettings.Layout.MINIMAL ->
+                listOf(binding.alarmLabel, binding.alarmNotes)
+        }
+        order.forEachIndexed { i, view -> root.addView(view, afterHeader + i) }
+        if (preset == AlarmScreenSettings.Layout.MINIMAL) {
+            binding.alarmTime.visibility = View.GONE
+        } else {
+            binding.alarmTime.visibility = View.VISIBLE
+        }
+
+        when (preset) {
+            AlarmScreenSettings.Layout.TIME_FOCUS -> {
+                binding.alarmTime.textSize = 72f
+                binding.alarmLabel.textSize = 24f
+                binding.alarmNotes.textSize = 16f
+            }
+            AlarmScreenSettings.Layout.TASK_FOCUS -> {
+                binding.alarmTime.textSize = 26f
+                binding.alarmLabel.textSize = 42f
+                binding.alarmNotes.textSize = 22f
+            }
+            AlarmScreenSettings.Layout.MINIMAL -> {
+                binding.alarmLabel.textSize = 42f
+                binding.alarmNotes.textSize = 22f
+            }
+        }
     }
 
     override fun onBackPressed() {
-        // Prevent dismissing with back button — must use the buttons.
+        if (isPreview) {
+            super.onBackPressed()
+        }
+        // Otherwise ignore — user must press a button.
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

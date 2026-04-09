@@ -45,4 +45,26 @@
     <string name="overlay_title">Wyświetlanie nad aplikacjami</string>
     <string name="overlay_message">Aby alarm mógł się pokazać na pełnym ekranie nawet gdy używasz innej aplikacji, włącz dla Przypomnień uprawnienie \"Wyświetlanie nad innymi aplikacjami\".</string>
     <string name="overlay_open_settings">Otwórz ustawienia</string>
+
+    <string name="settings_title">Ustawienia</string>
+    <string name="section_sound">Dźwięk</string>
+    <string name="section_alarm_screen">Wygląd alarmu</string>
+    <string name="alarm_sound">Dzwonek alarmu</string>
+    <string name="pick_sound">Wybierz dźwięk</string>
+    <string name="sound_system_default">Domyślny systemowy</string>
+    <string name="volume">Głośność</string>
+    <string name="volume_system">Używaj głośności systemowej</string>
+    <string name="volume_pct">%1$d%%</string>
+    <string name="use_system_volume">Użyj głośności systemowej</string>
+    <string name="layout_preset">Układ ekranu</string>
+    <string name="layout_time_focus">Godzina jako główna (domyślnie)</string>
+    <string name="layout_task_focus">Zadanie jako główne</string>
+    <string name="layout_minimal">Minimalny (bez godziny)</string>
+    <string name="bg_color">Kolor tła</string>
+    <string name="pick_bg_color">Wybierz kolor tła</string>
+    <string name="preview_alarm">Podgląd alarmu</string>
+
+    <string name="preview_header">Podgląd</string>
+    <string name="preview_label">Przykładowe zadanie</string>
+    <string name="preview_notes">Przykładowa notatka do przypomnienia — tak będą wyglądać Twoje notatki na ekranie alarmu.</string>
 </resources>

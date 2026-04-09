@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:title="@string/settings_title"
+        app:navigationIconTint="@android:color/white"
+        app:titleTextColor="@android:color/white" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- SOUND -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/section_sound"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/alarm_sound"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/currentSound"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textSize="14sp"
+                android:textColor="#888" />
+
+            <Button
+                android:id="@+id/btnPickSound"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/pick_sound" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/volume"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/volumeLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="#888" />
+
+            <SeekBar
+                android:id="@+id/volumeBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100" />
+
+            <Button
+                android:id="@+id/btnSystemVolume"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/use_system_volume" />
+
+            <!-- ALARM APPEARANCE -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/section_alarm_screen"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/layout_preset"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/layoutGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/layoutTimeFocus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/layout_time_focus" />
+
+                <RadioButton
+                    android:id="@+id/layoutTaskFocus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/layout_task_focus" />
+
+                <RadioButton
+                    android:id="@+id/layoutMinimal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/layout_minimal" />
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/bg_color"
+                android:textStyle="bold" />
+
+            <View
+                android:id="@+id/bgPreview"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="6dp" />
+
+            <Button
+                android:id="@+id/btnPickBg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/pick_bg_color" />
+
+            <Button
+                android:id="@+id/btnPreview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/preview_alarm" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

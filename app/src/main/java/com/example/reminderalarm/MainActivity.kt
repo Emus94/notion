@@ -9,15 +9,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.view.LayoutInflater
 import android.view.View
-import android.widget.SeekBar
-import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.reminderalarm.databinding.ActivityMainBinding
@@ -48,6 +44,10 @@ class MainActivity : BaseActivity() {
             when (item.itemId) {
                 R.id.action_theme -> { showThemeDialog(); true }
                 R.id.action_mode -> { showModeDialog(); true }
+                R.id.action_settings -> {
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                    true
+                }
                 else -> false
             }
         }
@@ -140,59 +140,15 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showCustomColorDialog() {
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_color_picker, null)
-        val preview = view.findViewById<View>(R.id.preview)
-        val hexLabel = view.findViewById<TextView>(R.id.hexLabel)
-        val hueBar = view.findViewById<SeekBar>(R.id.hueBar)
-        val satBar = view.findViewById<SeekBar>(R.id.satBar)
-        val valBar = view.findViewById<SeekBar>(R.id.valBar)
-
-        val startColor = ThemeManager.customPrimary(this)
-        val hsv = FloatArray(3)
-        Color.colorToHSV(startColor, hsv)
-        hueBar.progress = hsv[0].toInt()
-        satBar.progress = (hsv[1] * 100).toInt().coerceAtLeast(50)
-        valBar.progress = (hsv[2] * 100).toInt().coerceAtLeast(50)
-
-        fun update() {
-            val color = Color.HSVToColor(
-                floatArrayOf(
-                    hueBar.progress.toFloat(),
-                    satBar.progress / 100f,
-                    valBar.progress / 100f
-                )
-            )
-            preview.setBackgroundColor(color)
-            hexLabel.text = String.format("#%06X", 0xFFFFFF and color)
+        ColorPickerHelper.show(
+            context = this,
+            title = getString(R.string.custom_color_title),
+            initialColor = ThemeManager.customPrimary(this)
+        ) { color ->
+            ThemeManager.setCustom(this, color)
+            updateWidgets()
+            recreate()
         }
-        update()
-
-        val listener = object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(sb: SeekBar?, p: Int, fromUser: Boolean) { update() }
-            override fun onStartTrackingTouch(sb: SeekBar?) {}
-            override fun onStopTrackingTouch(sb: SeekBar?) {}
-        }
-        hueBar.setOnSeekBarChangeListener(listener)
-        satBar.setOnSeekBarChangeListener(listener)
-        valBar.setOnSeekBarChangeListener(listener)
-
-        AlertDialog.Builder(this)
-            .setTitle(R.string.custom_color_title)
-            .setView(view)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                val color = Color.HSVToColor(
-                    floatArrayOf(
-                        hueBar.progress.toFloat(),
-                        satBar.progress / 100f,
-                        valBar.progress / 100f
-                    )
-                )
-                ThemeManager.setCustom(this, color)
-                updateWidgets()
-                recreate()
-            }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
     }
 
     private fun showModeDialog() {
