@@ -95,6 +95,7 @@ class AlarmActivity : AppCompatActivity() {
             binding.alarmNotes.visibility = View.VISIBLE
             binding.alarmTime.text = timeFmt.format(Date())
             binding.alarmImage.visibility = View.GONE
+            binding.alarmScrim.visibility = View.GONE
             return
         }
 
@@ -115,32 +116,50 @@ class AlarmActivity : AppCompatActivity() {
             binding.alarmNotes.text = notes
         }
 
-        val bitmap = ImageLoader.loadSampled(this, reminder?.imageUri, 800)
+        // Full-screen photo background. The scrim sits on top so that
+        // the text content above it stays readable no matter what the
+        // image looks like.
+        val bitmap = ImageLoader.loadSampled(this, reminder?.imageUri, 1200)
         if (bitmap != null) {
             binding.alarmImage.setImageBitmap(bitmap)
             binding.alarmImage.visibility = View.VISIBLE
+            binding.alarmScrim.visibility = View.VISIBLE
         } else {
+            binding.alarmImage.setImageBitmap(null)
             binding.alarmImage.visibility = View.GONE
+            binding.alarmScrim.visibility = View.GONE
         }
     }
 
     /**
      * Applies the user-selected background color, text colors (derived
      * from luminance unless overridden) and layout preset. Reorders the
-     * three content elements directly in the root LinearLayout so the
-     * preset changes what shows up first on screen.
+     * three content elements inside [ActivityAlarmBinding.alarmContent]
+     * so the preset changes what shows up first on screen.
      */
     private fun applyUserLayout() {
         val bg = AlarmScreenSettings.getBackgroundColor(this)
         binding.alarmRoot.setBackgroundColor(bg)
 
-        val lightText = ColorUtils.calculateLuminance(bg) < 0.5
-        val autoText = if (lightText) Color.WHITE else Color.BLACK
-        val autoSubtle = if (lightText) 0xFFB8D0E7.toInt() else 0xFF555555.toInt()
+        val hasImage = binding.alarmImage.visibility == View.VISIBLE
 
-        // User-picked text color wins if set, else auto-derive from background.
-        val textColor = AlarmScreenSettings.getTextColor(this) ?: autoText
-        val subtleColor = AlarmScreenSettings.getTextColor(this)?.let { fade(it) } ?: autoSubtle
+        // Pick text colors: user override first, then either a luminance
+        // pick over the flat background or plain white over the scrimmed
+        // photo.
+        val explicit = AlarmScreenSettings.getTextColor(this)
+        val textColor: Int
+        val subtleColor: Int
+        if (explicit != null) {
+            textColor = explicit
+            subtleColor = fade(explicit)
+        } else if (hasImage) {
+            textColor = Color.WHITE
+            subtleColor = 0xCCFFFFFF.toInt()
+        } else {
+            val lightText = ColorUtils.calculateLuminance(bg) < 0.5
+            textColor = if (lightText) Color.WHITE else Color.BLACK
+            subtleColor = if (lightText) 0xFFB8D0E7.toInt() else 0xFF555555.toInt()
+        }
 
         binding.alarmHeader.setTextColor(subtleColor)
         binding.alarmTime.setTextColor(textColor)
@@ -166,14 +185,14 @@ class AlarmActivity : AppCompatActivity() {
         binding.btnDismiss.setTextColor(dismissText)
 
         val preset = AlarmScreenSettings.getLayout(this)
-        val root = binding.alarmRoot
+        val content = binding.alarmContent
 
         // Remove the three reorderable elements so we can re-add them
         // in the desired order right after the header.
-        root.removeView(binding.alarmTime)
-        root.removeView(binding.alarmLabel)
-        root.removeView(binding.alarmNotes)
-        val afterHeader = root.indexOfChild(binding.alarmHeader) + 1
+        content.removeView(binding.alarmTime)
+        content.removeView(binding.alarmLabel)
+        content.removeView(binding.alarmNotes)
+        val afterHeader = content.indexOfChild(binding.alarmHeader) + 1
 
         val order: List<TextView> = when (preset) {
             AlarmScreenSettings.Layout.TIME_FOCUS ->
@@ -183,7 +202,7 @@ class AlarmActivity : AppCompatActivity() {
             AlarmScreenSettings.Layout.MINIMAL ->
                 listOf(binding.alarmLabel, binding.alarmNotes)
         }
-        order.forEachIndexed { i, view -> root.addView(view, afterHeader + i) }
+        order.forEachIndexed { i, view -> content.addView(view, afterHeader + i) }
         if (preset == AlarmScreenSettings.Layout.MINIMAL) {
             binding.alarmTime.visibility = View.GONE
         } else {
