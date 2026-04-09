@@ -1,6 +1,6 @@
 package com.example.reminderalarm
 
-import android.app.KeyguardManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -24,7 +24,9 @@ class AlarmReceiver : BroadcastReceiver() {
         wl.acquire(10_000L)
 
         // Start the foreground sound service so the alarm keeps ringing
-        // even if the activity is killed.
+        // even if the activity is killed. The service also posts the
+        // full-screen notification, which is the system-approved way to
+        // bring the activity to the front from a background receiver.
         val soundIntent = Intent(context, AlarmSoundService::class.java).apply {
             putExtra(AlarmScheduler.EXTRA_ID, id)
         }
@@ -34,16 +36,20 @@ class AlarmReceiver : BroadcastReceiver() {
             context.startService(soundIntent)
         }
 
-        // Launch full-screen alarm UI.
+        // Try to launch the alarm activity directly. On Android 10+ this
+        // only works when we hold SYSTEM_ALERT_WINDOW (the user granted
+        // "Display over other apps") OR when the screen is locked.
+        // Otherwise the system falls back to the full-screen notification.
         val activityIntent = Intent(context, AlarmActivity::class.java).apply {
             addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    Intent.FLAG_ACTIVITY_NO_USER_ACTION
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                    Intent.FLAG_ACTIVITY_NO_USER_ACTION or
+                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
             )
             putExtra(AlarmScheduler.EXTRA_ID, id)
         }
-        context.startActivity(activityIntent)
+        runCatching { context.startActivity(activityIntent) }
 
         // Mark this one-shot reminder as done.
         ReminderStore.byId(context, id)?.let {

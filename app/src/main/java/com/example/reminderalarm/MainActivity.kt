@@ -242,6 +242,40 @@ class MainActivity : BaseActivity() {
                     data = Uri.parse("package:$packageName")
                 }
                 runCatching { startActivity(intent) }
+                return
+            }
+        }
+        // Android 14+: full-screen notifications need a separate explicit opt-in
+        // unless the app is categorised as alarm/calendar. Prompt the user so the
+        // alarm can pop over the lock screen reliably.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val nm = getSystemService(android.app.NotificationManager::class.java)
+            if (nm != null && !nm.canUseFullScreenIntent()) {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
+                    data = Uri.parse("package:$packageName")
+                }
+                runCatching { startActivity(intent) }
+                return
+            }
+        }
+        // "Display over other apps" — the only reliable way to force an
+        // activity from a background BroadcastReceiver on Android 10+.
+        // Without it the alarm only shows a heads-up notification when
+        // the phone is unlocked.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.overlay_title)
+                    .setMessage(R.string.overlay_message)
+                    .setPositiveButton(R.string.overlay_open_settings) { _, _ ->
+                        val intent = Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:$packageName")
+                        )
+                        runCatching { startActivity(intent) }
+                    }
+                    .setNegativeButton(R.string.cancel, null)
+                    .show()
             }
         }
     }

@@ -42,4 +42,7 @@
     <string name="brightness">Jasność</string>
     <string name="widget_add_label">Nowe przypomnienie</string>
     <string name="parsed_hint">✓ Rozpoznano z treści: %1$s</string>
+    <string name="overlay_title">Wyświetlanie nad aplikacjami</string>
+    <string name="overlay_message">Aby alarm mógł się pokazać na pełnym ekranie nawet gdy używasz innej aplikacji, włącz dla Przypomnień uprawnienie \"Wyświetlanie nad innymi aplikacjami\".</string>
+    <string name="overlay_open_settings">Otwórz ustawienia</string>
 </resources>
