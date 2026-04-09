@@ -1,12 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.ReminderAlarm" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <!-- Alias used in the manifest. Default is Granat (Navy Blue). -->
+    <style name="Theme.ReminderAlarm" parent="Theme.ReminderAlarm.Blue" />
+
+    <style name="Theme.ReminderAlarm.Blue" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">#1D3557</item>
         <item name="colorPrimaryDark">#0D1B2A</item>
         <item name="colorAccent">#E63946</item>
+        <item name="colorSecondary">#E63946</item>
     </style>
 
-    <style name="Theme.ReminderAlarm.Fullscreen" parent="Theme.ReminderAlarm">
+    <style name="Theme.ReminderAlarm.BottleGreen" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#1B4332</item>
+        <item name="colorPrimaryDark">#081C15</item>
+        <item name="colorAccent">#D4A373</item>
+        <item name="colorSecondary">#D4A373</item>
+    </style>
+
+    <style name="Theme.ReminderAlarm.SkyBlue" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#0077B6</item>
+        <item name="colorPrimaryDark">#023E8A</item>
+        <item name="colorAccent">#FFB703</item>
+        <item name="colorSecondary">#FFB703</item>
+    </style>
+
+    <style name="Theme.ReminderAlarm.Indigo" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#3A0CA3</item>
+        <item name="colorPrimaryDark">#240046</item>
+        <item name="colorAccent">#F72585</item>
+        <item name="colorSecondary">#F72585</item>
+    </style>
+
+    <style name="Theme.ReminderAlarm.Teal" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#006D77</item>
+        <item name="colorPrimaryDark">#023047</item>
+        <item name="colorAccent">#E29578</item>
+        <item name="colorSecondary">#E29578</item>
+    </style>
+
+    <!-- Fullscreen alarm screen keeps its own dark style regardless of theme. -->
+    <style name="Theme.ReminderAlarm.Fullscreen" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/black</item>

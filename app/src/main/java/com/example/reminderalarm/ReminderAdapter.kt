@@ -1,6 +1,7 @@
 package com.example.reminderalarm
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.reminderalarm.databinding.ItemReminderBinding
@@ -31,9 +32,24 @@ class ReminderAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val r = items[position]
-        holder.binding.label.text = r.label.ifBlank { holder.itemView.context.getString(R.string.untitled) }
+        val ctx = holder.itemView.context
+        holder.binding.label.text = r.label.ifBlank { ctx.getString(R.string.untitled) }
         holder.binding.time.text = fmt.format(Date(r.triggerAtMillis))
-        holder.binding.status.text = if (r.enabled) "" else holder.itemView.context.getString(R.string.done)
+
+        if (r.notes.isBlank()) {
+            holder.binding.notes.visibility = View.GONE
+        } else {
+            holder.binding.notes.visibility = View.VISIBLE
+            holder.binding.notes.text = r.notes
+        }
+
+        val statusParts = mutableListOf<String>()
+        if (!r.enabled) statusParts += ctx.getString(R.string.done)
+        if (r.vibrateOnly) statusParts += ctx.getString(R.string.vibrate_only_tag)
+        holder.binding.status.text = statusParts.joinToString(" • ")
+        holder.binding.status.visibility =
+            if (statusParts.isEmpty()) View.GONE else View.VISIBLE
+
         holder.binding.btnDelete.setOnClickListener { onDelete(r) }
         holder.itemView.setOnClickListener { onClick(r) }
     }

@@ -64,6 +64,14 @@ class AlarmActivity : AppCompatActivity() {
             Date(reminder?.triggerAtMillis ?: System.currentTimeMillis())
         )
 
+        val notes = reminder?.notes.orEmpty()
+        if (notes.isBlank()) {
+            binding.alarmNotes.visibility = android.view.View.GONE
+        } else {
+            binding.alarmNotes.visibility = android.view.View.VISIBLE
+            binding.alarmNotes.text = notes
+        }
+
         binding.btnDismiss.setOnClickListener { dismiss() }
         binding.btnSnooze.setOnClickListener { showSnoozeDialog() }
     }

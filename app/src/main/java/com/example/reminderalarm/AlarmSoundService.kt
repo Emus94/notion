@@ -31,35 +31,38 @@ class AlarmSoundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val id = intent?.getLongExtra(AlarmScheduler.EXTRA_ID, -1L) ?: -1L
+        val reminder = ReminderStore.byId(this, id)
         startForeground(NOTIF_ID, buildNotification(id))
-        startRinging()
+        startRinging(vibrateOnly = reminder?.vibrateOnly == true)
         return START_NOT_STICKY
     }
 
-    private fun startRinging() {
-        // Pick the alarm tone (fallback to ringtone/notification).
-        val uri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM)
-            ?: RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE)
-            ?: RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_NOTIFICATION)
+    private fun startRinging(vibrateOnly: Boolean) {
+        if (!vibrateOnly) {
+            // Pick the alarm tone (fallback to ringtone/notification).
+            val uri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM)
+                ?: RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE)
+                ?: RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_NOTIFICATION)
 
-        ringtone = RingtoneManager.getRingtone(this, uri).apply {
-            audioAttributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                isLooping = true
+            ringtone = RingtoneManager.getRingtone(this, uri).apply {
+                audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    isLooping = true
+                }
+                // Make sure alarm volume isn't zero.
+                val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                if (am.getStreamVolume(AudioManager.STREAM_ALARM) == 0) {
+                    am.setStreamVolume(
+                        AudioManager.STREAM_ALARM,
+                        am.getStreamMaxVolume(AudioManager.STREAM_ALARM) / 2,
+                        0
+                    )
+                }
+                play()
             }
-            // Make sure alarm volume isn't zero.
-            val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            if (am.getStreamVolume(AudioManager.STREAM_ALARM) == 0) {
-                am.setStreamVolume(
-                    AudioManager.STREAM_ALARM,
-                    am.getStreamMaxVolume(AudioManager.STREAM_ALARM) / 2,
-                    0
-                )
-            }
-            play()
         }
 
         vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

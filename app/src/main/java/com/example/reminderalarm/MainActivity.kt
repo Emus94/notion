@@ -2,6 +2,7 @@ package com.example.reminderalarm
 
 import android.Manifest
 import android.app.AlarmManager
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,14 +11,15 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.reminderalarm.databinding.ActivityMainBinding
+import com.google.android.material.tabs.TabLayout
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: ReminderAdapter
+    private var currentTab: Int = TAB_PLANNED
 
     private val notifPermLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -33,6 +35,23 @@ class MainActivity : AppCompatActivity() {
             packageManager.getPackageInfo(packageName, 0).versionName
         }.getOrNull() ?: ""
         binding.toolbar.title = getString(R.string.app_name) + "  •  v$version"
+
+        // Overflow menu with theme picker.
+        binding.toolbar.inflateMenu(R.menu.main_menu)
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.action_theme) {
+                showThemeDialog(); true
+            } else false
+        }
+
+        binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                currentTab = tab.position
+                refresh()
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab) {}
+            override fun onTabReselected(tab: TabLayout.Tab) {}
+        })
 
         adapter = ReminderAdapter(
             onDelete = { reminder ->
@@ -63,9 +82,40 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refresh() {
-        adapter.submit(ReminderStore.all(this))
+        val all = ReminderStore.all(this)
+        val filtered = when (currentTab) {
+            TAB_PLANNED -> all.filter { it.enabled }
+            else -> all.filter { !it.enabled }.sortedByDescending { it.triggerAtMillis }
+        }
+        adapter.submit(filtered)
         binding.empty.visibility =
             if (adapter.itemCount == 0) android.view.View.VISIBLE else android.view.View.GONE
+        binding.empty.text = when (currentTab) {
+            TAB_PLANNED -> getString(R.string.empty_hint)
+            else -> getString(R.string.empty_completed)
+        }
+    }
+
+    private fun showThemeDialog() {
+        val palettes = ThemeManager.Palette.values()
+        val current = ThemeManager.current(this)
+        val checked = palettes.indexOf(current)
+        val names = palettes.map { it.displayName }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.theme_title)
+            .setSingleChoiceItems(names, checked) { dialog, which ->
+                val picked = palettes[which]
+                if (picked != current) {
+                    ThemeManager.set(this, picked)
+                    dialog.dismiss()
+                    recreate()
+                } else {
+                    dialog.dismiss()
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun ensurePermissions() {
@@ -85,5 +135,9 @@ class MainActivity : AppCompatActivity() {
                 runCatching { startActivity(intent) }
             }
         }
+    }
+
+    companion object {
+        private const val TAB_PLANNED = 0
     }
 }

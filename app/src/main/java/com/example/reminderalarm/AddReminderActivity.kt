@@ -4,14 +4,13 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.example.reminderalarm.databinding.ActivityAddBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-class AddReminderActivity : AppCompatActivity() {
+class AddReminderActivity : BaseActivity() {
 
     private lateinit var binding: ActivityAddBinding
     private val cal = Calendar.getInstance().apply {
@@ -36,6 +35,8 @@ class AddReminderActivity : AppCompatActivity() {
                 title = getString(R.string.edit_reminder)
                 binding.btnSave.setText(R.string.save_changes)
                 binding.editLabel.setText(existing.label)
+                binding.editNotes.setText(existing.notes)
+                binding.switchVibrateOnly.isChecked = existing.vibrateOnly
                 cal.timeInMillis = existing.triggerAtMillis
             } else {
                 editingId = -1L
@@ -86,6 +87,8 @@ class AddReminderActivity : AppCompatActivity() {
 
     private fun save() {
         val label = binding.editLabel.text?.toString().orEmpty().trim()
+        val notes = binding.editNotes.text?.toString().orEmpty().trim()
+        val vibrateOnly = binding.switchVibrateOnly.isChecked
         val trigger = cal.timeInMillis
         if (trigger <= System.currentTimeMillis()) {
             Toast.makeText(this, R.string.err_past, Toast.LENGTH_SHORT).show()
@@ -96,15 +99,19 @@ class AddReminderActivity : AppCompatActivity() {
             Reminder(
                 id = editingId,
                 label = label,
+                notes = notes,
                 triggerAtMillis = trigger,
-                enabled = true
+                enabled = true,
+                vibrateOnly = vibrateOnly
             )
         } else {
             Reminder(
                 id = System.currentTimeMillis(),
                 label = label,
+                notes = notes,
                 triggerAtMillis = trigger,
-                enabled = true
+                enabled = true,
+                vibrateOnly = vibrateOnly
             )
         }
         ReminderStore.save(this, reminder)

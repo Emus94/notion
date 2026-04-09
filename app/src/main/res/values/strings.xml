@@ -6,9 +6,13 @@
     <string name="save">Zapisz</string>
     <string name="save_changes">Zapisz zmiany</string>
     <string name="empty_hint">Brak przypomnień. Dotknij +, aby dodać.</string>
+    <string name="empty_completed">Brak zakończonych przypomnień.</string>
     <string name="label_hint">Treść przypomnienia</string>
+    <string name="notes_hint">Notatki (opcjonalne)</string>
     <string name="pick_date">Data</string>
     <string name="pick_time">Godzina</string>
+    <string name="vibrate_only">Tylko wibracje (bez dźwięku)</string>
+    <string name="vibrate_only_tag">Wibracje</string>
     <string name="snooze_btn">Drzemka</string>
     <string name="snooze_title">Odłóż na…</string>
     <string name="snooze_5m">5 minut</string>
@@ -27,4 +31,8 @@
     <string name="done">Zakończone</string>
     <string name="new_reminder">Nowe przypomnienie</string>
     <string name="edit_reminder">Edytuj przypomnienie</string>
+    <string name="tab_planned">Zaplanowane</string>
+    <string name="tab_completed">Zakończone</string>
+    <string name="theme">Motyw</string>
+    <string name="theme_title">Wybierz motyw</string>
 </resources>

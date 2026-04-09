@@ -19,8 +19,10 @@ object ReminderStore {
             Reminder(
                 id = o.getLong("id"),
                 label = o.getString("label"),
+                notes = o.optString("notes", ""),
                 triggerAtMillis = o.getLong("triggerAtMillis"),
-                enabled = o.optBoolean("enabled", true)
+                enabled = o.optBoolean("enabled", true),
+                vibrateOnly = o.optBoolean("vibrateOnly", false)
             )
         }.sortedBy { it.triggerAtMillis }
     }
@@ -45,8 +47,10 @@ object ReminderStore {
                 JSONObject()
                     .put("id", it.id)
                     .put("label", it.label)
+                    .put("notes", it.notes)
                     .put("triggerAtMillis", it.triggerAtMillis)
                     .put("enabled", it.enabled)
+                    .put("vibrateOnly", it.vibrateOnly)
             )
         }
         prefs(context).edit().putString(KEY, arr.toString()).apply()
