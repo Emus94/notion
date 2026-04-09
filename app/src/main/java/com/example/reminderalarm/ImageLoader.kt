@@ -4,36 +4,52 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import java.io.File
 
 /**
- * Loads bitmaps from content URIs with on-the-fly downsampling so the
- * app never tries to decode a 20MP camera shot at full size into memory.
+ * Loads bitmaps with on-the-fly downsampling so a 20MP camera shot
+ * never has to be decoded at full size for a 56dp thumbnail. Accepts
+ * either an absolute file path (preferred, produced by [ImageStorage])
+ * or a content URI (legacy fallback for reminders saved with the old
+ * pick-URI-directly approach).
  */
 object ImageLoader {
 
-    /**
-     * Returns a bitmap whose longest side is roughly [maxDim] pixels,
-     * or null if the URI is unreadable. Uses the standard two-pass
-     * decode: first just the image bounds, then a downsampled decode.
-     */
-    fun loadSampled(context: Context, uri: Uri, maxDim: Int): Bitmap? {
+    fun loadSampled(context: Context, pathOrUri: String?, maxDim: Int): Bitmap? {
+        if (pathOrUri.isNullOrBlank()) return null
         return runCatching {
-            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            context.contentResolver.openInputStream(uri)?.use {
-                BitmapFactory.decodeStream(it, null, bounds)
-            } ?: return@runCatching null
-
-            val w = bounds.outWidth
-            val h = bounds.outHeight
-            if (w <= 0 || h <= 0) return@runCatching null
-
-            val decodeOpts = BitmapFactory.Options().apply {
-                inSampleSize = sampleSize(w, h, maxDim)
-            }
-            context.contentResolver.openInputStream(uri)?.use {
-                BitmapFactory.decodeStream(it, null, decodeOpts)
+            if (pathOrUri.startsWith("/")) {
+                decodeFile(pathOrUri, maxDim)
+            } else {
+                decodeUri(context, Uri.parse(pathOrUri), maxDim)
             }
         }.getOrNull()
+    }
+
+    private fun decodeFile(path: String, maxDim: Int): Bitmap? {
+        val file = File(path)
+        if (!file.exists()) return null
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(path, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        val decodeOpts = BitmapFactory.Options().apply {
+            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight, maxDim)
+        }
+        return BitmapFactory.decodeFile(path, decodeOpts)
+    }
+
+    private fun decodeUri(context: Context, uri: Uri, maxDim: Int): Bitmap? {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        context.contentResolver.openInputStream(uri)?.use {
+            BitmapFactory.decodeStream(it, null, bounds)
+        } ?: return null
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        val decodeOpts = BitmapFactory.Options().apply {
+            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight, maxDim)
+        }
+        return context.contentResolver.openInputStream(uri)?.use {
+            BitmapFactory.decodeStream(it, null, decodeOpts)
+        }
     }
 
     private fun sampleSize(width: Int, height: Int, maxDim: Int): Int {

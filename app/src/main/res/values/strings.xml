@@ -100,6 +100,7 @@
     <string name="image_optional">Zdjęcie (opcjonalne)</string>
     <string name="add_image">Dodaj zdjęcie</string>
     <string name="change_image">Zmień zdjęcie</string>
+    <string name="image_load_failed">Nie udało się załadować zdjęcia</string>
     <string name="name">Nazwa</string>
     <string name="color">Kolor</string>
     <string name="pick_color">Wybierz kolor</string>

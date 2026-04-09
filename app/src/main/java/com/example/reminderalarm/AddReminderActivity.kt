@@ -42,14 +42,21 @@ class AddReminderActivity : BaseActivity() {
         ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) {
-            runCatching {
-                contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
+            // Copy to internal storage so the alarm can always read it
+            // later, regardless of whether the source provider would
+            // survive the app process dying.
+            val localPath = ImageStorage.copyToInternal(this, uri)
+            if (localPath != null) {
+                // Replacing an existing internal image? Remove the old file.
+                val previous = selectedImageUri
+                if (previous != null && previous.startsWith("/")) {
+                    ImageStorage.delete(previous)
+                }
+                selectedImageUri = localPath
+                updateImagePreview()
+            } else {
+                Toast.makeText(this, R.string.image_load_failed, Toast.LENGTH_SHORT).show()
             }
-            selectedImageUri = uri.toString()
-            updateImagePreview()
         }
     }
 
@@ -138,6 +145,11 @@ class AddReminderActivity : BaseActivity() {
             pickImageLauncher.launch(arrayOf("image/*"))
         }
         binding.btnClearImage.setOnClickListener {
+            // Clean up the copied file if we have one.
+            val previous = selectedImageUri
+            if (previous != null && previous.startsWith("/")) {
+                ImageStorage.delete(previous)
+            }
             selectedImageUri = null
             updateImagePreview()
         }
@@ -279,17 +291,15 @@ class AddReminderActivity : BaseActivity() {
     }
 
     private fun updateImagePreview() {
-        val uriStr = selectedImageUri
-        if (uriStr == null) {
+        val pathOrUri = selectedImageUri
+        if (pathOrUri == null) {
             binding.imagePreview.visibility = View.GONE
             binding.imagePreview.setImageBitmap(null)
             binding.btnClearImage.visibility = View.GONE
             binding.btnPickImage.setText(R.string.add_image)
             return
         }
-        val bitmap = runCatching {
-            ImageLoader.loadSampled(this, Uri.parse(uriStr), 600)
-        }.getOrNull()
+        val bitmap = ImageLoader.loadSampled(this, pathOrUri, 600)
         if (bitmap != null) {
             binding.imagePreview.setImageBitmap(bitmap)
             binding.imagePreview.visibility = View.VISIBLE

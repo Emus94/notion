@@ -1,6 +1,5 @@
 package com.example.reminderalarm
 
-import android.net.Uri
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
@@ -48,17 +47,10 @@ class ReminderAdapter(
         holder.binding.label.text = r.label.ifBlank { ctx.getString(R.string.untitled) }
         holder.binding.time.text = fmt.format(Date(r.triggerAtMillis))
 
-        val imageUriStr = r.imageUri
-        if (imageUriStr != null) {
-            val bitmap = runCatching {
-                ImageLoader.loadSampled(ctx, Uri.parse(imageUriStr), 200)
-            }.getOrNull()
-            if (bitmap != null) {
-                holder.binding.thumbnail.setImageBitmap(bitmap)
-                holder.binding.thumbnail.visibility = View.VISIBLE
-            } else {
-                holder.binding.thumbnail.visibility = View.GONE
-            }
+        val bitmap = ImageLoader.loadSampled(ctx, r.imageUri, 200)
+        if (bitmap != null) {
+            holder.binding.thumbnail.setImageBitmap(bitmap)
+            holder.binding.thumbnail.visibility = View.VISIBLE
         } else {
             holder.binding.thumbnail.setImageBitmap(null)
             holder.binding.thumbnail.visibility = View.GONE

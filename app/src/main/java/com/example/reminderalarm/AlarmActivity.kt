@@ -115,17 +115,10 @@ class AlarmActivity : AppCompatActivity() {
             binding.alarmNotes.text = notes
         }
 
-        val imageUriStr = reminder?.imageUri
-        if (imageUriStr != null) {
-            val bitmap = runCatching {
-                ImageLoader.loadSampled(this, android.net.Uri.parse(imageUriStr), 800)
-            }.getOrNull()
-            if (bitmap != null) {
-                binding.alarmImage.setImageBitmap(bitmap)
-                binding.alarmImage.visibility = View.VISIBLE
-            } else {
-                binding.alarmImage.visibility = View.GONE
-            }
+        val bitmap = ImageLoader.loadSampled(this, reminder?.imageUri, 800)
+        if (bitmap != null) {
+            binding.alarmImage.setImageBitmap(bitmap)
+            binding.alarmImage.visibility = View.VISIBLE
         } else {
             binding.alarmImage.visibility = View.GONE
         }
