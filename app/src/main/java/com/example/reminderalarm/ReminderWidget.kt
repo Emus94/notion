@@ -8,9 +8,10 @@ import android.content.Intent
 import android.widget.RemoteViews
 
 /**
- * Home screen widget: a single tap launches AddReminderActivity so a new
- * reminder can be added without opening the app first. The background color
- * follows the currently selected palette.
+ * Home screen widget split into two tap targets:
+ * - the left half opens AddReminderActivity for quick add
+ * - the right half opens the main app
+ * The background color follows the currently selected palette.
  */
 class ReminderWidget : AppWidgetProvider() {
 
@@ -27,16 +28,29 @@ class ReminderWidget : AppWidgetProvider() {
                 ThemeManager.primaryColor(context)
             )
 
-            val intent = Intent(context, AddReminderActivity::class.java).apply {
+            // Left "+": new reminder
+            val addIntent = Intent(context, AddReminderActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             }
-            val pi = PendingIntent.getActivity(
+            val addPi = PendingIntent.getActivity(
                 context,
-                id,
-                intent,
+                id * 2,
+                addIntent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
-            views.setOnClickPendingIntent(R.id.widgetRoot, pi)
+            views.setOnClickPendingIntent(R.id.widgetAddSection, addPi)
+
+            // Right "⌂": open the app
+            val openIntent = Intent(context, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            }
+            val openPi = PendingIntent.getActivity(
+                context,
+                id * 2 + 1,
+                openIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            views.setOnClickPendingIntent(R.id.widgetOpenSection, openPi)
 
             appWidgetManager.updateAppWidget(id, views)
         }
