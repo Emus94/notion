@@ -9,7 +9,8 @@ import java.util.Date
 import java.util.Locale
 
 class ReminderAdapter(
-    private val onDelete: (Reminder) -> Unit
+    private val onDelete: (Reminder) -> Unit,
+    private val onClick: (Reminder) -> Unit
 ) : RecyclerView.Adapter<ReminderAdapter.VH>() {
 
     private val items = mutableListOf<Reminder>()
@@ -34,6 +35,7 @@ class ReminderAdapter(
         holder.binding.time.text = fmt.format(Date(r.triggerAtMillis))
         holder.binding.status.text = if (r.enabled) "" else holder.itemView.context.getString(R.string.done)
         holder.binding.btnDelete.setOnClickListener { onDelete(r) }
+        holder.itemView.setOnClickListener { onClick(r) }
     }
 
     class VH(val binding: ItemReminderBinding) : RecyclerView.ViewHolder(binding.root)

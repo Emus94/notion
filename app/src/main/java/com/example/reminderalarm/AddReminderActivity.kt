@@ -21,11 +21,29 @@ class AddReminderActivity : AppCompatActivity() {
     }
     private val fmt = SimpleDateFormat("EEE d MMM yyyy, HH:mm", Locale.getDefault())
 
+    private var editingId: Long = -1L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        editingId = intent.getLongExtra(EXTRA_EDIT_ID, -1L)
+        if (editingId > 0) {
+            val existing = ReminderStore.byId(this, editingId)
+            if (existing != null) {
+                title = getString(R.string.edit_reminder)
+                binding.btnSave.setText(R.string.save_changes)
+                binding.editLabel.setText(existing.label)
+                cal.timeInMillis = existing.triggerAtMillis
+            } else {
+                editingId = -1L
+                title = getString(R.string.new_reminder)
+            }
+        } else {
+            title = getString(R.string.new_reminder)
+        }
 
         updateDateTimeLabel()
 
@@ -73,12 +91,22 @@ class AddReminderActivity : AppCompatActivity() {
             Toast.makeText(this, R.string.err_past, Toast.LENGTH_SHORT).show()
             return
         }
-        val reminder = Reminder(
-            id = System.currentTimeMillis(),
-            label = label,
-            triggerAtMillis = trigger,
-            enabled = true
-        )
+        val reminder = if (editingId > 0) {
+            AlarmScheduler.cancel(this, editingId)
+            Reminder(
+                id = editingId,
+                label = label,
+                triggerAtMillis = trigger,
+                enabled = true
+            )
+        } else {
+            Reminder(
+                id = System.currentTimeMillis(),
+                label = label,
+                triggerAtMillis = trigger,
+                enabled = true
+            )
+        }
         ReminderStore.save(this, reminder)
         AlarmScheduler.schedule(this, reminder)
         Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show()
@@ -87,5 +115,9 @@ class AddReminderActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         finish(); return true
+    }
+
+    companion object {
+        const val EXTRA_EDIT_ID = "edit_id"
     }
 }

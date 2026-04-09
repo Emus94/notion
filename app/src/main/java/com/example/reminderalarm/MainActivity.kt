@@ -33,6 +33,12 @@ class MainActivity : AppCompatActivity() {
                 AlarmScheduler.cancel(this, reminder.id)
                 ReminderStore.delete(this, reminder.id)
                 refresh()
+            },
+            onClick = { reminder ->
+                val intent = Intent(this, AddReminderActivity::class.java).apply {
+                    putExtra(AddReminderActivity.EXTRA_EDIT_ID, reminder.id)
+                }
+                startActivity(intent)
             }
         )
         binding.list.layoutManager = LinearLayoutManager(this)
