@@ -28,6 +28,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Show version in the toolbar so it's obvious which build is installed.
+        val version = runCatching {
+            packageManager.getPackageInfo(packageName, 0).versionName
+        }.getOrNull() ?: ""
+        binding.toolbar.title = getString(R.string.app_name) + "  •  v$version"
+
         adapter = ReminderAdapter(
             onDelete = { reminder ->
                 AlarmScheduler.cancel(this, reminder.id)

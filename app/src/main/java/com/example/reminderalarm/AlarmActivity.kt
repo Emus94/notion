@@ -43,17 +43,13 @@ class AlarmActivity : AppCompatActivity() {
 
         // True immersive fullscreen: hide status bar + navigation bar.
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowInsetsControllerCompat(window, window.decorView).apply {
-            hide(WindowInsetsCompat.Type.systemBars())
-            systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             window.attributes = window.attributes.apply {
                 layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             }
         }
+        applyImmersive()
 
         binding = ActivityAlarmBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -74,6 +70,24 @@ class AlarmActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         // Prevent dismissing with back button — must use the buttons.
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) applyImmersive()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        applyImmersive()
+    }
+
+    private fun applyImmersive() {
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            hide(WindowInsetsCompat.Type.systemBars())
+            systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
     }
 
     private fun dismiss() {
