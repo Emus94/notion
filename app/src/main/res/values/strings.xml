@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Przypomnienia</string>
+    <string name="app_name">Przypominacz</string>
     <string name="add">Dodaj przypomnienie</string>
     <string name="delete">Usuń</string>
     <string name="save">Zapisz</string>
@@ -42,7 +42,7 @@
     <string name="hue">Odcień</string>
     <string name="saturation">Nasycenie</string>
     <string name="brightness">Jasność</string>
-    <string name="widget_add_label">Nowe przypomnienie</string>
+    <string name="widget_add_label">Dodaj</string>
     <string name="widget_open_label">Otwórz</string>
     <string name="parsed_hint">✓ Rozpoznano z treści: %1$s</string>
     <string name="overlay_title">Wyświetlanie nad aplikacjami</string>
