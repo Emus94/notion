@@ -7,5 +7,7 @@ data class Reminder(
     val triggerAtMillis: Long,
     val enabled: Boolean = true,
     val vibrateOnly: Boolean = false,
-    val recurrence: Recurrence = Recurrence.NONE
+    val recurrence: Recurrence = Recurrence.NONE,
+    val projectId: Long? = null,
+    val tagIds: List<Long> = emptyList()
 )

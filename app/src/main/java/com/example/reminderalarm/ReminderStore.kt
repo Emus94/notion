@@ -16,6 +16,11 @@ object ReminderStore {
         val arr = JSONArray(raw)
         return (0 until arr.length()).map { i ->
             val o = arr.getJSONObject(i)
+            val tagIds = mutableListOf<Long>()
+            val tagsArray = o.optJSONArray("tagIds")
+            if (tagsArray != null) {
+                for (t in 0 until tagsArray.length()) tagIds.add(tagsArray.getLong(t))
+            }
             Reminder(
                 id = o.getLong("id"),
                 label = o.getString("label"),
@@ -23,7 +28,9 @@ object ReminderStore {
                 triggerAtMillis = o.getLong("triggerAtMillis"),
                 enabled = o.optBoolean("enabled", true),
                 vibrateOnly = o.optBoolean("vibrateOnly", false),
-                recurrence = Recurrence.fromId(o.optString("recurrence", null))
+                recurrence = Recurrence.fromId(o.optString("recurrence", null)),
+                projectId = if (o.has("projectId") && !o.isNull("projectId")) o.getLong("projectId") else null,
+                tagIds = tagIds
             )
         }.sortedBy { it.triggerAtMillis }
     }
@@ -41,9 +48,27 @@ object ReminderStore {
         write(context, all(context).filterNot { it.id == id })
     }
 
+    /** Clears a stale project reference from every reminder. */
+    fun clearProjectReferences(context: Context, projectId: Long) {
+        val updated = all(context).map { r ->
+            if (r.projectId == projectId) r.copy(projectId = null) else r
+        }
+        write(context, updated)
+    }
+
+    /** Clears a stale tag reference from every reminder. */
+    fun clearTagReferences(context: Context, tagId: Long) {
+        val updated = all(context).map { r ->
+            if (tagId in r.tagIds) r.copy(tagIds = r.tagIds.filter { it != tagId }) else r
+        }
+        write(context, updated)
+    }
+
     private fun write(context: Context, list: List<Reminder>) {
         val arr = JSONArray()
         list.forEach {
+            val tagsArray = JSONArray()
+            it.tagIds.forEach { t -> tagsArray.put(t) }
             arr.put(
                 JSONObject()
                     .put("id", it.id)
@@ -53,6 +78,8 @@ object ReminderStore {
                     .put("enabled", it.enabled)
                     .put("vibrateOnly", it.vibrateOnly)
                     .put("recurrence", it.recurrence.id)
+                    .put("projectId", it.projectId ?: JSONObject.NULL)
+                    .put("tagIds", tagsArray)
             )
         }
         prefs(context).edit().putString(KEY, arr.toString()).apply()

@@ -1,5 +1,8 @@
 package com.example.reminderalarm
 
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,11 +18,19 @@ class ReminderAdapter(
 ) : RecyclerView.Adapter<ReminderAdapter.VH>() {
 
     private val items = mutableListOf<Reminder>()
+    private var projectsById: Map<Long, Project> = emptyMap()
+    private var tagsById: Map<Long, Tag> = emptyMap()
     private val fmt = SimpleDateFormat("EEE d MMM, HH:mm", Locale.getDefault())
 
-    fun submit(list: List<Reminder>) {
+    fun submit(
+        list: List<Reminder>,
+        projects: Map<Long, Project> = emptyMap(),
+        tags: Map<Long, Tag> = emptyMap()
+    ) {
         items.clear()
         items.addAll(list)
+        projectsById = projects
+        tagsById = tags
         notifyDataSetChanged()
     }
 
@@ -41,6 +52,35 @@ class ReminderAdapter(
         } else {
             holder.binding.notes.visibility = View.VISIBLE
             holder.binding.notes.text = r.notes
+        }
+
+        val project = r.projectId?.let { projectsById[it] }
+        if (project != null) {
+            holder.binding.projectLabel.visibility = View.VISIBLE
+            holder.binding.projectLabel.text = "● ${project.name}"
+            holder.binding.projectLabel.setTextColor(project.color)
+        } else {
+            holder.binding.projectLabel.visibility = View.GONE
+        }
+
+        val tags = r.tagIds.mapNotNull { tagsById[it] }
+        if (tags.isNotEmpty()) {
+            val ssb = SpannableStringBuilder()
+            tags.forEachIndexed { i, tag ->
+                val start = ssb.length
+                ssb.append("#").append(tag.name)
+                val end = ssb.length
+                ssb.setSpan(
+                    ForegroundColorSpan(tag.color),
+                    start, end,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                if (i < tags.size - 1) ssb.append("  ")
+            }
+            holder.binding.tagsLabel.visibility = View.VISIBLE
+            holder.binding.tagsLabel.text = ssb
+        } else {
+            holder.binding.tagsLabel.visibility = View.GONE
         }
 
         val statusParts = mutableListOf<String>()

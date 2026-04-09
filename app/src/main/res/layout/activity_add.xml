@@ -103,6 +103,32 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/project"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnProject"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/tags"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnTags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+
             <Button
                 android:id="@+id/btnSave"
                 android:layout_width="match_parent"

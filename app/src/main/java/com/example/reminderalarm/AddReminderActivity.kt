@@ -27,6 +27,8 @@ class AddReminderActivity : BaseActivity() {
     private var editingId: Long = -1L
     private var suppressParsing: Boolean = false
     private var recurrence: Recurrence = Recurrence.NONE
+    private var selectedProjectId: Long? = null
+    private val selectedTagIds: MutableList<Long> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +52,9 @@ class AddReminderActivity : BaseActivity() {
                 binding.switchVibrateOnly.isChecked = existing.vibrateOnly
                 cal.timeInMillis = existing.triggerAtMillis
                 recurrence = existing.recurrence
+                selectedProjectId = existing.projectId
+                selectedTagIds.clear()
+                selectedTagIds.addAll(existing.tagIds)
             } else {
                 editingId = -1L
                 title = getString(R.string.new_reminder)
@@ -68,6 +73,8 @@ class AddReminderActivity : BaseActivity() {
 
         updateDateTimeLabel()
         updateRecurrenceLabel()
+        updateProjectLabel()
+        updateTagsLabel()
 
         binding.btnPickDate.setOnClickListener {
             DatePickerDialog(
@@ -100,6 +107,8 @@ class AddReminderActivity : BaseActivity() {
         }
 
         binding.btnRecurrence.setOnClickListener { showRecurrenceDialog() }
+        binding.btnProject.setOnClickListener { showProjectDialog() }
+        binding.btnTags.setOnClickListener { showTagsDialog() }
         binding.btnSave.setOnClickListener { save() }
 
         applyPaletteColors()
@@ -154,6 +163,8 @@ class AddReminderActivity : BaseActivity() {
         binding.btnPickDate.backgroundTintList = tint
         binding.btnPickTime.backgroundTintList = tint
         binding.btnRecurrence.backgroundTintList = tint
+        binding.btnProject.backgroundTintList = tint
+        binding.btnTags.backgroundTintList = tint
         binding.btnSave.backgroundTintList = tint
     }
 
@@ -175,6 +186,68 @@ class AddReminderActivity : BaseActivity() {
                 recurrence = options[which]
                 updateRecurrenceLabel()
                 dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun updateProjectLabel() {
+        val project = selectedProjectId?.let { ProjectStore.byId(this, it) }
+        binding.btnProject.text = project?.name ?: getString(R.string.no_project)
+    }
+
+    private fun showProjectDialog() {
+        val projects = ProjectStore.all(this)
+        // First item is "(Brak)" so the user can always clear the assignment.
+        val ids: List<Long?> = listOf<Long?>(null) + projects.map { it.id }
+        val names = Array(ids.size) { i ->
+            if (i == 0) getString(R.string.no_project) else projects[i - 1].name
+        }
+        val checked = ids.indexOfFirst { it == selectedProjectId }.coerceAtLeast(0)
+        AlertDialog.Builder(this)
+            .setTitle(R.string.project)
+            .setSingleChoiceItems(names, checked) { dialog, which ->
+                selectedProjectId = ids[which]
+                updateProjectLabel()
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun updateTagsLabel() {
+        if (selectedTagIds.isEmpty()) {
+            binding.btnTags.text = getString(R.string.no_tags_selected)
+            return
+        }
+        val names = selectedTagIds.mapNotNull { TagStore.byId(this, it)?.name }
+        binding.btnTags.text = if (names.isEmpty()) {
+            getString(R.string.no_tags_selected)
+        } else {
+            names.joinToString(", ")
+        }
+    }
+
+    private fun showTagsDialog() {
+        val tags = TagStore.all(this)
+        if (tags.isEmpty()) {
+            Toast.makeText(this, R.string.no_tags_defined, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val names = tags.map { it.name }.toTypedArray()
+        val initiallyChecked = BooleanArray(tags.size) { tags[it].id in selectedTagIds }
+        val workingChecked = initiallyChecked.copyOf()
+        AlertDialog.Builder(this)
+            .setTitle(R.string.tags)
+            .setMultiChoiceItems(names, workingChecked) { _, which, isChecked ->
+                workingChecked[which] = isChecked
+            }
+            .setPositiveButton(R.string.ok) { _, _ ->
+                selectedTagIds.clear()
+                workingChecked.forEachIndexed { index, checked ->
+                    if (checked) selectedTagIds.add(tags[index].id)
+                }
+                updateTagsLabel()
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
@@ -203,7 +276,9 @@ class AddReminderActivity : BaseActivity() {
                 triggerAtMillis = trigger,
                 enabled = true,
                 vibrateOnly = vibrateOnly,
-                recurrence = recurrence
+                recurrence = recurrence,
+                projectId = selectedProjectId,
+                tagIds = selectedTagIds.toList()
             )
         } else {
             Reminder(
@@ -213,7 +288,9 @@ class AddReminderActivity : BaseActivity() {
                 triggerAtMillis = trigger,
                 enabled = true,
                 vibrateOnly = vibrateOnly,
-                recurrence = recurrence
+                recurrence = recurrence,
+                projectId = selectedProjectId,
+                tagIds = selectedTagIds.toList()
             )
         }
         ReminderStore.save(this, reminder)

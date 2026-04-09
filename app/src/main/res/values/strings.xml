@@ -71,4 +71,25 @@
     <string name="preview_notes">Przykładowa notatka do przypomnienia — tak będą wyglądać Twoje notatki na ekranie alarmu.</string>
 
     <string name="recurrence">Powtarzanie</string>
+
+    <string name="projects_title">Projekty</string>
+    <string name="tags_title">Tagi</string>
+    <string name="no_projects">Brak projektów. Dotknij +, aby dodać.</string>
+    <string name="no_tags">Brak tagów. Dotknij +, aby dodać.</string>
+    <string name="new_project">Nowy projekt</string>
+    <string name="edit_project">Edytuj projekt</string>
+    <string name="new_tag">Nowy tag</string>
+    <string name="edit_tag">Edytuj tag</string>
+    <string name="project">Projekt</string>
+    <string name="tags">Tagi</string>
+    <string name="no_project">(Brak)</string>
+    <string name="no_tags_selected">(Brak)</string>
+    <string name="no_tags_defined">Najpierw dodaj tagi w menu → Tagi</string>
+    <string name="name">Nazwa</string>
+    <string name="color">Kolor</string>
+    <string name="pick_color">Wybierz kolor</string>
+    <string name="err_empty_name">Podaj nazwę</string>
+    <string name="confirm_delete">Potwierdź usunięcie</string>
+    <string name="confirm_delete_project">Usunąć projekt? Przypomnienia przestaną być do niego przypisane.</string>
+    <string name="confirm_delete_tag">Usunąć tag? Zostanie zdjęty z przypomnień, które go używały.</string>
 </resources>

@@ -42,6 +42,14 @@ class MainActivity : BaseActivity() {
         binding.toolbar.inflateMenu(R.menu.main_menu)
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
+                R.id.action_projects -> {
+                    startActivity(Intent(this, ProjectsActivity::class.java))
+                    true
+                }
+                R.id.action_tags -> {
+                    startActivity(Intent(this, TagsActivity::class.java))
+                    true
+                }
                 R.id.action_theme -> { showThemeDialog(); true }
                 R.id.action_mode -> { showModeDialog(); true }
                 R.id.action_settings -> {
@@ -105,7 +113,9 @@ class MainActivity : BaseActivity() {
             TAB_RECURRING -> recurring
             else -> completed
         }
-        adapter.submit(filtered)
+        val projectsMap = ProjectStore.all(this).associateBy { it.id }
+        val tagsMap = TagStore.all(this).associateBy { it.id }
+        adapter.submit(filtered, projectsMap, tagsMap)
 
         // Show the count next to each tab label so the user always knows
         // how many items live in each bucket without switching tabs.
