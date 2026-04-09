@@ -5,14 +5,17 @@ import android.graphics.Color
 import androidx.annotation.StyleRes
 
 /**
- * Persists and applies the selected color palette. For built-in palettes the
- * colors come from XML styles; for the CUSTOM palette the user-picked color
- * is stored in prefs and applied programmatically by activities.
+ * Persists and applies the selected color palette. For built-in palettes
+ * the colors come from XML styles; the CUSTOM palette reads its primary
+ * colour from prefs and falls back to derived values for dark/accent —
+ * unless the user has overridden those individually too.
  */
 object ThemeManager {
     private const val PREFS = "theme_prefs"
     private const val KEY_PALETTE = "palette"
     private const val KEY_CUSTOM_PRIMARY = "custom_primary"
+    private const val KEY_CUSTOM_DARK = "custom_dark"
+    private const val KEY_CUSTOM_ACCENT = "custom_accent"
 
     enum class Palette(
         val id: String,
@@ -43,7 +46,6 @@ object ThemeManager {
             0xFF006D77.toInt(), 0xFF023047.toInt(), 0xFFE29578.toInt()
         ),
 
-        /** CUSTOM uses Blue as the XML base; colors are resolved from prefs at runtime. */
         CUSTOM(
             "custom", "Własny…", R.style.Theme_ReminderAlarm_Blue,
             0, 0, 0
@@ -71,6 +73,37 @@ object ThemeManager {
     fun customPrimary(context: Context): Int =
         prefs(context).getInt(KEY_CUSTOM_PRIMARY, 0xFF1D3557.toInt())
 
+    /** Stored custom dark color, or null if the user hasn't overridden it. */
+    fun customDark(context: Context): Int? {
+        val p = prefs(context)
+        return if (p.contains(KEY_CUSTOM_DARK)) p.getInt(KEY_CUSTOM_DARK, 0) else null
+    }
+
+    /** Stored custom accent color, or null if the user hasn't overridden it. */
+    fun customAccent(context: Context): Int? {
+        val p = prefs(context)
+        return if (p.contains(KEY_CUSTOM_ACCENT)) p.getInt(KEY_CUSTOM_ACCENT, 0) else null
+    }
+
+    fun setCustomPrimary(context: Context, color: Int) {
+        prefs(context).edit()
+            .putString(KEY_PALETTE, Palette.CUSTOM.id)
+            .putInt(KEY_CUSTOM_PRIMARY, color)
+            .apply()
+    }
+
+    fun setCustomDark(context: Context, color: Int?) {
+        val edit = prefs(context).edit()
+        if (color == null) edit.remove(KEY_CUSTOM_DARK) else edit.putInt(KEY_CUSTOM_DARK, color)
+        edit.apply()
+    }
+
+    fun setCustomAccent(context: Context, color: Int?) {
+        val edit = prefs(context).edit()
+        if (color == null) edit.remove(KEY_CUSTOM_ACCENT) else edit.putInt(KEY_CUSTOM_ACCENT, color)
+        edit.apply()
+    }
+
     fun primaryColor(context: Context): Int {
         val p = current(context)
         return if (p == Palette.CUSTOM) customPrimary(context) else p.primary
@@ -78,12 +111,16 @@ object ThemeManager {
 
     fun primaryDarkColor(context: Context): Int {
         val p = current(context)
-        return if (p == Palette.CUSTOM) darken(customPrimary(context), 0.7f) else p.primaryDark
+        if (p != Palette.CUSTOM) return p.primaryDark
+        customDark(context)?.let { return it }
+        return darken(customPrimary(context), 0.7f)
     }
 
     fun accentColor(context: Context): Int {
         val p = current(context)
-        return if (p == Palette.CUSTOM) complement(customPrimary(context)) else p.accent
+        if (p != Palette.CUSTOM) return p.accent
+        customAccent(context)?.let { return it }
+        return complement(customPrimary(context))
     }
 
     /** Produces a darker shade by scaling HSV value. */

@@ -95,6 +95,9 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Re-apply palette colors in case the user changed them in
+        // Settings and navigated back here.
+        applyPaletteColors()
         refresh()
     }
 

@@ -53,7 +53,8 @@
     <string name="section_sound">Dźwięk</string>
     <string name="section_alarm_screen">Wygląd alarmu</string>
     <string name="alarm_sound">Dzwonek alarmu</string>
-    <string name="pick_sound">Wybierz dźwięk</string>
+    <string name="pick_sound">Wybierz systemowy</string>
+    <string name="upload_sound">Wgraj plik</string>
     <string name="sound_system_default">Domyślny systemowy</string>
     <string name="volume">Głośność</string>
     <string name="volume_system">Używaj głośności systemowej</string>
@@ -64,8 +65,18 @@
     <string name="layout_task_focus">Zadanie jako główne</string>
     <string name="layout_minimal">Minimalny (bez godziny)</string>
     <string name="bg_color">Kolor tła</string>
+    <string name="text_color">Kolor tekstu</string>
+    <string name="snooze_color">Kolor przycisku Drzemka</string>
+    <string name="dismiss_color">Kolor przycisku Wyłącz</string>
     <string name="pick_bg_color">Wybierz kolor tła</string>
     <string name="preview_alarm">Podgląd alarmu</string>
+    <string name="section_theme_colors">Kolory motywu</string>
+    <string name="theme_colors_hint">Zmiana koloru automatycznie przełącza motyw na własny.</string>
+    <string name="theme_primary">Główny (toolbar, zakładki)</string>
+    <string name="theme_dark">Ciemny (pasek stanu)</string>
+    <string name="theme_accent">Akcent (FAB, Zapisz)</string>
+    <string name="change">Zmień</string>
+    <string name="auto">Auto</string>
 
     <string name="preview_header">Podgląd</string>
     <string name="preview_label">Przykładowe zadanie</string>

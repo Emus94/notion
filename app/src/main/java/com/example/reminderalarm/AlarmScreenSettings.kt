@@ -5,16 +5,20 @@ import android.net.Uri
 
 /**
  * Persists user preferences for the alarm screen: the ringtone, volume,
- * background color and the layout preset.
+ * background color, text/button colors and the layout preset.
  */
 object AlarmScreenSettings {
     private const val PREFS = "alarm_screen_prefs"
     private const val KEY_LAYOUT = "layout"
     private const val KEY_BG = "background"
+    private const val KEY_TEXT = "text_color"
+    private const val KEY_SNOOZE = "snooze_color"
+    private const val KEY_DISMISS = "dismiss_color"
     private const val KEY_SOUND_URI = "sound_uri"
     private const val KEY_VOLUME = "volume"
 
     const val DEFAULT_BG: Int = 0xFF0D1B2A.toInt()
+    const val DEFAULT_DISMISS_BG: Int = 0xFFE63946.toInt()
 
     /** Layout preset for the alarm screen. */
     enum class Layout(val id: String, val displayName: String) {
@@ -42,6 +46,24 @@ object AlarmScreenSettings {
         prefs(context).edit().putInt(KEY_BG, color).apply()
     }
 
+    /**
+     * Stored explicit text color for the alarm screen, or null if the
+     * user wants the app to derive it from the background luminance.
+     */
+    fun getTextColor(context: Context): Int? = getNullableColor(context, KEY_TEXT)
+
+    fun setTextColor(context: Context, color: Int?) = setNullableColor(context, KEY_TEXT, color)
+
+    /** Stored snooze button background, or null for the default. */
+    fun getSnoozeColor(context: Context): Int? = getNullableColor(context, KEY_SNOOZE)
+
+    fun setSnoozeColor(context: Context, color: Int?) = setNullableColor(context, KEY_SNOOZE, color)
+
+    /** Stored dismiss button background, or null for the default red. */
+    fun getDismissColor(context: Context): Int? = getNullableColor(context, KEY_DISMISS)
+
+    fun setDismissColor(context: Context, color: Int?) = setNullableColor(context, KEY_DISMISS, color)
+
     fun getSoundUri(context: Context): Uri? =
         prefs(context).getString(KEY_SOUND_URI, null)?.let { Uri.parse(it) }
 
@@ -58,6 +80,17 @@ object AlarmScreenSettings {
 
     fun setVolume(context: Context, volume: Int) {
         prefs(context).edit().putInt(KEY_VOLUME, volume).apply()
+    }
+
+    private fun getNullableColor(context: Context, key: String): Int? {
+        val p = prefs(context)
+        return if (p.contains(key)) p.getInt(key, 0) else null
+    }
+
+    private fun setNullableColor(context: Context, key: String, color: Int?) {
+        val edit = prefs(context).edit()
+        if (color == null) edit.remove(key) else edit.putInt(key, color)
+        edit.apply()
     }
 
     private fun prefs(context: Context) =

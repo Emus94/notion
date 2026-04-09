@@ -117,22 +117,44 @@ class AlarmActivity : AppCompatActivity() {
 
     /**
      * Applies the user-selected background color, text colors (derived
-     * from luminance) and layout preset. Reorders the three content
-     * elements directly in the root LinearLayout so the preset changes
-     * what shows up first on screen.
+     * from luminance unless overridden) and layout preset. Reorders the
+     * three content elements directly in the root LinearLayout so the
+     * preset changes what shows up first on screen.
      */
     private fun applyUserLayout() {
         val bg = AlarmScreenSettings.getBackgroundColor(this)
         binding.alarmRoot.setBackgroundColor(bg)
 
         val lightText = ColorUtils.calculateLuminance(bg) < 0.5
-        val textColor = if (lightText) Color.WHITE else Color.BLACK
-        val subtleColor = if (lightText) 0xFFB8D0E7.toInt() else 0xFF555555.toInt()
+        val autoText = if (lightText) Color.WHITE else Color.BLACK
+        val autoSubtle = if (lightText) 0xFFB8D0E7.toInt() else 0xFF555555.toInt()
+
+        // User-picked text color wins if set, else auto-derive from background.
+        val textColor = AlarmScreenSettings.getTextColor(this) ?: autoText
+        val subtleColor = AlarmScreenSettings.getTextColor(this)?.let { fade(it) } ?: autoSubtle
 
         binding.alarmHeader.setTextColor(subtleColor)
         binding.alarmTime.setTextColor(textColor)
         binding.alarmLabel.setTextColor(textColor)
         binding.alarmNotes.setTextColor(subtleColor)
+
+        // Buttons honour optional overrides from settings, otherwise keep
+        // the existing defaults (theme primary for snooze, red for dismiss).
+        val snoozeBg = AlarmScreenSettings.getSnoozeColor(this)
+        if (snoozeBg != null) {
+            binding.btnSnooze.backgroundTintList =
+                android.content.res.ColorStateList.valueOf(snoozeBg)
+            val snoozeText =
+                if (ColorUtils.calculateLuminance(snoozeBg) < 0.5) Color.WHITE else Color.BLACK
+            binding.btnSnooze.setTextColor(snoozeText)
+        }
+        val dismissBg = AlarmScreenSettings.getDismissColor(this)
+            ?: AlarmScreenSettings.DEFAULT_DISMISS_BG
+        binding.btnDismiss.backgroundTintList =
+            android.content.res.ColorStateList.valueOf(dismissBg)
+        val dismissText =
+            if (ColorUtils.calculateLuminance(dismissBg) < 0.5) Color.WHITE else Color.BLACK
+        binding.btnDismiss.setTextColor(dismissText)
 
         val preset = AlarmScreenSettings.getLayout(this)
         val root = binding.alarmRoot
@@ -274,5 +296,11 @@ class AlarmActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (current == this) current = null
+    }
+
+    /** Returns a slightly faded variant of a color for subtitle/secondary text. */
+    private fun fade(color: Int): Int {
+        val alpha = 0xB3 // ~70%
+        return (color and 0x00FFFFFF) or (alpha shl 24)
     }
 }

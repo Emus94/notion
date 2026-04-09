@@ -47,12 +47,27 @@
                 android:textSize="14sp"
                 android:textColor="#888" />
 
-            <Button
-                android:id="@+id/btnPickSound"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="@string/pick_sound" />
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnPickSound"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/pick_sound" />
+
+                <Button
+                    android:id="@+id/btnUploadSound"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="@string/upload_sound" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -79,6 +94,118 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/use_system_volume" />
+
+            <!-- THEME COLORS -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/section_theme_colors"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/theme_colors_hint"
+                android:textColor="#888"
+                android:textSize="12sp" />
+
+            <!-- primary -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/theme_primary" />
+
+                <View
+                    android:id="@+id/themePrimaryPreview"
+                    android:layout_width="36dp"
+                    android:layout_height="24dp" />
+
+                <Button
+                    android:id="@+id/btnThemePrimary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/change" />
+            </LinearLayout>
+
+            <!-- primary dark -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/theme_dark" />
+
+                <View
+                    android:id="@+id/themeDarkPreview"
+                    android:layout_width="36dp"
+                    android:layout_height="24dp" />
+
+                <Button
+                    android:id="@+id/btnThemeDark"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/change" />
+
+                <Button
+                    android:id="@+id/btnThemeDarkAuto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/auto" />
+            </LinearLayout>
+
+            <!-- accent -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/theme_accent" />
+
+                <View
+                    android:id="@+id/themeAccentPreview"
+                    android:layout_width="36dp"
+                    android:layout_height="24dp" />
+
+                <Button
+                    android:id="@+id/btnThemeAccent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/change" />
+
+                <Button
+                    android:id="@+id/btnThemeAccentAuto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/auto" />
+            </LinearLayout>
 
             <!-- ALARM APPEARANCE -->
             <TextView
@@ -121,25 +248,134 @@
                     android:text="@string/layout_minimal" />
             </RadioGroup>
 
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- alarm background -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="@string/bg_color"
-                android:textStyle="bold" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <View
-                android:id="@+id/bgPreview"
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/bg_color" />
+
+                <View
+                    android:id="@+id/bgPreview"
+                    android:layout_width="36dp"
+                    android:layout_height="24dp" />
+
+                <Button
+                    android:id="@+id/btnPickBg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/change" />
+            </LinearLayout>
+
+            <!-- alarm text -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="6dp" />
-
-            <Button
-                android:id="@+id/btnPickBg"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="@string/pick_bg_color" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/text_color" />
+
+                <View
+                    android:id="@+id/textPreview"
+                    android:layout_width="36dp"
+                    android:layout_height="24dp" />
+
+                <Button
+                    android:id="@+id/btnPickText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/change" />
+
+                <Button
+                    android:id="@+id/btnPickTextAuto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/auto" />
+            </LinearLayout>
+
+            <!-- alarm snooze -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/snooze_color" />
+
+                <View
+                    android:id="@+id/snoozePreview"
+                    android:layout_width="36dp"
+                    android:layout_height="24dp" />
+
+                <Button
+                    android:id="@+id/btnPickSnooze"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/change" />
+
+                <Button
+                    android:id="@+id/btnPickSnoozeAuto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/auto" />
+            </LinearLayout>
+
+            <!-- alarm dismiss -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/dismiss_color" />
+
+                <View
+                    android:id="@+id/dismissPreview"
+                    android:layout_width="36dp"
+                    android:layout_height="24dp" />
+
+                <Button
+                    android:id="@+id/btnPickDismiss"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/change" />
+
+                <Button
+                    android:id="@+id/btnPickDismissAuto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/auto" />
+            </LinearLayout>
 
             <Button
                 android:id="@+id/btnPreview"

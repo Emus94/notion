@@ -26,6 +26,22 @@ class SettingsActivity : BaseActivity() {
         }
     }
 
+    /** Picks any audio file from storage with a persistable read grant. */
+    private val pickCustomAudioLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            runCatching {
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+            AlarmScreenSettings.setSoundUri(this, uri)
+            updateSoundLabel()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
@@ -37,13 +53,26 @@ class SettingsActivity : BaseActivity() {
 
         applyPaletteColors()
 
-        // Sound section
+        setupSoundSection()
+        setupThemeColorsSection()
+        setupAlarmAppearanceSection()
+        refreshAllPreviews()
+    }
+
+    // -----------------------------------------------------------------
+    // Sound section
+    // -----------------------------------------------------------------
+
+    private fun setupSoundSection() {
         updateSoundLabel()
         binding.btnPickSound.setOnClickListener { pickRingtone() }
+        binding.btnUploadSound.setOnClickListener {
+            pickCustomAudioLauncher.launch(arrayOf("audio/*"))
+        }
 
-        // Volume
         val storedVolume = AlarmScreenSettings.getVolume(this)
-        binding.volumeBar.progress = if (storedVolume >= 0) storedVolume else currentSystemVolumePct()
+        binding.volumeBar.progress =
+            if (storedVolume >= 0) storedVolume else currentSystemVolumePct()
         updateVolumeLabel(storedVolume)
         binding.volumeBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -60,59 +89,6 @@ class SettingsActivity : BaseActivity() {
             binding.volumeBar.progress = currentSystemVolumePct()
             updateVolumeLabel(-1)
         }
-
-        // Layout preset
-        when (AlarmScreenSettings.getLayout(this)) {
-            AlarmScreenSettings.Layout.TIME_FOCUS -> binding.layoutGroup.check(R.id.layoutTimeFocus)
-            AlarmScreenSettings.Layout.TASK_FOCUS -> binding.layoutGroup.check(R.id.layoutTaskFocus)
-            AlarmScreenSettings.Layout.MINIMAL -> binding.layoutGroup.check(R.id.layoutMinimal)
-        }
-        binding.layoutGroup.setOnCheckedChangeListener { _, checkedId ->
-            val picked = when (checkedId) {
-                R.id.layoutTaskFocus -> AlarmScreenSettings.Layout.TASK_FOCUS
-                R.id.layoutMinimal -> AlarmScreenSettings.Layout.MINIMAL
-                else -> AlarmScreenSettings.Layout.TIME_FOCUS
-            }
-            AlarmScreenSettings.setLayout(this, picked)
-        }
-
-        // Background color
-        updateBgPreview()
-        binding.btnPickBg.setOnClickListener {
-            ColorPickerHelper.show(
-                context = this,
-                title = getString(R.string.pick_bg_color),
-                initialColor = AlarmScreenSettings.getBackgroundColor(this)
-            ) { color ->
-                AlarmScreenSettings.setBackgroundColor(this, color)
-                updateBgPreview()
-            }
-        }
-
-        // Preview
-        binding.btnPreview.setOnClickListener {
-            val intent = Intent(this, AlarmActivity::class.java).apply {
-                addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_ACTIVITY_CLEAR_TASK or
-                        Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                )
-                putExtra(AlarmActivity.EXTRA_PREVIEW, true)
-            }
-            startActivity(intent)
-        }
-    }
-
-    private fun applyPaletteColors() {
-        val primary = ThemeManager.primaryColor(this)
-        val primaryDark = ThemeManager.primaryDarkColor(this)
-        binding.toolbar.setBackgroundColor(primary)
-        window.statusBarColor = primaryDark
-        val tint = ColorStateList.valueOf(primary)
-        binding.btnPickSound.backgroundTintList = tint
-        binding.btnSystemVolume.backgroundTintList = tint
-        binding.btnPickBg.backgroundTintList = tint
-        binding.btnPreview.backgroundTintList = tint
     }
 
     private fun updateSoundLabel() {
@@ -122,7 +98,7 @@ class SettingsActivity : BaseActivity() {
         } else {
             runCatching {
                 RingtoneManager.getRingtone(this, uri).getTitle(this)
-            }.getOrNull() ?: uri.toString()
+            }.getOrNull() ?: uri.lastPathSegment ?: uri.toString()
         }
     }
 
@@ -132,10 +108,6 @@ class SettingsActivity : BaseActivity() {
         } else {
             getString(R.string.volume_pct, stored)
         }
-    }
-
-    private fun updateBgPreview() {
-        binding.bgPreview.setBackgroundColor(AlarmScreenSettings.getBackgroundColor(this))
     }
 
     private fun currentSystemVolumePct(): Int {
@@ -156,5 +128,194 @@ class SettingsActivity : BaseActivity() {
             }
         }
         pickRingtoneLauncher.launch(intent)
+    }
+
+    // -----------------------------------------------------------------
+    // Theme colors section (applies to CUSTOM palette)
+    // -----------------------------------------------------------------
+
+    private fun setupThemeColorsSection() {
+        binding.btnThemePrimary.setOnClickListener {
+            ColorPickerHelper.show(
+                this,
+                getString(R.string.theme_primary),
+                ThemeManager.primaryColor(this)
+            ) { color ->
+                ThemeManager.setCustomPrimary(this, color)
+                recreate()
+            }
+        }
+        binding.btnThemeDark.setOnClickListener {
+            ColorPickerHelper.show(
+                this,
+                getString(R.string.theme_dark),
+                ThemeManager.primaryDarkColor(this)
+            ) { color ->
+                ThemeManager.set(this, ThemeManager.Palette.CUSTOM)
+                ThemeManager.setCustomDark(this, color)
+                recreate()
+            }
+        }
+        binding.btnThemeDarkAuto.setOnClickListener {
+            ThemeManager.setCustomDark(this, null)
+            recreate()
+        }
+        binding.btnThemeAccent.setOnClickListener {
+            ColorPickerHelper.show(
+                this,
+                getString(R.string.theme_accent),
+                ThemeManager.accentColor(this)
+            ) { color ->
+                ThemeManager.set(this, ThemeManager.Palette.CUSTOM)
+                ThemeManager.setCustomAccent(this, color)
+                recreate()
+            }
+        }
+        binding.btnThemeAccentAuto.setOnClickListener {
+            ThemeManager.setCustomAccent(this, null)
+            recreate()
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // Alarm appearance section
+    // -----------------------------------------------------------------
+
+    private fun setupAlarmAppearanceSection() {
+        when (AlarmScreenSettings.getLayout(this)) {
+            AlarmScreenSettings.Layout.TIME_FOCUS -> binding.layoutGroup.check(R.id.layoutTimeFocus)
+            AlarmScreenSettings.Layout.TASK_FOCUS -> binding.layoutGroup.check(R.id.layoutTaskFocus)
+            AlarmScreenSettings.Layout.MINIMAL -> binding.layoutGroup.check(R.id.layoutMinimal)
+        }
+        binding.layoutGroup.setOnCheckedChangeListener { _, checkedId ->
+            val picked = when (checkedId) {
+                R.id.layoutTaskFocus -> AlarmScreenSettings.Layout.TASK_FOCUS
+                R.id.layoutMinimal -> AlarmScreenSettings.Layout.MINIMAL
+                else -> AlarmScreenSettings.Layout.TIME_FOCUS
+            }
+            AlarmScreenSettings.setLayout(this, picked)
+        }
+
+        binding.btnPickBg.setOnClickListener {
+            ColorPickerHelper.show(
+                this,
+                getString(R.string.pick_bg_color),
+                AlarmScreenSettings.getBackgroundColor(this)
+            ) { color ->
+                AlarmScreenSettings.setBackgroundColor(this, color)
+                refreshAllPreviews()
+            }
+        }
+
+        binding.btnPickText.setOnClickListener {
+            val current = AlarmScreenSettings.getTextColor(this)
+                ?: autoTextFor(AlarmScreenSettings.getBackgroundColor(this))
+            ColorPickerHelper.show(
+                this,
+                getString(R.string.text_color),
+                current
+            ) { color ->
+                AlarmScreenSettings.setTextColor(this, color)
+                refreshAllPreviews()
+            }
+        }
+        binding.btnPickTextAuto.setOnClickListener {
+            AlarmScreenSettings.setTextColor(this, null)
+            refreshAllPreviews()
+        }
+
+        binding.btnPickSnooze.setOnClickListener {
+            val current = AlarmScreenSettings.getSnoozeColor(this)
+                ?: ThemeManager.primaryColor(this)
+            ColorPickerHelper.show(
+                this,
+                getString(R.string.snooze_color),
+                current
+            ) { color ->
+                AlarmScreenSettings.setSnoozeColor(this, color)
+                refreshAllPreviews()
+            }
+        }
+        binding.btnPickSnoozeAuto.setOnClickListener {
+            AlarmScreenSettings.setSnoozeColor(this, null)
+            refreshAllPreviews()
+        }
+
+        binding.btnPickDismiss.setOnClickListener {
+            val current = AlarmScreenSettings.getDismissColor(this)
+                ?: AlarmScreenSettings.DEFAULT_DISMISS_BG
+            ColorPickerHelper.show(
+                this,
+                getString(R.string.dismiss_color),
+                current
+            ) { color ->
+                AlarmScreenSettings.setDismissColor(this, color)
+                refreshAllPreviews()
+            }
+        }
+        binding.btnPickDismissAuto.setOnClickListener {
+            AlarmScreenSettings.setDismissColor(this, null)
+            refreshAllPreviews()
+        }
+
+        binding.btnPreview.setOnClickListener {
+            val intent = Intent(this, AlarmActivity::class.java).apply {
+                addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                        Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                )
+                putExtra(AlarmActivity.EXTRA_PREVIEW, true)
+            }
+            startActivity(intent)
+        }
+    }
+
+    private fun refreshAllPreviews() {
+        binding.themePrimaryPreview.setBackgroundColor(ThemeManager.primaryColor(this))
+        binding.themeDarkPreview.setBackgroundColor(ThemeManager.primaryDarkColor(this))
+        binding.themeAccentPreview.setBackgroundColor(ThemeManager.accentColor(this))
+
+        val bg = AlarmScreenSettings.getBackgroundColor(this)
+        binding.bgPreview.setBackgroundColor(bg)
+        binding.textPreview.setBackgroundColor(
+            AlarmScreenSettings.getTextColor(this) ?: autoTextFor(bg)
+        )
+        binding.snoozePreview.setBackgroundColor(
+            AlarmScreenSettings.getSnoozeColor(this) ?: ThemeManager.primaryColor(this)
+        )
+        binding.dismissPreview.setBackgroundColor(
+            AlarmScreenSettings.getDismissColor(this) ?: AlarmScreenSettings.DEFAULT_DISMISS_BG
+        )
+    }
+
+    private fun autoTextFor(background: Int): Int {
+        val hsv = FloatArray(3)
+        android.graphics.Color.colorToHSV(background, hsv)
+        return if (hsv[2] < 0.5f) 0xFFFFFFFF.toInt() else 0xFF000000.toInt()
+    }
+
+    private fun applyPaletteColors() {
+        val primary = ThemeManager.primaryColor(this)
+        val primaryDark = ThemeManager.primaryDarkColor(this)
+        binding.toolbar.setBackgroundColor(primary)
+        window.statusBarColor = primaryDark
+        val tint = ColorStateList.valueOf(primary)
+        binding.btnPickSound.backgroundTintList = tint
+        binding.btnUploadSound.backgroundTintList = tint
+        binding.btnSystemVolume.backgroundTintList = tint
+        binding.btnThemePrimary.backgroundTintList = tint
+        binding.btnThemeDark.backgroundTintList = tint
+        binding.btnThemeDarkAuto.backgroundTintList = tint
+        binding.btnThemeAccent.backgroundTintList = tint
+        binding.btnThemeAccentAuto.backgroundTintList = tint
+        binding.btnPickBg.backgroundTintList = tint
+        binding.btnPickText.backgroundTintList = tint
+        binding.btnPickTextAuto.backgroundTintList = tint
+        binding.btnPickSnooze.backgroundTintList = tint
+        binding.btnPickSnoozeAuto.backgroundTintList = tint
+        binding.btnPickDismiss.backgroundTintList = tint
+        binding.btnPickDismissAuto.backgroundTintList = tint
+        binding.btnPreview.backgroundTintList = tint
     }
 }
