@@ -4,10 +4,13 @@ import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.WindowManager
 import android.widget.Toast
+import androidx.core.graphics.ColorUtils
 import com.example.reminderalarm.databinding.ActivityAddBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -112,6 +115,14 @@ class AddReminderActivity : BaseActivity() {
         binding.btnSave.setOnClickListener { save() }
 
         applyPaletteColors()
+
+        // When creating a new reminder, put the cursor in the title field
+        // and pop the keyboard up immediately so the user can start typing
+        // without an extra tap.
+        if (editingId <= 0) {
+            binding.editLabel.requestFocus()
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        }
     }
 
     private fun applyNaturalParsing(text: String) {
@@ -157,15 +168,23 @@ class AddReminderActivity : BaseActivity() {
     private fun applyPaletteColors() {
         val primary = ThemeManager.primaryColor(this)
         val primaryDark = ThemeManager.primaryDarkColor(this)
+        val accent = ThemeManager.accentColor(this)
         binding.toolbar.setBackgroundColor(primary)
         window.statusBarColor = primaryDark
-        val tint = ColorStateList.valueOf(primary)
-        binding.btnPickDate.backgroundTintList = tint
-        binding.btnPickTime.backgroundTintList = tint
-        binding.btnRecurrence.backgroundTintList = tint
-        binding.btnProject.backgroundTintList = tint
-        binding.btnTags.backgroundTintList = tint
-        binding.btnSave.backgroundTintList = tint
+        val primaryTint = ColorStateList.valueOf(primary)
+        binding.btnPickDate.backgroundTintList = primaryTint
+        binding.btnPickTime.backgroundTintList = primaryTint
+        binding.btnRecurrence.backgroundTintList = primaryTint
+        binding.btnProject.backgroundTintList = primaryTint
+        binding.btnTags.backgroundTintList = primaryTint
+
+        // Save button stands out with the accent color. Text color is
+        // flipped to black/white based on accent luminance so bright
+        // accents like yellow/pink stay readable.
+        binding.btnSave.backgroundTintList = ColorStateList.valueOf(accent)
+        binding.btnSave.setTextColor(
+            if (ColorUtils.calculateLuminance(accent) < 0.5) Color.WHITE else Color.BLACK
+        )
     }
 
     private fun updateDateTimeLabel() {
