@@ -57,6 +57,18 @@ object ThemeManager {
             "dawn", "Świt", R.style.Theme_ReminderAlarm_Dawn,
             0xFFFFAD8F.toInt(), 0xFFCC6F5C.toInt(), 0xFFFF5E7A.toInt()
         ),
+        NIGHT_CITY(
+            "night_city", "Noc miejska", R.style.Theme_ReminderAlarm_NightCity,
+            0xFF1A1F3A.toInt(), 0xFF0D1018.toInt(), 0xFF00E5FF.toInt()
+        ),
+        FOREST(
+            "forest", "Las", R.style.Theme_ReminderAlarm_Forest,
+            0xFF5B8C5A.toInt(), 0xFF2D5016.toInt(), 0xFFD4A574.toInt()
+        ),
+        OCEAN(
+            "ocean", "Ocean", R.style.Theme_ReminderAlarm_Ocean,
+            0xFF4FC3F7.toInt(), 0xFF0277BD.toInt(), 0xFFFF6F61.toInt()
+        ),
 
         CUSTOM(
             "custom", "Własny…", R.style.Theme_ReminderAlarm_Blue,

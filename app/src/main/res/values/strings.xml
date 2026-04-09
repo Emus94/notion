@@ -105,6 +105,12 @@
     <string name="reminder_deleted">Przypomnienie usunięte</string>
     <string name="reminder_completed">Oznaczono jako zakończone</string>
     <string name="undo">Cofnij</string>
+    <string name="search">Szukaj</string>
+    <string name="search_hint">Szukaj w tytułach i notatkach…</string>
+    <string name="empty_search">Brak wyników dla „%1$s"</string>
+    <string name="sort">Sortowanie</string>
+    <string name="sort_title">Sortuj według</string>
+    <string name="empty_cta_add">Dodaj pierwsze przypomnienie</string>
     <string name="name">Nazwa</string>
     <string name="color">Kolor</string>
     <string name="pick_color">Wybierz kolor</string>

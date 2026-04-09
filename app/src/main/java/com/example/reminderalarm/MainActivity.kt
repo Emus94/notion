@@ -12,12 +12,14 @@ import android.content.res.ColorStateList
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,6 +34,7 @@ class MainActivity : BaseActivity() {
     private lateinit var adapter: ReminderAdapter
     private var currentTab: Int = TAB_PLANNED
     private var currentProjectFilter: Long? = null // null = "Wszystkie"
+    private var currentSearchQuery: String = ""
 
     private val notifPermLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -48,8 +51,10 @@ class MainActivity : BaseActivity() {
         binding.toolbar.title = getString(R.string.app_name) + "  •  v$version"
 
         binding.toolbar.inflateMenu(R.menu.main_menu)
+        setupSearch()
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
+                R.id.action_sort -> { showSortDialog(); true }
                 R.id.action_projects -> {
                     startActivity(Intent(this, ProjectsActivity::class.java))
                     true
@@ -89,12 +94,56 @@ class MainActivity : BaseActivity() {
         binding.list.adapter = adapter
         attachSwipeActions()
 
-        binding.fabAdd.setOnClickListener {
+        binding.fabAdd.setOnClickListener { v ->
+            // Micro-interaction: small squish on tap.
+            v.animate().scaleX(0.9f).scaleY(0.9f).setDuration(70).withEndAction {
+                v.animate().scaleX(1f).scaleY(1f).setDuration(70).start()
+            }.start()
+            startActivity(Intent(this, AddReminderActivity::class.java))
+        }
+        binding.emptyCta.setOnClickListener {
             startActivity(Intent(this, AddReminderActivity::class.java))
         }
 
         applyPaletteColors()
         ensurePermissions()
+    }
+
+    private fun setupSearch() {
+        val searchItem = binding.toolbar.menu.findItem(R.id.action_search) ?: return
+        val searchView = searchItem.actionView as? SearchView ?: return
+        searchView.queryHint = getString(R.string.search_hint)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean = false
+            override fun onQueryTextChange(newText: String?): Boolean {
+                currentSearchQuery = newText.orEmpty()
+                refresh()
+                return true
+            }
+        })
+        searchItem.setOnActionExpandListener(object : android.view.MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: android.view.MenuItem): Boolean = true
+            override fun onMenuItemActionCollapse(item: android.view.MenuItem): Boolean {
+                currentSearchQuery = ""
+                refresh()
+                return true
+            }
+        })
+    }
+
+    private fun showSortDialog() {
+        val sorts = ListSortManager.Sort.values()
+        val names = sorts.map { it.displayName }.toTypedArray()
+        val checked = sorts.indexOf(ListSortManager.current(this))
+        AlertDialog.Builder(this)
+            .setTitle(R.string.sort_title)
+            .setSingleChoiceItems(names, checked) { dialog, which ->
+                ListSortManager.set(this, sorts[which])
+                dialog.dismiss()
+                refresh()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     override fun onResume() {
@@ -107,6 +156,7 @@ class MainActivity : BaseActivity() {
         val all = ReminderStore.all(this)
         val planned = all.filter { it.enabled && it.recurrence == Recurrence.NONE }
         val recurring = all.filter { it.enabled && it.recurrence != Recurrence.NONE }
+        // "Zakończone" always show newest-first regardless of user sort.
         val completed = all.filter { !it.enabled }.sortedByDescending { it.triggerAtMillis }
 
         val baseForTab = when (currentTab) {
@@ -114,9 +164,23 @@ class MainActivity : BaseActivity() {
             TAB_RECURRING -> recurring
             else -> completed
         }
-        val filtered = if (currentProjectFilter != null) {
+        var filtered = if (currentProjectFilter != null) {
             baseForTab.filter { it.projectId == currentProjectFilter }
         } else baseForTab
+
+        // Search: case-insensitive match against label or notes.
+        val query = currentSearchQuery.trim()
+        if (query.isNotEmpty()) {
+            filtered = filtered.filter {
+                it.label.contains(query, ignoreCase = true) ||
+                    it.notes.contains(query, ignoreCase = true)
+            }
+        }
+
+        // Apply sort (except for Completed tab — kept newest-first).
+        if (currentTab != TAB_COMPLETED) {
+            filtered = ListSortManager.apply(this, filtered)
+        }
 
         val projectsMap = ProjectStore.all(this).associateBy { it.id }
         val tagsMap = TagStore.all(this).associateBy { it.id }
@@ -129,12 +193,17 @@ class MainActivity : BaseActivity() {
         binding.tabs.getTabAt(TAB_COMPLETED)?.text =
             getString(R.string.tab_completed) + " (" + completed.size + ")"
 
-        binding.empty.visibility = if (adapter.itemCount == 0) View.VISIBLE else View.GONE
-        binding.empty.text = when (currentTab) {
-            TAB_PLANNED -> getString(R.string.empty_hint)
-            TAB_RECURRING -> getString(R.string.empty_recurring)
+        binding.emptyContainer.visibility =
+            if (adapter.itemCount == 0) View.VISIBLE else View.GONE
+        binding.empty.text = when {
+            query.isNotEmpty() -> getString(R.string.empty_search, query)
+            currentTab == TAB_PLANNED -> getString(R.string.empty_hint)
+            currentTab == TAB_RECURRING -> getString(R.string.empty_recurring)
             else -> getString(R.string.empty_completed)
         }
+        // CTA only in the planned tab (nothing to add when viewing history).
+        binding.emptyCta.visibility =
+            if (currentTab == TAB_PLANNED && query.isEmpty()) View.VISIBLE else View.GONE
 
         rebuildFilterChips(projectsMap.values.toList())
     }
@@ -294,11 +363,27 @@ class MainActivity : BaseActivity() {
         val primaryDark = ThemeManager.primaryDarkColor(this)
         val accent = ThemeManager.accentColor(this)
 
-        binding.appbar.setBackgroundColor(primary)
-        binding.toolbar.setBackgroundColor(primary)
-        binding.tabs.setBackgroundColor(primary)
+        // Subtle left-to-right gradient on the whole app bar — primary
+        // to a slightly lighter shade so the header gets some depth
+        // without screaming for attention.
+        val lighter = lightenHsv(primary, 0.1f)
+        val gradient = GradientDrawable(
+            GradientDrawable.Orientation.LEFT_RIGHT,
+            intArrayOf(primary, lighter)
+        )
+        binding.appbar.background = gradient
+        binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
+        binding.tabs.setBackgroundColor(Color.TRANSPARENT)
         binding.fabAdd.backgroundTintList = ColorStateList.valueOf(accent)
+        binding.emptyCta.backgroundTintList = ColorStateList.valueOf(accent)
         window.statusBarColor = primaryDark
+    }
+
+    private fun lightenHsv(color: Int, amount: Float): Int {
+        val hsv = FloatArray(3)
+        Color.colorToHSV(color, hsv)
+        hsv[2] = (hsv[2] + amount).coerceAtMost(1f)
+        return Color.HSVToColor(hsv)
     }
 
     private fun showThemeDialog() {
