@@ -3,13 +3,17 @@ package com.example.reminderalarm
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.graphics.ColorUtils
 import com.example.reminderalarm.databinding.ActivityAddBinding
 import java.text.SimpleDateFormat
@@ -32,6 +36,22 @@ class AddReminderActivity : BaseActivity() {
     private var recurrence: Recurrence = Recurrence.NONE
     private var selectedProjectId: Long? = null
     private val selectedTagIds: MutableList<Long> = mutableListOf()
+    private var selectedImageUri: String? = null
+
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            runCatching {
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+            selectedImageUri = uri.toString()
+            updateImagePreview()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +78,7 @@ class AddReminderActivity : BaseActivity() {
                 selectedProjectId = existing.projectId
                 selectedTagIds.clear()
                 selectedTagIds.addAll(existing.tagIds)
+                selectedImageUri = existing.imageUri
             } else {
                 editingId = -1L
                 title = getString(R.string.new_reminder)
@@ -78,6 +99,7 @@ class AddReminderActivity : BaseActivity() {
         updateRecurrenceLabel()
         updateProjectLabel()
         updateTagsLabel()
+        updateImagePreview()
 
         binding.btnPickDate.setOnClickListener {
             DatePickerDialog(
@@ -112,6 +134,13 @@ class AddReminderActivity : BaseActivity() {
         binding.btnRecurrence.setOnClickListener { showRecurrenceDialog() }
         binding.btnProject.setOnClickListener { showProjectDialog() }
         binding.btnTags.setOnClickListener { showTagsDialog() }
+        binding.btnPickImage.setOnClickListener {
+            pickImageLauncher.launch(arrayOf("image/*"))
+        }
+        binding.btnClearImage.setOnClickListener {
+            selectedImageUri = null
+            updateImagePreview()
+        }
         binding.btnSave.setOnClickListener { save() }
 
         applyPaletteColors()
@@ -177,6 +206,8 @@ class AddReminderActivity : BaseActivity() {
         binding.btnRecurrence.backgroundTintList = primaryTint
         binding.btnProject.backgroundTintList = primaryTint
         binding.btnTags.backgroundTintList = primaryTint
+        binding.btnPickImage.backgroundTintList = primaryTint
+        binding.btnClearImage.backgroundTintList = primaryTint
 
         // Save button stands out with the accent color. Text color is
         // flipped to black/white based on accent luminance so bright
@@ -247,6 +278,28 @@ class AddReminderActivity : BaseActivity() {
         }
     }
 
+    private fun updateImagePreview() {
+        val uriStr = selectedImageUri
+        if (uriStr == null) {
+            binding.imagePreview.visibility = View.GONE
+            binding.imagePreview.setImageBitmap(null)
+            binding.btnClearImage.visibility = View.GONE
+            binding.btnPickImage.setText(R.string.add_image)
+            return
+        }
+        val bitmap = runCatching {
+            ImageLoader.loadSampled(this, Uri.parse(uriStr), 600)
+        }.getOrNull()
+        if (bitmap != null) {
+            binding.imagePreview.setImageBitmap(bitmap)
+            binding.imagePreview.visibility = View.VISIBLE
+        } else {
+            binding.imagePreview.visibility = View.GONE
+        }
+        binding.btnClearImage.visibility = View.VISIBLE
+        binding.btnPickImage.setText(R.string.change_image)
+    }
+
     private fun showTagsDialog() {
         val tags = TagStore.all(this)
         if (tags.isEmpty()) {
@@ -297,7 +350,8 @@ class AddReminderActivity : BaseActivity() {
                 vibrateOnly = vibrateOnly,
                 recurrence = recurrence,
                 projectId = selectedProjectId,
-                tagIds = selectedTagIds.toList()
+                tagIds = selectedTagIds.toList(),
+                imageUri = selectedImageUri
             )
         } else {
             Reminder(
@@ -309,7 +363,8 @@ class AddReminderActivity : BaseActivity() {
                 vibrateOnly = vibrateOnly,
                 recurrence = recurrence,
                 projectId = selectedProjectId,
-                tagIds = selectedTagIds.toList()
+                tagIds = selectedTagIds.toList(),
+                imageUri = selectedImageUri
             )
         }
         ReminderStore.save(this, reminder)

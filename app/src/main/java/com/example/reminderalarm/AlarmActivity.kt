@@ -94,6 +94,7 @@ class AlarmActivity : AppCompatActivity() {
             binding.alarmNotes.text = getString(R.string.preview_notes)
             binding.alarmNotes.visibility = View.VISIBLE
             binding.alarmTime.text = timeFmt.format(Date())
+            binding.alarmImage.visibility = View.GONE
             return
         }
 
@@ -112,6 +113,21 @@ class AlarmActivity : AppCompatActivity() {
         } else {
             binding.alarmNotes.visibility = View.VISIBLE
             binding.alarmNotes.text = notes
+        }
+
+        val imageUriStr = reminder?.imageUri
+        if (imageUriStr != null) {
+            val bitmap = runCatching {
+                ImageLoader.loadSampled(this, android.net.Uri.parse(imageUriStr), 800)
+            }.getOrNull()
+            if (bitmap != null) {
+                binding.alarmImage.setImageBitmap(bitmap)
+                binding.alarmImage.visibility = View.VISIBLE
+            } else {
+                binding.alarmImage.visibility = View.GONE
+            }
+        } else {
+            binding.alarmImage.visibility = View.GONE
         }
     }
 
