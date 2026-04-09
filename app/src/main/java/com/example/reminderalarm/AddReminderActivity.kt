@@ -2,6 +2,7 @@ package com.example.reminderalarm
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.widget.Toast
 import com.example.reminderalarm.databinding.ActivityAddBinding
@@ -26,7 +27,10 @@ class AddReminderActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAddBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        binding.toolbar.setNavigationOnClickListener { finish() }
 
         editingId = intent.getLongExtra(EXTRA_EDIT_ID, -1L)
         if (editingId > 0) {
@@ -79,6 +83,19 @@ class AddReminderActivity : BaseActivity() {
         }
 
         binding.btnSave.setOnClickListener { save() }
+
+        applyPaletteColors()
+    }
+
+    private fun applyPaletteColors() {
+        val primary = ThemeManager.primaryColor(this)
+        val primaryDark = ThemeManager.primaryDarkColor(this)
+        binding.toolbar.setBackgroundColor(primary)
+        window.statusBarColor = primaryDark
+        val tint = ColorStateList.valueOf(primary)
+        binding.btnPickDate.backgroundTintList = tint
+        binding.btnPickTime.backgroundTintList = tint
+        binding.btnSave.backgroundTintList = tint
     }
 
     private fun updateDateTimeLabel() {

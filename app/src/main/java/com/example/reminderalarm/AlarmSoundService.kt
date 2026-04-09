@@ -12,7 +12,9 @@ import android.media.AudioManager
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -26,6 +28,8 @@ class AlarmSoundService : Service() {
 
     private var ringtone: Ringtone? = null
     private var vibrator: Vibrator? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private var autoSnoozeRunnable: Runnable? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -34,7 +38,25 @@ class AlarmSoundService : Service() {
         val reminder = ReminderStore.byId(this, id)
         startForeground(NOTIF_ID, buildNotification(id))
         startRinging(vibrateOnly = reminder?.vibrateOnly == true)
+
+        // If the user doesn't react within a minute, automatically snooze
+        // for 10 minutes so the alarm keeps nagging instead of disappearing.
+        autoSnoozeRunnable = Runnable { performAutoSnooze(id) }
+        handler.postDelayed(autoSnoozeRunnable!!, AUTO_SNOOZE_DELAY_MS)
+
         return START_NOT_STICKY
+    }
+
+    private fun performAutoSnooze(id: Long) {
+        val reminder = ReminderStore.byId(this, id)
+        if (reminder != null) {
+            val snoozedAt = System.currentTimeMillis() + AUTO_SNOOZE_MINUTES * 60_000L
+            val updated = reminder.copy(triggerAtMillis = snoozedAt, enabled = true)
+            ReminderStore.save(this, updated)
+            AlarmScheduler.schedule(this, updated)
+        }
+        AlarmActivity.current?.finish()
+        stopSelf()
     }
 
     private fun startRinging(vibrateOnly: Boolean) {
@@ -82,6 +104,8 @@ class AlarmSoundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        autoSnoozeRunnable?.let { handler.removeCallbacks(it) }
+        autoSnoozeRunnable = null
         try { ringtone?.stop() } catch (_: Throwable) {}
         try { vibrator?.cancel() } catch (_: Throwable) {}
     }
@@ -129,6 +153,8 @@ class AlarmSoundService : Service() {
     companion object {
         private const val CHANNEL_ID = "alarm_ringing"
         private const val NOTIF_ID = 4242
+        private const val AUTO_SNOOZE_DELAY_MS = 60_000L
+        private const val AUTO_SNOOZE_MINUTES = 10L
 
         fun stop(context: Context) {
             context.stopService(Intent(context, AlarmSoundService::class.java))

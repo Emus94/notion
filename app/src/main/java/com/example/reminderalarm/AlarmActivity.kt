@@ -22,8 +22,19 @@ class AlarmActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAlarmBinding
     private var reminderId: Long = -1L
 
+    companion object {
+        /**
+         * Static reference to the currently shown AlarmActivity so the
+         * service can finish it on auto-snooze. Only set while the
+         * activity is alive.
+         */
+        @Volatile
+        var current: AlarmActivity? = null
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        current = this
 
         // Show over lockscreen and turn screen on.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -155,5 +166,10 @@ class AlarmActivity : AppCompatActivity() {
         ReminderStore.save(this, updated)
         AlarmScheduler.schedule(this, updated)
         finish()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (current == this) current = null
     }
 }

@@ -3,13 +3,21 @@ package com.example.reminderalarm
 import android.Manifest
 import android.app.AlarmManager
 import android.app.AlertDialog
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.SeekBar
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.reminderalarm.databinding.ActivityMainBinding
@@ -30,18 +38,18 @@ class MainActivity : BaseActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Show version in the toolbar so it's obvious which build is installed.
         val version = runCatching {
             packageManager.getPackageInfo(packageName, 0).versionName
         }.getOrNull() ?: ""
         binding.toolbar.title = getString(R.string.app_name) + "  •  v$version"
 
-        // Overflow menu with theme picker.
         binding.toolbar.inflateMenu(R.menu.main_menu)
         binding.toolbar.setOnMenuItemClickListener { item ->
-            if (item.itemId == R.id.action_theme) {
-                showThemeDialog(); true
-            } else false
+            when (item.itemId) {
+                R.id.action_theme -> { showThemeDialog(); true }
+                R.id.action_mode -> { showModeDialog(); true }
+                else -> false
+            }
         }
 
         binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -73,6 +81,7 @@ class MainActivity : BaseActivity() {
             startActivity(Intent(this, AddReminderActivity::class.java))
         }
 
+        applyPaletteColors()
         ensurePermissions()
     }
 
@@ -88,12 +97,23 @@ class MainActivity : BaseActivity() {
             else -> all.filter { !it.enabled }.sortedByDescending { it.triggerAtMillis }
         }
         adapter.submit(filtered)
-        binding.empty.visibility =
-            if (adapter.itemCount == 0) android.view.View.VISIBLE else android.view.View.GONE
+        binding.empty.visibility = if (adapter.itemCount == 0) View.VISIBLE else View.GONE
         binding.empty.text = when (currentTab) {
             TAB_PLANNED -> getString(R.string.empty_hint)
             else -> getString(R.string.empty_completed)
         }
+    }
+
+    private fun applyPaletteColors() {
+        val primary = ThemeManager.primaryColor(this)
+        val primaryDark = ThemeManager.primaryDarkColor(this)
+        val accent = ThemeManager.accentColor(this)
+
+        binding.appbar.setBackgroundColor(primary)
+        binding.toolbar.setBackgroundColor(primary)
+        binding.tabs.setBackgroundColor(primary)
+        binding.fabAdd.backgroundTintList = ColorStateList.valueOf(accent)
+        window.statusBarColor = primaryDark
     }
 
     private fun showThemeDialog() {
@@ -106,16 +126,105 @@ class MainActivity : BaseActivity() {
             .setTitle(R.string.theme_title)
             .setSingleChoiceItems(names, checked) { dialog, which ->
                 val picked = palettes[which]
-                if (picked != current) {
+                dialog.dismiss()
+                if (picked == ThemeManager.Palette.CUSTOM) {
+                    showCustomColorDialog()
+                } else if (picked != current) {
                     ThemeManager.set(this, picked)
-                    dialog.dismiss()
+                    updateWidgets()
                     recreate()
-                } else {
-                    dialog.dismiss()
                 }
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
+    }
+
+    private fun showCustomColorDialog() {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_color_picker, null)
+        val preview = view.findViewById<View>(R.id.preview)
+        val hexLabel = view.findViewById<TextView>(R.id.hexLabel)
+        val hueBar = view.findViewById<SeekBar>(R.id.hueBar)
+        val satBar = view.findViewById<SeekBar>(R.id.satBar)
+        val valBar = view.findViewById<SeekBar>(R.id.valBar)
+
+        val startColor = ThemeManager.customPrimary(this)
+        val hsv = FloatArray(3)
+        Color.colorToHSV(startColor, hsv)
+        hueBar.progress = hsv[0].toInt()
+        satBar.progress = (hsv[1] * 100).toInt().coerceAtLeast(50)
+        valBar.progress = (hsv[2] * 100).toInt().coerceAtLeast(50)
+
+        fun update() {
+            val color = Color.HSVToColor(
+                floatArrayOf(
+                    hueBar.progress.toFloat(),
+                    satBar.progress / 100f,
+                    valBar.progress / 100f
+                )
+            )
+            preview.setBackgroundColor(color)
+            hexLabel.text = String.format("#%06X", 0xFFFFFF and color)
+        }
+        update()
+
+        val listener = object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(sb: SeekBar?, p: Int, fromUser: Boolean) { update() }
+            override fun onStartTrackingTouch(sb: SeekBar?) {}
+            override fun onStopTrackingTouch(sb: SeekBar?) {}
+        }
+        hueBar.setOnSeekBarChangeListener(listener)
+        satBar.setOnSeekBarChangeListener(listener)
+        valBar.setOnSeekBarChangeListener(listener)
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.custom_color_title)
+            .setView(view)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val color = Color.HSVToColor(
+                    floatArrayOf(
+                        hueBar.progress.toFloat(),
+                        satBar.progress / 100f,
+                        valBar.progress / 100f
+                    )
+                )
+                ThemeManager.setCustom(this, color)
+                updateWidgets()
+                recreate()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun showModeDialog() {
+        val modes = AppModeManager.Mode.values()
+        val current = AppModeManager.current(this)
+        val checked = modes.indexOf(current)
+        val names = modes.map { it.displayName }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.mode_title)
+            .setSingleChoiceItems(names, checked) { dialog, which ->
+                val picked = modes[which]
+                dialog.dismiss()
+                if (picked != current) {
+                    AppModeManager.set(this, picked)
+                    recreate()
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun updateWidgets() {
+        val mgr = AppWidgetManager.getInstance(this)
+        val ids = mgr.getAppWidgetIds(ComponentName(this, ReminderWidget::class.java))
+        if (ids.isNotEmpty()) {
+            val intent = Intent(this, ReminderWidget::class.java).apply {
+                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+            }
+            sendBroadcast(intent)
+        }
     }
 
     private fun ensurePermissions() {
