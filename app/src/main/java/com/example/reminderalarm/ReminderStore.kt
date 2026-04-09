@@ -22,7 +22,8 @@ object ReminderStore {
                 notes = o.optString("notes", ""),
                 triggerAtMillis = o.getLong("triggerAtMillis"),
                 enabled = o.optBoolean("enabled", true),
-                vibrateOnly = o.optBoolean("vibrateOnly", false)
+                vibrateOnly = o.optBoolean("vibrateOnly", false),
+                recurrence = Recurrence.fromId(o.optString("recurrence", null))
             )
         }.sortedBy { it.triggerAtMillis }
     }
@@ -51,6 +52,7 @@ object ReminderStore {
                     .put("triggerAtMillis", it.triggerAtMillis)
                     .put("enabled", it.enabled)
                     .put("vibrateOnly", it.vibrateOnly)
+                    .put("recurrence", it.recurrence.id)
             )
         }
         prefs(context).edit().putString(KEY, arr.toString()).apply()

@@ -49,11 +49,15 @@ class AlarmSoundService : Service() {
 
     private fun performAutoSnooze(id: Long) {
         val reminder = ReminderStore.byId(this, id)
+        val snoozedAt = System.currentTimeMillis() + AUTO_SNOOZE_MINUTES * 60_000L
         if (reminder != null) {
-            val snoozedAt = System.currentTimeMillis() + AUTO_SNOOZE_MINUTES * 60_000L
-            val updated = reminder.copy(triggerAtMillis = snoozedAt, enabled = true)
-            ReminderStore.save(this, updated)
-            AlarmScheduler.schedule(this, updated)
+            if (reminder.recurrence == Recurrence.NONE) {
+                val updated = reminder.copy(triggerAtMillis = snoozedAt, enabled = true)
+                ReminderStore.save(this, updated)
+                AlarmScheduler.schedule(this, updated)
+            } else {
+                AlarmScheduler.scheduleSnooze(this, id, snoozedAt)
+            }
         }
         AlarmActivity.current?.finish()
         stopSelf()

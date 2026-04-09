@@ -1,5 +1,6 @@
 package com.example.reminderalarm
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.res.ColorStateList
@@ -25,6 +26,7 @@ class AddReminderActivity : BaseActivity() {
 
     private var editingId: Long = -1L
     private var suppressParsing: Boolean = false
+    private var recurrence: Recurrence = Recurrence.NONE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +49,7 @@ class AddReminderActivity : BaseActivity() {
                 binding.editNotes.setText(existing.notes)
                 binding.switchVibrateOnly.isChecked = existing.vibrateOnly
                 cal.timeInMillis = existing.triggerAtMillis
+                recurrence = existing.recurrence
             } else {
                 editingId = -1L
                 title = getString(R.string.new_reminder)
@@ -64,6 +67,7 @@ class AddReminderActivity : BaseActivity() {
         })
 
         updateDateTimeLabel()
+        updateRecurrenceLabel()
 
         binding.btnPickDate.setOnClickListener {
             DatePickerDialog(
@@ -95,6 +99,7 @@ class AddReminderActivity : BaseActivity() {
             ).show()
         }
 
+        binding.btnRecurrence.setOnClickListener { showRecurrenceDialog() }
         binding.btnSave.setOnClickListener { save() }
 
         applyPaletteColors()
@@ -148,6 +153,7 @@ class AddReminderActivity : BaseActivity() {
         val tint = ColorStateList.valueOf(primary)
         binding.btnPickDate.backgroundTintList = tint
         binding.btnPickTime.backgroundTintList = tint
+        binding.btnRecurrence.backgroundTintList = tint
         binding.btnSave.backgroundTintList = tint
     }
 
@@ -155,8 +161,32 @@ class AddReminderActivity : BaseActivity() {
         binding.dateTimeLabel.text = fmt.format(Date(cal.timeInMillis))
     }
 
+    private fun updateRecurrenceLabel() {
+        binding.btnRecurrence.text = recurrence.displayName
+    }
+
+    private fun showRecurrenceDialog() {
+        val options = Recurrence.values()
+        val names = options.map { it.displayName }.toTypedArray()
+        val checked = options.indexOf(recurrence)
+        AlertDialog.Builder(this)
+            .setTitle(R.string.recurrence)
+            .setSingleChoiceItems(names, checked) { dialog, which ->
+                recurrence = options[which]
+                updateRecurrenceLabel()
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
     private fun save() {
-        val label = binding.editLabel.text?.toString().orEmpty().trim()
+        val rawLabel = binding.editLabel.text?.toString().orEmpty()
+        // Strip the date/time tokens the parser recognised so they don't
+        // pollute the final title displayed in the list and alarm screen.
+        val parsed = NaturalDateParser.parse(rawLabel)
+        val cleanLabel = NaturalDateParser.stripRanges(rawLabel, parsed.matchedRanges)
+        val label = cleanLabel.ifBlank { rawLabel.trim() }
         val notes = binding.editNotes.text?.toString().orEmpty().trim()
         val vibrateOnly = binding.switchVibrateOnly.isChecked
         val trigger = cal.timeInMillis
@@ -172,7 +202,8 @@ class AddReminderActivity : BaseActivity() {
                 notes = notes,
                 triggerAtMillis = trigger,
                 enabled = true,
-                vibrateOnly = vibrateOnly
+                vibrateOnly = vibrateOnly,
+                recurrence = recurrence
             )
         } else {
             Reminder(
@@ -181,7 +212,8 @@ class AddReminderActivity : BaseActivity() {
                 notes = notes,
                 triggerAtMillis = trigger,
                 enabled = true,
-                vibrateOnly = vibrateOnly
+                vibrateOnly = vibrateOnly,
+                recurrence = recurrence
             )
         }
         ReminderStore.save(this, reminder)

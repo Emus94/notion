@@ -67,4 +67,6 @@
     <string name="preview_header">Podgląd</string>
     <string name="preview_label">Przykładowe zadanie</string>
     <string name="preview_notes">Przykładowa notatka do przypomnienia — tak będą wyglądać Twoje notatki na ekranie alarmu.</string>
+
+    <string name="recurrence">Powtarzanie</string>
 </resources>

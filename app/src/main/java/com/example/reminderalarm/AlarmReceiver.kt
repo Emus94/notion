@@ -51,9 +51,20 @@ class AlarmReceiver : BroadcastReceiver() {
         }
         runCatching { context.startActivity(activityIntent) }
 
-        // Mark this one-shot reminder as done.
-        ReminderStore.byId(context, id)?.let {
-            ReminderStore.save(context, it.copy(enabled = false))
+        val isSnooze = intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_SNOOZE, false)
+        if (!isSnooze) {
+            // Normal fire (not a detour from snooze): either advance the
+            // recurring schedule or mark one-shot as completed.
+            ReminderStore.byId(context, id)?.let { reminder ->
+                if (reminder.recurrence != Recurrence.NONE) {
+                    val next = reminder.recurrence.nextAfter(reminder.triggerAtMillis)
+                    val advanced = reminder.copy(triggerAtMillis = next, enabled = true)
+                    ReminderStore.save(context, advanced)
+                    AlarmScheduler.schedule(context, advanced)
+                } else {
+                    ReminderStore.save(context, reminder.copy(enabled = false))
+                }
+            }
         }
 
         try { wl.release() } catch (_: Throwable) {}

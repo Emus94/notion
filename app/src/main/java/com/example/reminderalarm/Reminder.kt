@@ -6,5 +6,6 @@ data class Reminder(
     val notes: String = "",
     val triggerAtMillis: Long,
     val enabled: Boolean = true,
-    val vibrateOnly: Boolean = false
+    val vibrateOnly: Boolean = false,
+    val recurrence: Recurrence = Recurrence.NONE
 )

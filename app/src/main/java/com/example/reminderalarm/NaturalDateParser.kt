@@ -5,14 +5,16 @@ import java.util.Calendar
 /**
  * Extracts a date and/or time from free-form Polish text in the reminder
  * label, similar to Todoist's quick-add. Intentionally forgiving — no
- * match just returns an empty [Parsed].
+ * match just returns an empty [Parsed]. Also reports the character
+ * ranges that matched so the caller can strip them from the final label.
  */
 object NaturalDateParser {
 
     data class Parsed(
         val datePart: Calendar? = null,
         val timeHour: Int? = null,
-        val timeMinute: Int? = null
+        val timeMinute: Int? = null,
+        val matchedRanges: List<IntRange> = emptyList()
     ) {
         fun hasAny() = datePart != null || timeHour != null
     }
@@ -40,22 +42,38 @@ object NaturalDateParser {
     )
 
     private val timeRegex = Regex("""(?<!\d)(\d{1,2})[:.](\d{2})(?!\d)""")
-    private val relMinRegex = Regex(
-        """\bza\s+(\d+)\s*(?:min|minut|minutę|minuty|minuta)\b""",
+
+    // Longest alternatives first so the alternation prefers full words
+    // ("poniedziałek") over their abbreviations ("pon").
+    private val dowAlternation = dayOfWeekMap.keys
+        .sortedByDescending { it.length }
+        .joinToString("|") { Regex.escape(it) }
+    private val dowRegex = Regex(
+        """(?<!\p{L})(?:$dowAlternation)(?!\p{L})""",
         RegexOption.IGNORE_CASE
     )
+
+    private val relDayRegex = Regex(
+        """(?<!\p{L})(?:pojutrze|jutro|dzisiaj|dziś|dzis)(?!\p{L})""",
+        RegexOption.IGNORE_CASE
+    )
+
+    private val relMinRegex = Regex(
+        """(?<!\p{L})za\s+(\d+)\s*(?:min|minut|minutę|minuty|minuta)(?!\p{L})""",
+        RegexOption.IGNORE_CASE
+    )
+
     private val relHourRegex = Regex(
-        """\bza\s+(\d+)\s*(?:h|godz|godzin|godziny|godzinę|godzina)\b""",
+        """(?<!\p{L})za\s+(\d+)\s*(?:h|godz|godzin|godziny|godzinę|godzina)(?!\p{L})""",
         RegexOption.IGNORE_CASE
     )
 
     fun parse(text: String): Parsed {
         if (text.isBlank()) return Parsed()
+        val ranges = mutableListOf<IntRange>()
 
-        val lower = text.lowercase()
-
-        // "za N minut" — fully defines the moment; return immediately.
-        relMinRegex.find(lower)?.let { m ->
+        // "za N minut" fully defines the moment — return straight away.
+        relMinRegex.find(text)?.let { m ->
             val n = m.groupValues[1].toIntOrNull() ?: 0
             if (n > 0) {
                 val c = Calendar.getInstance().apply {
@@ -63,12 +81,13 @@ object NaturalDateParser {
                     set(Calendar.SECOND, 0)
                     set(Calendar.MILLISECOND, 0)
                 }
-                return Parsed(c, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE))
+                ranges.add(m.range)
+                return Parsed(c, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), ranges)
             }
         }
 
         // "za N godzin"
-        relHourRegex.find(lower)?.let { m ->
+        relHourRegex.find(text)?.let { m ->
             val n = m.groupValues[1].toIntOrNull() ?: 0
             if (n > 0) {
                 val c = Calendar.getInstance().apply {
@@ -76,55 +95,74 @@ object NaturalDateParser {
                     set(Calendar.SECOND, 0)
                     set(Calendar.MILLISECOND, 0)
                 }
-                return Parsed(c, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE))
+                ranges.add(m.range)
+                return Parsed(c, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), ranges)
             }
         }
 
         var hour: Int? = null
         var minute: Int? = null
+        var datePart: Calendar? = null
 
+        // Absolute time HH:MM
         timeRegex.find(text)?.let { m ->
             val h = m.groupValues[1].toIntOrNull()
             val mn = m.groupValues[2].toIntOrNull()
             if (h != null && mn != null && h in 0..23 && mn in 0..59) {
                 hour = h
                 minute = mn
+                ranges.add(m.range)
             }
         }
 
-        var datePart: Calendar? = null
-
-        // Tokenize by whitespace and punctuation for date keyword matching.
-        val tokens = lower
-            .split(Regex("""[\s,.!?;:()\[\]{}/\\-]+"""))
-            .filter { it.isNotEmpty() }
-
-        // Day of week — pick the first matching token.
-        for (token in tokens) {
-            val dow = dayOfWeekMap[token] ?: continue
-            val c = Calendar.getInstance()
-            val currentDow = c.get(Calendar.DAY_OF_WEEK)
-            var daysToAdd = (dow - currentDow + 7) % 7
-            if (daysToAdd == 0) daysToAdd = 7 // "pon" on Monday = next Monday
-            c.add(Calendar.DAY_OF_YEAR, daysToAdd)
-            datePart = c
-            break
-        }
-
-        // Relative day keywords (only if no weekday already picked).
-        if (datePart == null) {
-            when {
-                "pojutrze" in tokens -> datePart = Calendar.getInstance().apply {
-                    add(Calendar.DAY_OF_YEAR, 2)
-                }
-                "jutro" in tokens -> datePart = Calendar.getInstance().apply {
-                    add(Calendar.DAY_OF_YEAR, 1)
-                }
-                "dziś" in tokens || "dzis" in tokens || "dzisiaj" in tokens ->
-                    datePart = Calendar.getInstance()
+        // Day of week — first match sets the date, but every occurrence
+        // is reported so stripping can remove stray tokens.
+        val dowMatches = dowRegex.findAll(text).toList()
+        if (dowMatches.isNotEmpty()) {
+            val firstKey = dowMatches.first().value.lowercase()
+            val dow = dayOfWeekMap[firstKey]
+            if (dow != null) {
+                val c = Calendar.getInstance()
+                val currentDow = c.get(Calendar.DAY_OF_WEEK)
+                var daysToAdd = (dow - currentDow + 7) % 7
+                if (daysToAdd == 0) daysToAdd = 7 // "pon" on Monday = next Monday
+                c.add(Calendar.DAY_OF_YEAR, daysToAdd)
+                datePart = c
             }
+            dowMatches.forEach { ranges.add(it.range) }
         }
 
-        return Parsed(datePart, hour, minute)
+        // Relative day ("jutro", "pojutrze", "dziś")
+        val relDayMatches = relDayRegex.findAll(text).toList()
+        if (relDayMatches.isNotEmpty()) {
+            if (datePart == null) {
+                val firstKey = relDayMatches.first().value.lowercase()
+                datePart = when (firstKey) {
+                    "pojutrze" -> Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 2) }
+                    "jutro" -> Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
+                    "dziś", "dzis", "dzisiaj" -> Calendar.getInstance()
+                    else -> null
+                }
+            }
+            relDayMatches.forEach { ranges.add(it.range) }
+        }
+
+        return Parsed(datePart, hour, minute, ranges)
+    }
+
+    /**
+     * Removes the supplied character ranges from [text] and collapses
+     * any resulting stretches of whitespace. Used to clean the reminder
+     * label after the parser has consumed the date/time tokens.
+     */
+    fun stripRanges(text: String, ranges: List<IntRange>): String {
+        if (ranges.isEmpty()) return text
+        val sorted = ranges.sortedByDescending { it.first }
+        var result = text
+        for (range in sorted) {
+            if (range.first < 0 || range.last >= result.length) continue
+            result = result.substring(0, range.first) + result.substring(range.last + 1)
+        }
+        return result.replace(Regex("\\s+"), " ").trim()
     }
 }

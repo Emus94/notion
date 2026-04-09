@@ -205,9 +205,12 @@ class AlarmActivity : AppCompatActivity() {
     private fun dismiss() {
         AlarmSoundService.stop(this)
         if (reminderId > 0) {
-            ReminderStore.byId(this, reminderId)?.let {
-                ReminderStore.save(this, it.copy(enabled = false))
+            val reminder = ReminderStore.byId(this, reminderId)
+            if (reminder != null && reminder.recurrence == Recurrence.NONE) {
+                ReminderStore.save(this, reminder.copy(enabled = false))
             }
+            // For recurring reminders the receiver already advanced to
+            // the next occurrence — nothing to do on dismiss.
         }
         finish()
     }
@@ -255,9 +258,16 @@ class AlarmActivity : AppCompatActivity() {
         AlarmSoundService.stop(this)
         val reminder = ReminderStore.byId(this, reminderId) ?: run { finish(); return }
         val snoozedAt = System.currentTimeMillis() + minutes * 60_000L
-        val updated = reminder.copy(triggerAtMillis = snoozedAt, enabled = true)
-        ReminderStore.save(this, updated)
-        AlarmScheduler.schedule(this, updated)
+        if (reminder.recurrence == Recurrence.NONE) {
+            // One-shot: bounce the reminder itself to the snoozed time.
+            val updated = reminder.copy(triggerAtMillis = snoozedAt, enabled = true)
+            ReminderStore.save(this, updated)
+            AlarmScheduler.schedule(this, updated)
+        } else {
+            // Recurring: schedule a separate side alarm so the regular
+            // cadence (already advanced by the receiver) is untouched.
+            AlarmScheduler.scheduleSnooze(this, reminder.id, snoozedAt)
+        }
         finish()
     }
 

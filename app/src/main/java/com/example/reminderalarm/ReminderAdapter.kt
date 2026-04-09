@@ -46,6 +46,7 @@ class ReminderAdapter(
         val statusParts = mutableListOf<String>()
         if (!r.enabled) statusParts += ctx.getString(R.string.done)
         if (r.vibrateOnly) statusParts += ctx.getString(R.string.vibrate_only_tag)
+        if (r.recurrence != Recurrence.NONE) statusParts += "\uD83D\uDD01 ${r.recurrence.displayName}"
         holder.binding.status.text = statusParts.joinToString(" • ")
         holder.binding.status.visibility =
             if (statusParts.isEmpty()) View.GONE else View.VISIBLE

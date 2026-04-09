@@ -90,6 +90,19 @@
                 android:layout_marginTop="24dp"
                 android:text="@string/vibrate_only" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/recurrence"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnRecurrence"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+
             <Button
                 android:id="@+id/btnSave"
                 android:layout_width="match_parent"
