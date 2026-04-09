@@ -32,7 +32,9 @@
     <string name="new_reminder">Nowe przypomnienie</string>
     <string name="edit_reminder">Edytuj przypomnienie</string>
     <string name="tab_planned">Zaplanowane</string>
+    <string name="tab_recurring">Cykliczne</string>
     <string name="tab_completed">Zakończone</string>
+    <string name="empty_recurring">Brak zadań cyklicznych.</string>
     <string name="theme">Motyw</string>
     <string name="theme_title">Wybierz motyw</string>
     <string name="mode_title">Tryb wyświetlania</string>

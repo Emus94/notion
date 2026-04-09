@@ -92,14 +92,34 @@ class MainActivity : BaseActivity() {
 
     private fun refresh() {
         val all = ReminderStore.all(this)
+        val planned = all
+            .filter { it.enabled && it.recurrence == Recurrence.NONE }
+        val recurring = all
+            .filter { it.enabled && it.recurrence != Recurrence.NONE }
+        val completed = all
+            .filter { !it.enabled }
+            .sortedByDescending { it.triggerAtMillis }
+
         val filtered = when (currentTab) {
-            TAB_PLANNED -> all.filter { it.enabled }
-            else -> all.filter { !it.enabled }.sortedByDescending { it.triggerAtMillis }
+            TAB_PLANNED -> planned
+            TAB_RECURRING -> recurring
+            else -> completed
         }
         adapter.submit(filtered)
+
+        // Show the count next to each tab label so the user always knows
+        // how many items live in each bucket without switching tabs.
+        binding.tabs.getTabAt(TAB_PLANNED)?.text =
+            getString(R.string.tab_planned) + " (" + planned.size + ")"
+        binding.tabs.getTabAt(TAB_RECURRING)?.text =
+            getString(R.string.tab_recurring) + " (" + recurring.size + ")"
+        binding.tabs.getTabAt(TAB_COMPLETED)?.text =
+            getString(R.string.tab_completed) + " (" + completed.size + ")"
+
         binding.empty.visibility = if (adapter.itemCount == 0) View.VISIBLE else View.GONE
         binding.empty.text = when (currentTab) {
             TAB_PLANNED -> getString(R.string.empty_hint)
+            TAB_RECURRING -> getString(R.string.empty_recurring)
             else -> getString(R.string.empty_completed)
         }
     }
@@ -238,5 +258,7 @@ class MainActivity : BaseActivity() {
 
     companion object {
         private const val TAB_PLANNED = 0
+        private const val TAB_RECURRING = 1
+        private const val TAB_COMPLETED = 2
     }
 }
