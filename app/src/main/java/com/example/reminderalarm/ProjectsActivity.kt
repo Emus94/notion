@@ -54,7 +54,14 @@ class ProjectsActivity : BaseActivity() {
 
     private fun refresh() {
         val projects = ProjectStore.all(this)
-        adapter.submit(projects.map { ColoredEntityAdapter.Entry(it.id, it.name, it.color) })
+        val counts = ReminderStore.all(this)
+            .groupingBy { it.projectId }
+            .eachCount()
+        adapter.submit(
+            projects.map {
+                ColoredEntityAdapter.Entry(it.id, it.name, it.color, counts[it.id] ?: 0)
+            }
+        )
         binding.empty.visibility = if (projects.isEmpty()) View.VISIBLE else View.GONE
     }
 

@@ -9,14 +9,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.reminderalarm.databinding.ActivityMainBinding
+import com.google.android.material.chip.Chip
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 
 class MainActivity : BaseActivity() {
@@ -24,10 +31,11 @@ class MainActivity : BaseActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: ReminderAdapter
     private var currentTab: Int = TAB_PLANNED
+    private var currentProjectFilter: Long? = null // null = "Wszystkie"
 
     private val notifPermLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { /* ignore result; alarm still rings via foreground service */ }
+    ) { /* ignore */ }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,11 +78,6 @@ class MainActivity : BaseActivity() {
         })
 
         adapter = ReminderAdapter(
-            onDelete = { reminder ->
-                AlarmScheduler.cancel(this, reminder.id)
-                ReminderStore.delete(this, reminder.id)
-                refresh()
-            },
             onClick = { reminder ->
                 val intent = Intent(this, AddReminderActivity::class.java).apply {
                     putExtra(AddReminderActivity.EXTRA_EDIT_ID, reminder.id)
@@ -84,6 +87,7 @@ class MainActivity : BaseActivity() {
         )
         binding.list.layoutManager = LinearLayoutManager(this)
         binding.list.adapter = adapter
+        attachSwipeActions()
 
         binding.fabAdd.setOnClickListener {
             startActivity(Intent(this, AddReminderActivity::class.java))
@@ -95,33 +99,29 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Re-apply palette colors in case the user changed them in
-        // Settings and navigated back here.
         applyPaletteColors()
         refresh()
     }
 
     private fun refresh() {
         val all = ReminderStore.all(this)
-        val planned = all
-            .filter { it.enabled && it.recurrence == Recurrence.NONE }
-        val recurring = all
-            .filter { it.enabled && it.recurrence != Recurrence.NONE }
-        val completed = all
-            .filter { !it.enabled }
-            .sortedByDescending { it.triggerAtMillis }
+        val planned = all.filter { it.enabled && it.recurrence == Recurrence.NONE }
+        val recurring = all.filter { it.enabled && it.recurrence != Recurrence.NONE }
+        val completed = all.filter { !it.enabled }.sortedByDescending { it.triggerAtMillis }
 
-        val filtered = when (currentTab) {
+        val baseForTab = when (currentTab) {
             TAB_PLANNED -> planned
             TAB_RECURRING -> recurring
             else -> completed
         }
+        val filtered = if (currentProjectFilter != null) {
+            baseForTab.filter { it.projectId == currentProjectFilter }
+        } else baseForTab
+
         val projectsMap = ProjectStore.all(this).associateBy { it.id }
         val tagsMap = TagStore.all(this).associateBy { it.id }
         adapter.submit(filtered, projectsMap, tagsMap)
 
-        // Show the count next to each tab label so the user always knows
-        // how many items live in each bucket without switching tabs.
         binding.tabs.getTabAt(TAB_PLANNED)?.text =
             getString(R.string.tab_planned) + " (" + planned.size + ")"
         binding.tabs.getTabAt(TAB_RECURRING)?.text =
@@ -135,7 +135,159 @@ class MainActivity : BaseActivity() {
             TAB_RECURRING -> getString(R.string.empty_recurring)
             else -> getString(R.string.empty_completed)
         }
+
+        rebuildFilterChips(projectsMap.values.toList())
     }
+
+    private fun rebuildFilterChips(projects: List<Project>) {
+        val group = binding.filterChips
+        group.removeAllViews()
+
+        // "Wszystkie" — the default, clears the filter.
+        val allChip = Chip(this).apply {
+            text = getString(R.string.filter_all)
+            isCheckable = true
+            isChecked = currentProjectFilter == null
+            setOnClickListener {
+                currentProjectFilter = null
+                isChecked = true
+                refresh()
+            }
+        }
+        group.addView(allChip)
+
+        projects.forEach { project ->
+            val chip = Chip(this).apply {
+                text = project.name
+                isCheckable = true
+                isChecked = currentProjectFilter == project.id
+                chipBackgroundColor = ColorStateList.valueOf(
+                    androidx.core.graphics.ColorUtils.setAlphaComponent(project.color, 0x22)
+                )
+                chipStrokeColor = ColorStateList.valueOf(project.color)
+                chipStrokeWidth = resources.displayMetrics.density
+                setTextColor(project.color)
+                setOnClickListener {
+                    currentProjectFilter = project.id
+                    refresh()
+                }
+            }
+            group.addView(chip)
+        }
+
+        // Hide the whole filter bar when there are no projects to pick from.
+        binding.filterScroll.visibility =
+            if (projects.isEmpty()) View.GONE else View.VISIBLE
+    }
+
+    // ---------------------------------------------------------------
+    // Swipe: left = delete (undoable), right = mark completed (undoable)
+    // ---------------------------------------------------------------
+
+    private fun attachSwipeActions() {
+        val redBg = ColorDrawable(0xFFE63946.toInt())
+        val greenBg = ColorDrawable(0xFF2E7D32.toInt())
+
+        val callback = object : ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+            override fun onMove(
+                rv: RecyclerView,
+                vh: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean = false
+
+            override fun onSwiped(vh: RecyclerView.ViewHolder, direction: Int) {
+                val reminder = adapter.getAt(vh.bindingAdapterPosition) ?: run {
+                    refresh(); return
+                }
+                when (direction) {
+                    ItemTouchHelper.LEFT -> handleSwipeDelete(reminder)
+                    ItemTouchHelper.RIGHT -> handleSwipeComplete(reminder)
+                }
+            }
+
+            override fun onChildDraw(
+                c: Canvas,
+                rv: RecyclerView,
+                vh: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                val itemView = vh.itemView
+                when {
+                    dX > 0 -> {
+                        greenBg.setBounds(
+                            itemView.left,
+                            itemView.top,
+                            itemView.left + dX.toInt(),
+                            itemView.bottom
+                        )
+                        greenBg.draw(c)
+                    }
+                    dX < 0 -> {
+                        redBg.setBounds(
+                            itemView.right + dX.toInt(),
+                            itemView.top,
+                            itemView.right,
+                            itemView.bottom
+                        )
+                        redBg.draw(c)
+                    }
+                }
+                super.onChildDraw(c, rv, vh, dX, dY, actionState, isCurrentlyActive)
+            }
+        }
+        ItemTouchHelper(callback).attachToRecyclerView(binding.list)
+    }
+
+    private fun handleSwipeDelete(reminder: Reminder) {
+        AlarmScheduler.cancel(this, reminder.id)
+        ReminderStore.delete(this, reminder.id)
+        refresh()
+
+        Snackbar.make(binding.list, R.string.reminder_deleted, Snackbar.LENGTH_LONG)
+            .setAction(R.string.undo) {
+                ReminderStore.save(this, reminder)
+                if (reminder.enabled) AlarmScheduler.schedule(this, reminder)
+                refresh()
+            }
+            .addCallback(object : Snackbar.Callback() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    // Not undone — commit the image file deletion.
+                    if (event != DISMISS_EVENT_ACTION) {
+                        val path = reminder.imageUri
+                        if (path != null && path.startsWith("/")) {
+                            ImageStorage.delete(path)
+                        }
+                    }
+                }
+            })
+            .show()
+    }
+
+    private fun handleSwipeComplete(reminder: Reminder) {
+        // Mark as done: disable it and cancel its scheduled alarm.
+        val updated = reminder.copy(enabled = false)
+        AlarmScheduler.cancel(this, reminder.id)
+        ReminderStore.save(this, updated)
+        refresh()
+
+        Snackbar.make(binding.list, R.string.reminder_completed, Snackbar.LENGTH_LONG)
+            .setAction(R.string.undo) {
+                ReminderStore.save(this, reminder)
+                if (reminder.enabled) AlarmScheduler.schedule(this, reminder)
+                refresh()
+            }
+            .show()
+    }
+
+    // ---------------------------------------------------------------
+    // Palette / theme plumbing (unchanged)
+    // ---------------------------------------------------------------
 
     private fun applyPaletteColors() {
         val primary = ThemeManager.primaryColor(this)
@@ -234,9 +386,6 @@ class MainActivity : BaseActivity() {
                 return
             }
         }
-        // Android 14+: full-screen notifications need a separate explicit opt-in
-        // unless the app is categorised as alarm/calendar. Prompt the user so the
-        // alarm can pop over the lock screen reliably.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             val nm = getSystemService(android.app.NotificationManager::class.java)
             if (nm != null && !nm.canUseFullScreenIntent()) {
@@ -247,10 +396,6 @@ class MainActivity : BaseActivity() {
                 return
             }
         }
-        // "Display over other apps" — the only reliable way to force an
-        // activity from a background BroadcastReceiver on Android 10+.
-        // Without it the alarm only shows a heads-up notification when
-        // the phone is unlocked.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
                 AlertDialog.Builder(this)

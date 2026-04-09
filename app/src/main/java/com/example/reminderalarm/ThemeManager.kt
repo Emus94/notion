@@ -45,6 +45,18 @@ object ThemeManager {
             "teal", "Turkus", R.style.Theme_ReminderAlarm_Teal,
             0xFF006D77.toInt(), 0xFF023047.toInt(), 0xFFE29578.toInt()
         ),
+        MIST(
+            "mist", "Mgła", R.style.Theme_ReminderAlarm_Mist,
+            0xFFB4A7D6.toInt(), 0xFF7B6BA8.toInt(), 0xFFE8B4BC.toInt()
+        ),
+        PAPER(
+            "paper", "Papier", R.style.Theme_ReminderAlarm_Paper,
+            0xFFD4A574.toInt(), 0xFF8B6F47.toInt(), 0xFFC84B31.toInt()
+        ),
+        DAWN(
+            "dawn", "Świt", R.style.Theme_ReminderAlarm_Dawn,
+            0xFFFFAD8F.toInt(), 0xFFCC6F5C.toInt(), 0xFFFF5E7A.toInt()
+        ),
 
         CUSTOM(
             "custom", "Własny…", R.style.Theme_ReminderAlarm_Blue,

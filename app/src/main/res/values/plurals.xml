@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="tasks_count">
+        <item quantity="one">%d zadanie</item>
+        <item quantity="few">%d zadania</item>
+        <item quantity="many">%d zadań</item>
+        <item quantity="other">%d zadań</item>
+    </plurals>
+</resources>

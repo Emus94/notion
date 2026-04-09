@@ -1,19 +1,20 @@
 package com.example.reminderalarm
 
-import android.text.SpannableStringBuilder
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.example.reminderalarm.databinding.ItemReminderBinding
+import com.google.android.material.chip.Chip
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class ReminderAdapter(
-    private val onDelete: (Reminder) -> Unit,
     private val onClick: (Reminder) -> Unit
 ) : RecyclerView.Adapter<ReminderAdapter.VH>() {
 
@@ -34,6 +35,8 @@ class ReminderAdapter(
         notifyDataSetChanged()
     }
 
+    fun getAt(position: Int): Reminder? = items.getOrNull(position)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val b = ItemReminderBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return VH(b)
@@ -47,6 +50,7 @@ class ReminderAdapter(
         holder.binding.label.text = r.label.ifBlank { ctx.getString(R.string.untitled) }
         holder.binding.time.text = fmt.format(Date(r.triggerAtMillis))
 
+        // Thumbnail
         val bitmap = ImageLoader.loadSampled(ctx, r.imageUri, 200)
         if (bitmap != null) {
             holder.binding.thumbnail.setImageBitmap(bitmap)
@@ -56,6 +60,7 @@ class ReminderAdapter(
             holder.binding.thumbnail.visibility = View.GONE
         }
 
+        // Notes
         if (r.notes.isBlank()) {
             holder.binding.notes.visibility = View.GONE
         } else {
@@ -63,46 +68,63 @@ class ReminderAdapter(
             holder.binding.notes.text = r.notes
         }
 
+        // Project — both the colored left strip AND the text label.
         val project = r.projectId?.let { projectsById[it] }
         if (project != null) {
+            holder.binding.colorStrip.setBackgroundColor(project.color)
             holder.binding.projectLabel.visibility = View.VISIBLE
-            holder.binding.projectLabel.text = "● ${project.name}"
+            holder.binding.projectLabel.text = project.name
             holder.binding.projectLabel.setTextColor(project.color)
         } else {
+            holder.binding.colorStrip.setBackgroundColor(Color.TRANSPARENT)
             holder.binding.projectLabel.visibility = View.GONE
         }
 
+        // Tags as Material chips (one chip per tag with its own color).
+        holder.binding.tagsGroup.removeAllViews()
         val tags = r.tagIds.mapNotNull { tagsById[it] }
         if (tags.isNotEmpty()) {
-            val ssb = SpannableStringBuilder()
-            tags.forEachIndexed { i, tag ->
-                val start = ssb.length
-                ssb.append("#").append(tag.name)
-                val end = ssb.length
-                ssb.setSpan(
-                    ForegroundColorSpan(tag.color),
-                    start, end,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-                if (i < tags.size - 1) ssb.append("  ")
+            holder.binding.tagsGroup.visibility = View.VISIBLE
+            tags.forEach { tag ->
+                val chip = Chip(ctx).apply {
+                    text = tag.name
+                    isClickable = false
+                    isCheckable = false
+                    chipBackgroundColor = ColorStateList.valueOf(
+                        ColorUtils.setAlphaComponent(tag.color, 0x33)
+                    )
+                    chipStrokeColor = ColorStateList.valueOf(tag.color)
+                    chipStrokeWidth = dp(ctx, 1f)
+                    setTextColor(tag.color)
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
+                    chipMinHeight = dp(ctx, 24f)
+                    textStartPadding = dp(ctx, 6f)
+                    textEndPadding = dp(ctx, 6f)
+                    chipStartPadding = 0f
+                    chipEndPadding = 0f
+                }
+                holder.binding.tagsGroup.addView(chip)
             }
-            holder.binding.tagsLabel.visibility = View.VISIBLE
-            holder.binding.tagsLabel.text = ssb
         } else {
-            holder.binding.tagsLabel.visibility = View.GONE
+            holder.binding.tagsGroup.visibility = View.GONE
         }
 
+        // Status row: completed badge, vibrate-only, recurrence.
         val statusParts = mutableListOf<String>()
         if (!r.enabled) statusParts += ctx.getString(R.string.done)
         if (r.vibrateOnly) statusParts += ctx.getString(R.string.vibrate_only_tag)
-        if (r.recurrence != Recurrence.NONE) statusParts += "\uD83D\uDD01 ${r.recurrence.displayName}"
+        if (r.recurrence != Recurrence.NONE) {
+            statusParts += "\uD83D\uDD01 ${r.recurrence.displayName}"
+        }
         holder.binding.status.text = statusParts.joinToString(" • ")
         holder.binding.status.visibility =
             if (statusParts.isEmpty()) View.GONE else View.VISIBLE
 
-        holder.binding.btnDelete.setOnClickListener { onDelete(r) }
         holder.itemView.setOnClickListener { onClick(r) }
     }
+
+    private fun dp(ctx: android.content.Context, v: Float): Float =
+        v * ctx.resources.displayMetrics.density
 
     class VH(val binding: ItemReminderBinding) : RecyclerView.ViewHolder(binding.root)
 }

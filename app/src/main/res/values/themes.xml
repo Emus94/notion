@@ -38,6 +38,27 @@
         <item name="colorSecondary">#E29578</item>
     </style>
 
+    <style name="Theme.ReminderAlarm.Mist" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#B4A7D6</item>
+        <item name="colorPrimaryDark">#7B6BA8</item>
+        <item name="colorAccent">#E8B4BC</item>
+        <item name="colorSecondary">#E8B4BC</item>
+    </style>
+
+    <style name="Theme.ReminderAlarm.Paper" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#D4A574</item>
+        <item name="colorPrimaryDark">#8B6F47</item>
+        <item name="colorAccent">#C84B31</item>
+        <item name="colorSecondary">#C84B31</item>
+    </style>
+
+    <style name="Theme.ReminderAlarm.Dawn" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#FFAD8F</item>
+        <item name="colorPrimaryDark">#CC6F5C</item>
+        <item name="colorAccent">#FF5E7A</item>
+        <item name="colorSecondary">#FF5E7A</item>
+    </style>
+
     <!-- Fullscreen alarm screen keeps its own dark style regardless of theme. -->
     <style name="Theme.ReminderAlarm.Fullscreen" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:windowFullscreen">true</item>

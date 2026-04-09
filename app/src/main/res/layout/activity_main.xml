@@ -44,6 +44,25 @@
                 android:layout_height="wrap_content"
                 android:text="@string/tab_completed" />
         </com.google.android.material.tabs.TabLayout>
+
+        <HorizontalScrollView
+            android:id="@+id/filterScroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/colorBackground"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:scrollbars="none">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/filterChips"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipSpacingHorizontal="6dp"
+                app:selectionRequired="true"
+                app:singleLine="true"
+                app:singleSelection="true" />
+        </HorizontalScrollView>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -51,7 +70,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:padding="8dp"
+        android:paddingHorizontal="4dp"
+        android:paddingVertical="4dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <TextView

@@ -101,6 +101,10 @@
     <string name="add_image">Dodaj zdjęcie</string>
     <string name="change_image">Zmień zdjęcie</string>
     <string name="image_load_failed">Nie udało się załadować zdjęcia</string>
+    <string name="filter_all">Wszystkie</string>
+    <string name="reminder_deleted">Przypomnienie usunięte</string>
+    <string name="reminder_completed">Oznaczono jako zakończone</string>
+    <string name="undo">Cofnij</string>
     <string name="name">Nazwa</string>
     <string name="color">Kolor</string>
     <string name="pick_color">Wybierz kolor</string>

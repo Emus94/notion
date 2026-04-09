@@ -54,7 +54,20 @@ class TagsActivity : BaseActivity() {
 
     private fun refresh() {
         val tags = TagStore.all(this)
-        adapter.submit(tags.map { ColoredEntityAdapter.Entry(it.id, it.name, it.color) })
+        val reminders = ReminderStore.all(this)
+        // One reminder can carry multiple tags, so we count tag occurrences
+        // across every reminder's tagIds list, not distinct reminders.
+        val counts = mutableMapOf<Long, Int>()
+        for (r in reminders) {
+            for (t in r.tagIds) {
+                counts[t] = (counts[t] ?: 0) + 1
+            }
+        }
+        adapter.submit(
+            tags.map {
+                ColoredEntityAdapter.Entry(it.id, it.name, it.color, counts[it.id] ?: 0)
+            }
+        )
         binding.empty.visibility = if (tags.isEmpty()) View.VISIBLE else View.GONE
     }
 
