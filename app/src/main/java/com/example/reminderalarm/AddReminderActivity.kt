@@ -4,6 +4,8 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.widget.Toast
 import com.example.reminderalarm.databinding.ActivityAddBinding
 import java.text.SimpleDateFormat
@@ -22,6 +24,7 @@ class AddReminderActivity : BaseActivity() {
     private val fmt = SimpleDateFormat("EEE d MMM yyyy, HH:mm", Locale.getDefault())
 
     private var editingId: Long = -1L
+    private var suppressParsing: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +41,9 @@ class AddReminderActivity : BaseActivity() {
             if (existing != null) {
                 title = getString(R.string.edit_reminder)
                 binding.btnSave.setText(R.string.save_changes)
+                suppressParsing = true
                 binding.editLabel.setText(existing.label)
+                suppressParsing = false
                 binding.editNotes.setText(existing.notes)
                 binding.switchVibrateOnly.isChecked = existing.vibrateOnly
                 cal.timeInMillis = existing.triggerAtMillis
@@ -49,6 +54,14 @@ class AddReminderActivity : BaseActivity() {
         } else {
             title = getString(R.string.new_reminder)
         }
+
+        binding.editLabel.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                applyNaturalParsing(s?.toString().orEmpty())
+            }
+        })
 
         updateDateTimeLabel()
 
@@ -85,6 +98,46 @@ class AddReminderActivity : BaseActivity() {
         binding.btnSave.setOnClickListener { save() }
 
         applyPaletteColors()
+    }
+
+    private fun applyNaturalParsing(text: String) {
+        if (suppressParsing) return
+        if (text.isBlank()) {
+            binding.labelLayout.helperText = null
+            return
+        }
+        val parsed = NaturalDateParser.parse(text)
+        if (!parsed.hasAny()) {
+            binding.labelLayout.helperText = null
+            return
+        }
+
+        val datePart = parsed.datePart
+        if (datePart != null) {
+            cal.set(Calendar.YEAR, datePart.get(Calendar.YEAR))
+            cal.set(Calendar.MONTH, datePart.get(Calendar.MONTH))
+            cal.set(Calendar.DAY_OF_MONTH, datePart.get(Calendar.DAY_OF_MONTH))
+            parsed.timeHour?.let { h ->
+                cal.set(Calendar.HOUR_OF_DAY, h)
+                cal.set(Calendar.MINUTE, parsed.timeMinute ?: 0)
+            }
+        } else {
+            parsed.timeHour?.let { h ->
+                cal.set(Calendar.HOUR_OF_DAY, h)
+                cal.set(Calendar.MINUTE, parsed.timeMinute ?: 0)
+                // Only-time parse with a moment already in the past → push
+                // to the next day so save() doesn't reject it.
+                if (cal.timeInMillis <= System.currentTimeMillis()) {
+                    cal.add(Calendar.DAY_OF_YEAR, 1)
+                }
+            }
+        }
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+
+        updateDateTimeLabel()
+        binding.labelLayout.helperText =
+            getString(R.string.parsed_hint, fmt.format(Date(cal.timeInMillis)))
     }
 
     private fun applyPaletteColors() {
