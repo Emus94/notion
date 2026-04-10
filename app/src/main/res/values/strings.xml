@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Przypominacz</string>
+    <string name="app_name">ForgetMeNot</string>
     <string name="add">Dodaj przypomnienie</string>
     <string name="delete">Usuń</string>
     <string name="save">Zapisz</string>

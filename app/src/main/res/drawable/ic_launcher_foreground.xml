@@ -5,17 +5,68 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <!--
-      Material "notifications" bell (24x24 viewport) scaled 2.5x and
-      translated so it sits centered inside the 108x108 safe zone.
-      Final bounds: (24,24) → (84,84) — well inside the 72dp safe area.
+      Minimalist forget-me-not flower — five rounded petals
+      around a small centre dot. Black stroked lines on the
+      transparent foreground layer; the mustard background
+      shows through from ic_launcher_background.
+
+      The flower sits centered in the 72dp safe zone
+      (18,18 → 90,90) of the 108dp adaptive-icon canvas.
     -->
-    <group
-        android:scaleX="2.5"
-        android:scaleY="2.5"
-        android:translateX="24"
-        android:translateY="24">
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M12,22c1.1,0 2,-0.9 2,-2h-4c0,1.1 0.89,2 2,2zM18,16v-5c0,-3.07 -1.63,-5.64 -4.5,-6.32L13.5,4c0,-0.83 -0.67,-1.5 -1.5,-1.5s-1.5,0.67 -1.5,1.5v0.68C7.64,5.36 6,7.92 6,11v5l-2,2v1h16v-1l-2,-2z" />
-    </group>
+
+    <!-- Petal 1 — top -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1A1A1A"
+        android:strokeWidth="2.4"
+        android:pathData="M54,33 C49,28 44,28 42,33 C40,38 44,43 49,44 C50,44 53,44 54,42 C55,44 58,44 59,44 C64,43 68,38 66,33 C64,28 59,28 54,33Z" />
+
+    <!-- Petal 2 — top-right -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1A1A1A"
+        android:strokeWidth="2.4"
+        android:pathData="M62,38 C66,34 70,34 72,38 C74,42 72,47 68,50 C66,52 63,52 62,50 C64,52 64,56 63,57 C59,60 54,58 54,53 C54,48 58,42 62,38Z" />
+
+    <!-- Petal 3 — bottom-right -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1A1A1A"
+        android:strokeWidth="2.4"
+        android:pathData="M59,55 C64,58 66,62 63,66 C60,70 55,70 52,67 C50,65 50,62 52,60 C50,62 47,63 45,62 C42,59 43,54 48,52 C53,50 58,51 59,55Z" />
+
+    <!-- Petal 4 — bottom-left -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1A1A1A"
+        android:strokeWidth="2.4"
+        android:pathData="M49,55 C44,58 42,62 45,66 C48,70 53,70 56,67 C58,65 58,62 56,60 C58,62 61,63 63,62 C66,59 65,54 60,52 C55,50 50,51 49,55Z" />
+
+    <!-- Petal 5 — top-left -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1A1A1A"
+        android:strokeWidth="2.4"
+        android:pathData="M46,38 C42,34 38,34 36,38 C34,42 36,47 40,50 C42,52 45,52 46,50 C44,52 44,56 45,57 C49,60 54,58 54,53 C54,48 50,42 46,38Z" />
+
+    <!-- Centre dot -->
+    <path
+        android:fillColor="#1A1A1A"
+        android:pathData="M54,47 m-4,0 a4,4 0,1 1,8 0 a4,4 0,1 1,-8 0" />
+
+    <!-- Stem — thin line going down from centre -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1A1A1A"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M54,51 C54,60 50,68 46,75" />
+
+    <!-- Small leaf on the stem -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1A1A1A"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M50,65 C54,62 58,64 56,68" />
 </vector>
