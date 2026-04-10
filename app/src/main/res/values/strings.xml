@@ -48,6 +48,7 @@
     <string name="overlay_title">Wyświetlanie nad aplikacjami</string>
     <string name="overlay_message">Aby alarm mógł się pokazać na pełnym ekranie nawet gdy używasz innej aplikacji, włącz dla Przypomnień uprawnienie \"Wyświetlanie nad innymi aplikacjami\".</string>
     <string name="overlay_open_settings">Otwórz ustawienia</string>
+    <string name="overlay_warning_banner">Alarm nie pojawi się nad innymi aplikacjami. Dotknij, aby włączyć uprawnienie.</string>
 
     <string name="settings_title">Ustawienia</string>
     <string name="section_sound">Dźwięk</string>

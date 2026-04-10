@@ -16,6 +16,7 @@ import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
@@ -149,7 +150,31 @@ class MainActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         applyPaletteColors()
+        checkOverlayWarning()
         refresh()
+    }
+
+    /**
+     * Shows a persistent warning banner whenever the "display over other
+     * apps" permission is missing. The banner stays visible on every
+     * onResume until the user fixes it. Tapping it opens the system
+     * settings page directly.
+     */
+    private fun checkOverlayWarning() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            !Settings.canDrawOverlays(this)
+        ) {
+            binding.overlayWarning.visibility = View.VISIBLE
+            binding.overlayWarning.setOnClickListener {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
+                runCatching { startActivity(intent) }
+            }
+        } else {
+            binding.overlayWarning.visibility = View.GONE
+        }
     }
 
     private fun refresh() {
@@ -495,6 +520,20 @@ class MainActivity : BaseActivity() {
                     }
                     .setNegativeButton(R.string.cancel, null)
                     .show()
+                return
+            }
+        }
+        // Ask the system to exempt the app from battery optimization so
+        // AlarmSoundService stays alive reliably. Shows a one-tap system
+        // dialog, not a full settings page.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                val intent = Intent(
+                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    Uri.parse("package:$packageName")
+                )
+                runCatching { startActivity(intent) }
             }
         }
     }
