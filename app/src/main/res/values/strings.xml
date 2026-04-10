@@ -98,7 +98,10 @@
     <string name="no_tags_selected">(Brak)</string>
     <string name="no_tags_defined">Najpierw dodaj tagi w menu → Tagi</string>
     <string name="image_optional">Zdjęcie (opcjonalne)</string>
+    <string name="image_label">Zdjęcie</string>
     <string name="add_image">Dodaj zdjęcie</string>
+    <string name="add_image_short">Dodaj</string>
+    <string name="image_attached">✓ Załączono</string>
     <string name="change_image">Zmień zdjęcie</string>
     <string name="image_load_failed">Nie udało się załadować zdjęcia</string>
     <string name="filter_all">Wszystkie</string>

@@ -29,7 +29,9 @@ class AddReminderActivity : BaseActivity() {
         set(Calendar.SECOND, 0)
         set(Calendar.MILLISECOND, 0)
     }
-    private val fmt = SimpleDateFormat("EEE d MMM yyyy, HH:mm", Locale.getDefault())
+    private val dateFmt = SimpleDateFormat("EEE d MMM yyyy", Locale.getDefault())
+    private val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
+    private val fullFmt = SimpleDateFormat("EEE d MMM yyyy, HH:mm", Locale.getDefault())
 
     private var editingId: Long = -1L
     private var suppressParsing: Boolean = false
@@ -42,16 +44,10 @@ class AddReminderActivity : BaseActivity() {
         ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) {
-            // Copy to internal storage so the alarm can always read it
-            // later, regardless of whether the source provider would
-            // survive the app process dying.
             val localPath = ImageStorage.copyToInternal(this, uri)
             if (localPath != null) {
-                // Replacing an existing internal image? Remove the old file.
                 val previous = selectedImageUri
-                if (previous != null && previous.startsWith("/")) {
-                    ImageStorage.delete(previous)
-                }
+                if (previous != null && previous.startsWith("/")) ImageStorage.delete(previous)
                 selectedImageUri = localPath
                 updateImagePreview()
             } else {
@@ -102,54 +98,36 @@ class AddReminderActivity : BaseActivity() {
             }
         })
 
-        updateDateTimeLabel()
+        updateDateTime()
         updateRecurrenceLabel()
         updateProjectLabel()
         updateTagsLabel()
         updateImagePreview()
 
-        binding.btnPickDate.setOnClickListener {
-            DatePickerDialog(
-                this,
-                { _, y, m, d ->
-                    cal.set(Calendar.YEAR, y)
-                    cal.set(Calendar.MONTH, m)
-                    cal.set(Calendar.DAY_OF_MONTH, d)
-                    updateDateTimeLabel()
-                },
-                cal.get(Calendar.YEAR),
-                cal.get(Calendar.MONTH),
-                cal.get(Calendar.DAY_OF_MONTH)
-            ).show()
+        // Compact row click handlers
+        binding.rowDate.setOnClickListener {
+            DatePickerDialog(this, { _, y, m, d ->
+                cal.set(Calendar.YEAR, y)
+                cal.set(Calendar.MONTH, m)
+                cal.set(Calendar.DAY_OF_MONTH, d)
+                updateDateTime()
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
         }
-
-        binding.btnPickTime.setOnClickListener {
-            TimePickerDialog(
-                this,
-                { _, h, min ->
-                    cal.set(Calendar.HOUR_OF_DAY, h)
-                    cal.set(Calendar.MINUTE, min)
-                    cal.set(Calendar.SECOND, 0)
-                    updateDateTimeLabel()
-                },
-                cal.get(Calendar.HOUR_OF_DAY),
-                cal.get(Calendar.MINUTE),
-                true
-            ).show()
+        binding.rowTime.setOnClickListener {
+            TimePickerDialog(this, { _, h, min ->
+                cal.set(Calendar.HOUR_OF_DAY, h)
+                cal.set(Calendar.MINUTE, min)
+                cal.set(Calendar.SECOND, 0)
+                updateDateTime()
+            }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), true).show()
         }
-
-        binding.btnRecurrence.setOnClickListener { showRecurrenceDialog() }
-        binding.btnProject.setOnClickListener { showProjectDialog() }
-        binding.btnTags.setOnClickListener { showTagsDialog() }
-        binding.btnPickImage.setOnClickListener {
-            pickImageLauncher.launch(arrayOf("image/*"))
-        }
+        binding.rowRecurrence.setOnClickListener { showRecurrenceDialog() }
+        binding.rowProject.setOnClickListener { showProjectDialog() }
+        binding.rowTags.setOnClickListener { showTagsDialog() }
+        binding.rowImage.setOnClickListener { pickImageLauncher.launch(arrayOf("image/*")) }
         binding.btnClearImage.setOnClickListener {
-            // Clean up the copied file if we have one.
-            val previous = selectedImageUri
-            if (previous != null && previous.startsWith("/")) {
-                ImageStorage.delete(previous)
-            }
+            val prev = selectedImageUri
+            if (prev != null && prev.startsWith("/")) ImageStorage.delete(prev)
             selectedImageUri = null
             updateImagePreview()
         }
@@ -157,26 +135,21 @@ class AddReminderActivity : BaseActivity() {
 
         applyPaletteColors()
 
-        // When creating a new reminder, put the cursor in the title field
-        // and pop the keyboard up immediately so the user can start typing
-        // without an extra tap.
         if (editingId <= 0) {
             binding.editLabel.requestFocus()
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
         }
     }
 
+    // ------------------------------------------------------------------
+    // Natural language parsing
+    // ------------------------------------------------------------------
+
     private fun applyNaturalParsing(text: String) {
         if (suppressParsing) return
-        if (text.isBlank()) {
-            binding.labelLayout.helperText = null
-            return
-        }
+        if (text.isBlank()) { binding.labelLayout.helperText = null; return }
         val parsed = NaturalDateParser.parse(text)
-        if (!parsed.hasAny()) {
-            binding.labelLayout.helperText = null
-            return
-        }
+        if (!parsed.hasAny()) { binding.labelLayout.helperText = null; return }
 
         val datePart = parsed.datePart
         if (datePart != null) {
@@ -191,8 +164,6 @@ class AddReminderActivity : BaseActivity() {
             parsed.timeHour?.let { h ->
                 cal.set(Calendar.HOUR_OF_DAY, h)
                 cal.set(Calendar.MINUTE, parsed.timeMinute ?: 0)
-                // Only-time parse with a moment already in the past → push
-                // to the next day so save() doesn't reject it.
                 if (cal.timeInMillis <= System.currentTimeMillis()) {
                     cal.add(Calendar.DAY_OF_YEAR, 1)
                 }
@@ -201,42 +172,65 @@ class AddReminderActivity : BaseActivity() {
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
 
-        updateDateTimeLabel()
+        updateDateTime()
         binding.labelLayout.helperText =
-            getString(R.string.parsed_hint, fmt.format(Date(cal.timeInMillis)))
+            getString(R.string.parsed_hint, fullFmt.format(Date(cal.timeInMillis)))
     }
 
-    private fun applyPaletteColors() {
-        val primary = ThemeManager.primaryColor(this)
-        val primaryDark = ThemeManager.primaryDarkColor(this)
-        val accent = ThemeManager.accentColor(this)
-        binding.toolbar.setBackgroundColor(primary)
-        window.statusBarColor = primaryDark
-        val primaryTint = ColorStateList.valueOf(primary)
-        binding.btnPickDate.backgroundTintList = primaryTint
-        binding.btnPickTime.backgroundTintList = primaryTint
-        binding.btnRecurrence.backgroundTintList = primaryTint
-        binding.btnProject.backgroundTintList = primaryTint
-        binding.btnTags.backgroundTintList = primaryTint
-        binding.btnPickImage.backgroundTintList = primaryTint
-        binding.btnClearImage.backgroundTintList = primaryTint
+    // ------------------------------------------------------------------
+    // Update helpers
+    // ------------------------------------------------------------------
 
-        // Save button stands out with the accent color. Text color is
-        // flipped to black/white based on accent luminance so bright
-        // accents like yellow/pink stay readable.
-        binding.btnSave.backgroundTintList = ColorStateList.valueOf(accent)
-        binding.btnSave.setTextColor(
-            if (ColorUtils.calculateLuminance(accent) < 0.5) Color.WHITE else Color.BLACK
-        )
-    }
-
-    private fun updateDateTimeLabel() {
-        binding.dateTimeLabel.text = fmt.format(Date(cal.timeInMillis))
+    private fun updateDateTime() {
+        binding.dateValue.text = dateFmt.format(Date(cal.timeInMillis))
+        binding.timeValue.text = timeFmt.format(Date(cal.timeInMillis))
     }
 
     private fun updateRecurrenceLabel() {
-        binding.btnRecurrence.text = recurrence.displayName
+        binding.recurrenceValue.text = recurrence.displayName
     }
+
+    private fun updateProjectLabel() {
+        val project = selectedProjectId?.let { ProjectStore.byId(this, it) }
+        binding.projectValue.text = project?.name ?: getString(R.string.no_project)
+    }
+
+    private fun updateTagsLabel() {
+        if (selectedTagIds.isEmpty()) {
+            binding.tagsValue.text = getString(R.string.no_tags_selected)
+            return
+        }
+        val names = selectedTagIds.mapNotNull { TagStore.byId(this, it)?.name }
+        binding.tagsValue.text =
+            if (names.isEmpty()) getString(R.string.no_tags_selected)
+            else names.joinToString(", ")
+    }
+
+    private fun updateImagePreview() {
+        val pathOrUri = selectedImageUri
+        if (pathOrUri == null) {
+            binding.imagePreview.visibility = View.GONE
+            binding.imagePreview.setImageBitmap(null)
+            binding.btnClearImage.visibility = View.GONE
+            binding.imageStatus.text = getString(R.string.add_image_short)
+            return
+        }
+        val bitmap = ImageLoader.loadSampled(this, pathOrUri, 400)
+        if (bitmap != null) {
+            binding.imagePreview.setImageBitmap(bitmap)
+            binding.imagePreview.visibility = View.VISIBLE
+            binding.btnClearImage.visibility = View.VISIBLE
+            binding.imageStatus.text = getString(R.string.image_attached)
+        } else {
+            binding.imagePreview.visibility = View.GONE
+            binding.btnClearImage.visibility = View.GONE
+            binding.imageStatus.text = getString(R.string.add_image_short)
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Picker dialogs
+    // ------------------------------------------------------------------
 
     private fun showRecurrenceDialog() {
         val options = Recurrence.values()
@@ -253,14 +247,8 @@ class AddReminderActivity : BaseActivity() {
             .show()
     }
 
-    private fun updateProjectLabel() {
-        val project = selectedProjectId?.let { ProjectStore.byId(this, it) }
-        binding.btnProject.text = project?.name ?: getString(R.string.no_project)
-    }
-
     private fun showProjectDialog() {
         val projects = ProjectStore.all(this)
-        // First item is "(Brak)" so the user can always clear the assignment.
         val ids: List<Long?> = listOf<Long?>(null) + projects.map { it.id }
         val names = Array(ids.size) { i ->
             if (i == 0) getString(R.string.no_project) else projects[i - 1].name
@@ -277,39 +265,6 @@ class AddReminderActivity : BaseActivity() {
             .show()
     }
 
-    private fun updateTagsLabel() {
-        if (selectedTagIds.isEmpty()) {
-            binding.btnTags.text = getString(R.string.no_tags_selected)
-            return
-        }
-        val names = selectedTagIds.mapNotNull { TagStore.byId(this, it)?.name }
-        binding.btnTags.text = if (names.isEmpty()) {
-            getString(R.string.no_tags_selected)
-        } else {
-            names.joinToString(", ")
-        }
-    }
-
-    private fun updateImagePreview() {
-        val pathOrUri = selectedImageUri
-        if (pathOrUri == null) {
-            binding.imagePreview.visibility = View.GONE
-            binding.imagePreview.setImageBitmap(null)
-            binding.btnClearImage.visibility = View.GONE
-            binding.btnPickImage.setText(R.string.add_image)
-            return
-        }
-        val bitmap = ImageLoader.loadSampled(this, pathOrUri, 600)
-        if (bitmap != null) {
-            binding.imagePreview.setImageBitmap(bitmap)
-            binding.imagePreview.visibility = View.VISIBLE
-        } else {
-            binding.imagePreview.visibility = View.GONE
-        }
-        binding.btnClearImage.visibility = View.VISIBLE
-        binding.btnPickImage.setText(R.string.change_image)
-    }
-
     private fun showTagsDialog() {
         val tags = TagStore.all(this)
         if (tags.isEmpty()) {
@@ -317,8 +272,7 @@ class AddReminderActivity : BaseActivity() {
             return
         }
         val names = tags.map { it.name }.toTypedArray()
-        val initiallyChecked = BooleanArray(tags.size) { tags[it].id in selectedTagIds }
-        val workingChecked = initiallyChecked.copyOf()
+        val workingChecked = BooleanArray(tags.size) { tags[it].id in selectedTagIds }
         AlertDialog.Builder(this)
             .setTitle(R.string.tags)
             .setMultiChoiceItems(names, workingChecked) { _, which, isChecked ->
@@ -326,8 +280,8 @@ class AddReminderActivity : BaseActivity() {
             }
             .setPositiveButton(R.string.ok) { _, _ ->
                 selectedTagIds.clear()
-                workingChecked.forEachIndexed { index, checked ->
-                    if (checked) selectedTagIds.add(tags[index].id)
+                workingChecked.forEachIndexed { index, c ->
+                    if (c) selectedTagIds.add(tags[index].id)
                 }
                 updateTagsLabel()
             }
@@ -335,10 +289,37 @@ class AddReminderActivity : BaseActivity() {
             .show()
     }
 
+    // ------------------------------------------------------------------
+    // Theme
+    // ------------------------------------------------------------------
+
+    private fun applyPaletteColors() {
+        val primary = ThemeManager.primaryColor(this)
+        val primaryDark = ThemeManager.primaryDarkColor(this)
+        val accent = ThemeManager.accentColor(this)
+        binding.toolbar.setBackgroundColor(primary)
+        window.statusBarColor = primaryDark
+
+        val accentColor = accent
+        binding.dateValue.setTextColor(accentColor)
+        binding.timeValue.setTextColor(accentColor)
+        binding.recurrenceValue.setTextColor(accentColor)
+        binding.projectValue.setTextColor(accentColor)
+        binding.tagsValue.setTextColor(accentColor)
+        binding.imageStatus.setTextColor(accentColor)
+
+        binding.btnSave.backgroundTintList = ColorStateList.valueOf(accent)
+        binding.btnSave.setTextColor(
+            if (ColorUtils.calculateLuminance(accent) < 0.5) Color.WHITE else Color.BLACK
+        )
+    }
+
+    // ------------------------------------------------------------------
+    // Save
+    // ------------------------------------------------------------------
+
     private fun save() {
         val rawLabel = binding.editLabel.text?.toString().orEmpty()
-        // Strip the date/time tokens the parser recognised so they don't
-        // pollute the final title displayed in the list and alarm screen.
         val parsed = NaturalDateParser.parse(rawLabel)
         val cleanLabel = NaturalDateParser.stripRanges(rawLabel, parsed.matchedRanges)
         val label = cleanLabel.ifBlank { rawLabel.trim() }
@@ -351,31 +332,11 @@ class AddReminderActivity : BaseActivity() {
         }
         val reminder = if (editingId > 0) {
             AlarmScheduler.cancel(this, editingId)
-            Reminder(
-                id = editingId,
-                label = label,
-                notes = notes,
-                triggerAtMillis = trigger,
-                enabled = true,
-                vibrateOnly = vibrateOnly,
-                recurrence = recurrence,
-                projectId = selectedProjectId,
-                tagIds = selectedTagIds.toList(),
-                imageUri = selectedImageUri
-            )
+            Reminder(editingId, label, notes, trigger, true, vibrateOnly, recurrence,
+                selectedProjectId, selectedTagIds.toList(), selectedImageUri)
         } else {
-            Reminder(
-                id = System.currentTimeMillis(),
-                label = label,
-                notes = notes,
-                triggerAtMillis = trigger,
-                enabled = true,
-                vibrateOnly = vibrateOnly,
-                recurrence = recurrence,
-                projectId = selectedProjectId,
-                tagIds = selectedTagIds.toList(),
-                imageUri = selectedImageUri
-            )
+            Reminder(System.currentTimeMillis(), label, notes, trigger, true, vibrateOnly,
+                recurrence, selectedProjectId, selectedTagIds.toList(), selectedImageUri)
         }
         ReminderStore.save(this, reminder)
         AlarmScheduler.schedule(this, reminder)
@@ -383,9 +344,7 @@ class AddReminderActivity : BaseActivity() {
         finish()
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        finish(); return true
-    }
+    override fun onSupportNavigateUp(): Boolean { finish(); return true }
 
     companion object {
         const val EXTRA_EDIT_ID = "edit_id"
