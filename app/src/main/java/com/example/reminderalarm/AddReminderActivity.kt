@@ -35,10 +35,13 @@ class AddReminderActivity : BaseActivity() {
 
     private var editingId: Long = -1L
     private var suppressParsing: Boolean = false
+    private var autoSaveTriggered: Boolean = false
     private var recurrence: Recurrence = Recurrence.NONE
     private var selectedProjectId: Long? = null
     private val selectedTagIds: MutableList<Long> = mutableListOf()
     private var selectedImageUri: String? = null
+
+    private val autoSaveRegex = Regex("""zapisz\s+zapisz""", RegexOption.IGNORE_CASE)
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -94,7 +97,19 @@ class AddReminderActivity : BaseActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                applyNaturalParsing(s?.toString().orEmpty())
+                val text = s?.toString().orEmpty()
+                // Magic phrase: typing "zapisz zapisz" auto-submits.
+                if (!autoSaveTriggered && autoSaveRegex.containsMatchIn(text)) {
+                    autoSaveTriggered = true
+                    val cleaned = text.replace(autoSaveRegex, "").trim()
+                    suppressParsing = true
+                    binding.editLabel.setText(cleaned)
+                    binding.editLabel.setSelection(cleaned.length)
+                    suppressParsing = false
+                    save()
+                    return
+                }
+                applyNaturalParsing(text)
             }
         })
 

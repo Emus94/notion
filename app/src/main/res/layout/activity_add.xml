@@ -28,25 +28,46 @@
             <!-- Title -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/labelLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/label_hint"
-                app:helperTextEnabled="true">
+                android:textColorHint="?android:attr/textColorSecondary"
+                app:boxBackgroundColor="#18808080"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:helperTextEnabled="true"
+                app:hintTextColor="?attr/colorAccent">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textCapSentences"
-                    android:maxLines="2" />
+                    android:maxLines="2"
+                    android:textColor="?android:attr/textColorPrimary" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Notes -->
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:hint="@string/notes_hint">
+                android:layout_marginTop="8dp"
+                android:hint="@string/notes_hint"
+                android:textColorHint="?android:attr/textColorSecondary"
+                app:boxBackgroundColor="#18808080"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:hintTextColor="?attr/colorAccent">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editNotes"
@@ -55,7 +76,8 @@
                     android:gravity="top|start"
                     android:inputType="textCapSentences|textMultiLine"
                     android:maxLines="3"
-                    android:minLines="1" />
+                    android:minLines="1"
+                    android:textColor="?android:attr/textColorPrimary" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- ═══ DATE + TIME side-by-side cards ═══ -->
@@ -70,7 +92,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:clickable="true"
                     android:focusable="true"
                     app:cardCornerRadius="16dp"
@@ -110,6 +132,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
+                                android:ellipsize="end"
+                                android:singleLine="true"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
@@ -161,6 +185,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
+                                android:singleLine="true"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
                         </LinearLayout>

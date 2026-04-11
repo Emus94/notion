@@ -41,10 +41,34 @@ object NaturalDateParser {
         "niedziela" to Calendar.SUNDAY
     )
 
+    /** Polish word numbers, case-insensitive lookup. */
+    private val wordNumbers = mapOf(
+        "jeden" to 1, "jedna" to 1, "jedną" to 1, "jednej" to 1,
+        "dwa" to 2, "dwie" to 2, "dwóch" to 2, "dwu" to 2,
+        "trzy" to 3, "trzech" to 3,
+        "cztery" to 4, "czterech" to 4,
+        "pięć" to 5, "piec" to 5, "pięciu" to 5,
+        "sześć" to 6, "szesc" to 6, "sześciu" to 6,
+        "siedem" to 7, "siedmiu" to 7,
+        "osiem" to 8, "ośmiu" to 8, "osmiu" to 8,
+        "dziewięć" to 9, "dziewiec" to 9, "dziewięciu" to 9,
+        "dziesięć" to 10, "dziesiec" to 10, "dziesięciu" to 10,
+        "jedenaście" to 11, "dwanaście" to 12, "trzynaście" to 13,
+        "czternaście" to 14, "piętnaście" to 15, "szesnaście" to 16,
+        "siedemnaście" to 17, "osiemnaście" to 18, "dziewiętnaście" to 19,
+        "dwadzieścia" to 20, "dwadziescia" to 20,
+        "trzydzieści" to 30, "trzydziesci" to 30,
+        "czterdzieści" to 40, "czterdziesci" to 40,
+        "pięćdziesiąt" to 50, "piecdziesiat" to 50,
+        "sześćdziesiąt" to 60
+    )
+
+    private val wordNumberAlt = wordNumbers.keys
+        .sortedByDescending { it.length }
+        .joinToString("|") { Regex.escape(it) }
+
     private val timeRegex = Regex("""(?<!\d)(\d{1,2})[:.](\d{2})(?!\d)""")
 
-    // Longest alternatives first so the alternation prefers full words
-    // ("poniedziałek") over their abbreviations ("pon").
     private val dowAlternation = dayOfWeekMap.keys
         .sortedByDescending { it.length }
         .joinToString("|") { Regex.escape(it) }
@@ -58,13 +82,39 @@ object NaturalDateParser {
         RegexOption.IGNORE_CASE
     )
 
+    // "za 5 minut" / "za pięć minut" — digits or word numbers
     private val relMinRegex = Regex(
-        """(?<!\p{L})za\s+(\d+)\s*(?:min|minut|minutę|minuty|minuta)(?!\p{L})""",
+        """(?<!\p{L})za\s+(\d+|$wordNumberAlt)\s*(?:min|minut|minutę|minuty|minuta|minutki)(?!\p{L})""",
         RegexOption.IGNORE_CASE
     )
 
+    // "za 2 godziny" / "za dwie godziny" — digits or word numbers
     private val relHourRegex = Regex(
-        """(?<!\p{L})za\s+(\d+)\s*(?:h|godz|godzin|godziny|godzinę|godzina)(?!\p{L})""",
+        """(?<!\p{L})za\s+(\d+|$wordNumberAlt)\s*(?:h|godz|godzin|godziny|godzinę|godzina)(?!\p{L})""",
+        RegexOption.IGNORE_CASE
+    )
+
+    // "za godzinę" / "za godzine" — implicit 1 hour, no number
+    private val relOneHourRegex = Regex(
+        """(?<!\p{L})za\s+godzin[ęey](?!\p{L})""",
+        RegexOption.IGNORE_CASE
+    )
+
+    // "pół godziny" / "za pół godziny" — 30 minutes
+    private val relHalfHourRegex = Regex(
+        """(?<!\p{L})(?:za\s+)?pół\s+godziny(?!\p{L})""",
+        RegexOption.IGNORE_CASE
+    )
+
+    // "kwadrans" / "za kwadrans" — 15 minutes
+    private val relKwadransRegex = Regex(
+        """(?<!\p{L})(?:za\s+)?kwadrans(?!\p{L})""",
+        RegexOption.IGNORE_CASE
+    )
+
+    // "za chwilę" — 5 minutes
+    private val relChwilaRegex = Regex(
+        """(?<!\p{L})za\s+chwil[ęe](?!\p{L})""",
         RegexOption.IGNORE_CASE
     )
 
@@ -72,31 +122,27 @@ object NaturalDateParser {
         if (text.isBlank()) return Parsed()
         val ranges = mutableListOf<IntRange>()
 
-        // "za N minut" fully defines the moment — return straight away.
+        // Special-case phrases that fully define the moment. Return
+        // immediately on a match so they don't have to fight with the
+        // generic "za N x" regex.
+        relHalfHourRegex.find(text)?.let { return relativeParsed(it.range, 30) }
+        relKwadransRegex.find(text)?.let { return relativeParsed(it.range, 15) }
+        relChwilaRegex.find(text)?.let { return relativeParsed(it.range, 5) }
+        relOneHourRegex.find(text)?.let { return relativeParsed(it.range, 60) }
+
+        // "za N minut" — digits or word numbers.
         relMinRegex.find(text)?.let { m ->
-            val n = m.groupValues[1].toIntOrNull() ?: 0
+            val n = parseNumber(m.groupValues[1])
             if (n > 0) {
-                val c = Calendar.getInstance().apply {
-                    timeInMillis = System.currentTimeMillis() + n * 60_000L
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-                ranges.add(m.range)
-                return Parsed(c, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), ranges)
+                return relativeParsed(m.range, n.toLong())
             }
         }
 
-        // "za N godzin"
+        // "za N godzin" — digits or word numbers.
         relHourRegex.find(text)?.let { m ->
-            val n = m.groupValues[1].toIntOrNull() ?: 0
+            val n = parseNumber(m.groupValues[1])
             if (n > 0) {
-                val c = Calendar.getInstance().apply {
-                    timeInMillis = System.currentTimeMillis() + n * 3_600_000L
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-                ranges.add(m.range)
-                return Parsed(c, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), ranges)
+                return relativeParsed(m.range, n.toLong() * 60L)
             }
         }
 
@@ -115,8 +161,6 @@ object NaturalDateParser {
             }
         }
 
-        // Day of week — first match sets the date, but every occurrence
-        // is reported so stripping can remove stray tokens.
         val dowMatches = dowRegex.findAll(text).toList()
         if (dowMatches.isNotEmpty()) {
             val firstKey = dowMatches.first().value.lowercase()
@@ -125,14 +169,13 @@ object NaturalDateParser {
                 val c = Calendar.getInstance()
                 val currentDow = c.get(Calendar.DAY_OF_WEEK)
                 var daysToAdd = (dow - currentDow + 7) % 7
-                if (daysToAdd == 0) daysToAdd = 7 // "pon" on Monday = next Monday
+                if (daysToAdd == 0) daysToAdd = 7
                 c.add(Calendar.DAY_OF_YEAR, daysToAdd)
                 datePart = c
             }
             dowMatches.forEach { ranges.add(it.range) }
         }
 
-        // Relative day ("jutro", "pojutrze", "dziś")
         val relDayMatches = relDayRegex.findAll(text).toList()
         if (relDayMatches.isNotEmpty()) {
             if (datePart == null) {
@@ -148,6 +191,31 @@ object NaturalDateParser {
         }
 
         return Parsed(datePart, hour, minute, ranges)
+    }
+
+    /**
+     * Builds a [Parsed] for a relative offset of [minutes] minutes from
+     * now, tagging the supplied text range as the source for later
+     * stripping.
+     */
+    private fun relativeParsed(range: IntRange, minutes: Long): Parsed {
+        val c = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis() + minutes * 60_000L
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        return Parsed(
+            datePart = c,
+            timeHour = c.get(Calendar.HOUR_OF_DAY),
+            timeMinute = c.get(Calendar.MINUTE),
+            matchedRanges = listOf(range)
+        )
+    }
+
+    /** Parses either a literal digit string or a Polish word number. */
+    private fun parseNumber(raw: String): Int {
+        val trimmed = raw.trim().lowercase()
+        return trimmed.toIntOrNull() ?: wordNumbers[trimmed] ?: 0
     }
 
     /**
