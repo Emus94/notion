@@ -175,8 +175,8 @@ class AddReminderActivity : BaseActivity() {
     /**
      * Populates the form from an incoming [Intent.ACTION_SEND] — the user
      * picked "Udostępnij do ForgetMeNot" in another app. Supports
-     * text/plain (SMS, notes, links, email subject+body) and image/*
-     * (screenshots, photos).
+     * text/plain (SMS, notes, links, email subject+body) and any image
+     * MIME (screenshots, photos).
      */
     @Suppress("DEPRECATION")
     private fun handleShareIntent() {
