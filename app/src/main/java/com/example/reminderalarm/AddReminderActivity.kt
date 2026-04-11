@@ -1,8 +1,6 @@
 package com.example.reminderalarm
 
 import android.app.AlertDialog
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -16,10 +14,14 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.graphics.ColorUtils
 import com.example.reminderalarm.databinding.ActivityAddBinding
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 class AddReminderActivity : BaseActivity() {
 
@@ -167,23 +169,11 @@ class AddReminderActivity : BaseActivity() {
         updateTagsLabel()
         updateImagePreview()
 
-        // Compact row click handlers
-        binding.rowDate.setOnClickListener {
-            DatePickerDialog(this, { _, y, m, d ->
-                cal.set(Calendar.YEAR, y)
-                cal.set(Calendar.MONTH, m)
-                cal.set(Calendar.DAY_OF_MONTH, d)
-                updateDateTime()
-            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
-        }
-        binding.rowTime.setOnClickListener {
-            TimePickerDialog(this, { _, h, min ->
-                cal.set(Calendar.HOUR_OF_DAY, h)
-                cal.set(Calendar.MINUTE, min)
-                cal.set(Calendar.SECOND, 0)
-                updateDateTime()
-            }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), true).show()
-        }
+        // Compact row click handlers — Material pickers inherit the
+        // app's colorPrimary/colorOnPrimary so they follow the palette
+        // automatically, unlike the legacy DatePickerDialog.
+        binding.rowDate.setOnClickListener { openDatePicker() }
+        binding.rowTime.setOnClickListener { openTimePicker() }
         binding.rowRecurrence.setOnClickListener { showRecurrenceDialog() }
         binding.rowPriority.setOnClickListener { showPriorityDialog() }
         binding.rowProject.setOnClickListener { showProjectDialog() }
@@ -374,6 +364,46 @@ class AddReminderActivity : BaseActivity() {
             binding.btnClearImage.visibility = View.GONE
             binding.imageStatus.text = getString(R.string.add_image_short)
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Date / time pickers (Material)
+    // ------------------------------------------------------------------
+
+    private fun openDatePicker() {
+        val picker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText(R.string.pick_date)
+            .setSelection(cal.timeInMillis)
+            .build()
+        picker.addOnPositiveButtonClickListener { millis ->
+            // MaterialDatePicker returns UTC midnight for the selected
+            // local calendar day — read Y/M/D from a UTC calendar so we
+            // don't slip a day in Europe/Warsaw.
+            val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+                timeInMillis = millis
+            }
+            cal.set(Calendar.YEAR, utc.get(Calendar.YEAR))
+            cal.set(Calendar.MONTH, utc.get(Calendar.MONTH))
+            cal.set(Calendar.DAY_OF_MONTH, utc.get(Calendar.DAY_OF_MONTH))
+            updateDateTime()
+        }
+        picker.show(supportFragmentManager, "datePicker")
+    }
+
+    private fun openTimePicker() {
+        val tp = MaterialTimePicker.Builder()
+            .setTimeFormat(TimeFormat.CLOCK_24H)
+            .setHour(cal.get(Calendar.HOUR_OF_DAY))
+            .setMinute(cal.get(Calendar.MINUTE))
+            .setTitleText(R.string.pick_time)
+            .build()
+        tp.addOnPositiveButtonClickListener {
+            cal.set(Calendar.HOUR_OF_DAY, tp.hour)
+            cal.set(Calendar.MINUTE, tp.minute)
+            cal.set(Calendar.SECOND, 0)
+            updateDateTime()
+        }
+        tp.show(supportFragmentManager, "timePicker")
     }
 
     // ------------------------------------------------------------------

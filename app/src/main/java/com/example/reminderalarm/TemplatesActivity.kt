@@ -33,6 +33,7 @@ class TemplatesActivity : BaseActivity() {
         binding.toolbar.setNavigationOnClickListener { finish() }
         binding.toolbar.title = getString(R.string.templates_title)
         binding.empty.text = getString(R.string.templates_empty)
+        binding.emptyIcon.setImageResource(R.drawable.ic_empty_template)
 
         applyPaletteColors()
 
@@ -84,7 +85,7 @@ class TemplatesActivity : BaseActivity() {
                 )
             }
         )
-        binding.empty.visibility = if (templates.isEmpty()) View.VISIBLE else View.GONE
+        binding.emptyContainer.visibility = if (templates.isEmpty()) View.VISIBLE else View.GONE
     }
 
     /**

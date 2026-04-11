@@ -26,6 +26,7 @@ class TagsActivity : BaseActivity() {
         binding.toolbar.setNavigationOnClickListener { finish() }
         binding.toolbar.title = getString(R.string.tags_title)
         binding.empty.text = getString(R.string.no_tags)
+        binding.emptyIcon.setImageResource(R.drawable.ic_empty_tag)
 
         applyPaletteColors()
 
@@ -68,7 +69,7 @@ class TagsActivity : BaseActivity() {
                 ColoredEntityAdapter.Entry(it.id, it.name, it.color, counts[it.id] ?: 0)
             }
         )
-        binding.empty.visibility = if (tags.isEmpty()) View.VISIBLE else View.GONE
+        binding.emptyContainer.visibility = if (tags.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun showEditDialog(existing: Tag?) {

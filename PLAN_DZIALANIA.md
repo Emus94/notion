@@ -64,12 +64,12 @@ korporacyjne, nie jak produkt konsumencki 2025.
 | P0 | 3 nowe palety lekkie: Mgła, Papier, Świt | 1h | ✅ |
 | P0 | Naprawić hardcoded `#888` → `textColorSecondary` | 5 min | ✅ |
 | P0 | Card corner radius 12dp → 16dp + padding 14dp → 18dp | 15 min | ✅ |
-| P1 | Typografia Inter (free) zamiast systemowej | 30 min | ⏳ |
+| P1 | Typografia Inter (free) zamiast systemowej | 30 min | ✅ (system sans-serif-medium) |
 | P1 | Delete button 40dp → 48dp (tap target) | 2 min | ✅ |
 | P2 | Gradient toolbar (`primary → primary+8%`) | 30 min | ✅ |
 | P2 | Material You / Dynamic Colors (Android 12+) | 1h | ⏳ |
 | P2 | FAB micro-animation (scale down on tap) | 20 min | ✅ |
-| P3 | Empty states z wektorowymi ilustracjami | 2h | ⏳ |
+| P3 | Empty states z wektorowymi ilustracjami | 2h | ✅ |
 | P3 | Pozostałe 3 palety: Noc miejska, Las, Ocean | 1h | ✅ |
 
 ---
@@ -168,7 +168,7 @@ korporacyjne, nie jak produkt konsumencki 2025.
 | P1 | Unikalność nazw projektów/tagów | 10 min | ✅ |
 | P2 | Async image loading + cache | 2h | ✅ |
 | P2 | NaturalDateParser rozszerzenie | 1h | ✅ |
-| P2 | DatePicker/TimePicker z custom motywem | 30 min | ⏳ |
+| P2 | DatePicker/TimePicker z custom motywem | 30 min | ✅ (Material* pickers) |
 
 ---
 

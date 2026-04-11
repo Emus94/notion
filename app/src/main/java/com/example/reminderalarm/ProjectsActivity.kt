@@ -26,6 +26,7 @@ class ProjectsActivity : BaseActivity() {
         binding.toolbar.setNavigationOnClickListener { finish() }
         binding.toolbar.title = getString(R.string.projects_title)
         binding.empty.text = getString(R.string.no_projects)
+        binding.emptyIcon.setImageResource(R.drawable.ic_empty_folder)
 
         applyPaletteColors()
 
@@ -62,7 +63,7 @@ class ProjectsActivity : BaseActivity() {
                 ColoredEntityAdapter.Entry(it.id, it.name, it.color, counts[it.id] ?: 0)
             }
         )
-        binding.empty.visibility = if (projects.isEmpty()) View.VISIBLE else View.GONE
+        binding.emptyContainer.visibility = if (projects.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun showEditDialog(existing: Project?) {

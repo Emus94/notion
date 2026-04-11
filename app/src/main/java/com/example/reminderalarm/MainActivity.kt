@@ -3,8 +3,6 @@ package com.example.reminderalarm
 import android.Manifest
 import android.app.AlarmManager
 import android.app.AlertDialog
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -574,15 +572,8 @@ class MainActivity : BaseActivity() {
     }
 
     private fun updateWidgets() {
-        val mgr = AppWidgetManager.getInstance(this)
-        val ids = mgr.getAppWidgetIds(ComponentName(this, ReminderWidget::class.java))
-        if (ids.isNotEmpty()) {
-            val intent = Intent(this, ReminderWidget::class.java).apply {
-                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-            }
-            sendBroadcast(intent)
-        }
+        ReminderWidget.requestUpdate(this)
+        QuickAddWidget.requestUpdate(this)
     }
 
     private fun ensurePermissions() {

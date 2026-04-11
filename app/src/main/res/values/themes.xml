@@ -3,6 +3,21 @@
     <!-- Alias used in the manifest. Default is Granat (Navy Blue). -->
     <style name="Theme.ReminderAlarm" parent="Theme.ReminderAlarm.Blue" />
 
+    <!-- Typography overrides shared by every palette: medium weight for
+         headlines/titles (closer to Inter's "Medium") and regular for
+         body. Applied via the android:textAppearance* theme attrs so it
+         affects toolbar titles, material dialogs, and list items
+         without touching individual layouts. -->
+    <style name="TextAppearance.ReminderAlarm.Headline" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="TextAppearance.ReminderAlarm.Title" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="TextAppearance.ReminderAlarm.Body" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
     <style name="Theme.ReminderAlarm.Blue" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">#1D3557</item>
         <item name="colorPrimaryDark">#0D1B2A</item>
