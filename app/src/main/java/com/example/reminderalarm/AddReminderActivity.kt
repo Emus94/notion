@@ -119,8 +119,10 @@ class AddReminderActivity : BaseActivity() {
         })
 
         // If launched via "Share to ForgetMeNot" from another app, prefill
-        // label/notes/image from the incoming intent.
-        if (editingId <= 0) {
+        // label/notes/image from the incoming intent — but only on the
+        // first creation so rotation / recreation doesn't re-apply it on
+        // top of user edits.
+        if (editingId <= 0 && savedInstanceState == null) {
             handleShareIntent()
         }
 
@@ -172,25 +174,21 @@ class AddReminderActivity : BaseActivity() {
     // ------------------------------------------------------------------
 
     /**
-     * Populates the form from an incoming [Intent.ACTION_SEND] or
-     * [Intent.ACTION_SEND_MULTIPLE] — the user picked "Udostępnij do
-     * ForgetMeNot" in another app. Supports text/plain (SMS, notes,
-     * links, email subject+body) and image/* (screenshots, photos).
+     * Populates the form from an incoming [Intent.ACTION_SEND] — the user
+     * picked "Udostępnij do ForgetMeNot" in another app. Supports
+     * text/plain (SMS, notes, links, email subject+body) and image/*
+     * (screenshots, photos).
      */
     private fun handleShareIntent() {
-        val action = intent?.action ?: return
-        if (action != Intent.ACTION_SEND && action != Intent.ACTION_SEND_MULTIPLE) return
+        val receivedIntent = intent ?: return
+        if (receivedIntent.action != Intent.ACTION_SEND) return
 
-        val type = intent.type.orEmpty()
+        val type = receivedIntent.type.orEmpty()
 
         // ---------- Image payload ----------
         if (type.startsWith("image/")) {
-            val imageUri: Uri? = when (action) {
-                Intent.ACTION_SEND ->
-                    IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
-                Intent.ACTION_SEND_MULTIPLE -> getFirstStreamUri(intent)
-                else -> null
-            }
+            val imageUri: Uri? =
+                IntentCompat.getParcelableExtra(receivedIntent, Intent.EXTRA_STREAM, Uri::class.java)
             if (imageUri != null) {
                 val copied = ImageStorage.copyToInternal(this, imageUri)
                 if (copied != null) {
@@ -202,8 +200,8 @@ class AddReminderActivity : BaseActivity() {
         }
 
         // ---------- Text payload ----------
-        val subject = intent.getStringExtra(Intent.EXTRA_SUBJECT)?.trim().orEmpty()
-        val text = intent.getStringExtra(Intent.EXTRA_TEXT)?.trim().orEmpty()
+        val subject = receivedIntent.getStringExtra(Intent.EXTRA_SUBJECT)?.trim().orEmpty()
+        val text = receivedIntent.getStringExtra(Intent.EXTRA_TEXT)?.trim().orEmpty()
 
         val (prefilledLabel, prefilledNotes) = when {
             // Email-style: subject is a clean title, body goes to notes.
@@ -230,27 +228,6 @@ class AddReminderActivity : BaseActivity() {
         if (prefilledNotes.isNotEmpty()) {
             binding.editNotes.setText(prefilledNotes)
         }
-
-        // Consume the intent so rotation / recreation doesn't re-apply it
-        // (and doesn't wipe out edits the user made in the meantime).
-        intent.action = null
-        intent.type = null
-        intent.removeExtra(Intent.EXTRA_TEXT)
-        intent.removeExtra(Intent.EXTRA_SUBJECT)
-        intent.removeExtra(Intent.EXTRA_STREAM)
-    }
-
-    /**
-     * Pulls the first URI out of an [Intent.ACTION_SEND_MULTIPLE] payload.
-     * [IntentCompat] has no `getParcelableArrayListExtra` helper, and the
-     * typed overload on [Intent] is only available from API 33. The
-     * untyped deprecated overload still exists on every API level we
-     * support, so we just use it with the deprecation suppressed.
-     */
-    private fun getFirstStreamUri(intent: Intent): Uri? {
-        @Suppress("DEPRECATION")
-        val list = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
-        return list?.firstOrNull()
     }
 
     // ------------------------------------------------------------------
