@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -188,9 +189,7 @@ class AddReminderActivity : BaseActivity() {
             val imageUri: Uri? = when (action) {
                 Intent.ACTION_SEND ->
                     IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
-                Intent.ACTION_SEND_MULTIPLE ->
-                    IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
-                        ?.firstOrNull()
+                Intent.ACTION_SEND_MULTIPLE -> getFirstStreamUri(intent)
                 else -> null
             }
             if (imageUri != null) {
@@ -240,6 +239,21 @@ class AddReminderActivity : BaseActivity() {
         intent.removeExtra(Intent.EXTRA_TEXT)
         intent.removeExtra(Intent.EXTRA_SUBJECT)
         intent.removeExtra(Intent.EXTRA_STREAM)
+    }
+
+    /**
+     * Pulls the first URI out of an [Intent.ACTION_SEND_MULTIPLE] payload.
+     * There is no `IntentCompat.getParcelableArrayListExtra` helper yet,
+     * so we branch on API level and suppress the pre-33 deprecation.
+     */
+    private fun getFirstStreamUri(intent: Intent): Uri? {
+        @Suppress("DEPRECATION", "UNCHECKED_CAST")
+        val list: ArrayList<Uri>? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+        } else {
+            intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+        }
+        return list?.firstOrNull()
     }
 
     // ------------------------------------------------------------------
