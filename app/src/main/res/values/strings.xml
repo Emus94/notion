@@ -175,6 +175,27 @@
     <string name="shake_snooze_label">Drzemka przez potrząśnięcie</string>
     <string name="shake_snooze_hint">Mocne potrząśnięcie telefonu podczas alarmu = drzemka 5 minut.</string>
 
+    <!-- Voice input -->
+    <string name="voice_input">Dyktuj</string>
+    <string name="voice_prompt">Podyktuj treść przypomnienia</string>
+    <string name="voice_unavailable">Rozpoznawanie mowy niedostępne na tym telefonie</string>
+
+    <!-- Location / geofencing -->
+    <string name="location">Lokalizacja</string>
+    <string name="location_none">(brak — alarm według czasu)</string>
+    <string name="location_name">Nazwa miejsca</string>
+    <string name="location_name_hint">np. Dom, Praca, Biedronka</string>
+    <string name="location_coords">Współrzędne</string>
+    <string name="location_no_coords">— nie wybrano —</string>
+    <string name="use_current_location">Użyj obecnej lokalizacji</string>
+    <string name="location_radius">Promień</string>
+    <string name="location_radius_value">%1$d metrów</string>
+    <string name="location_clear">Wyczyść</string>
+    <string name="location_permission_denied">Brak uprawnień do lokalizacji</string>
+    <string name="location_fetch_failed">Nie udało się pobrać lokalizacji — sprawdź GPS</string>
+    <string name="location_tag_generic">Miejsce</string>
+    <string name="location_background_hint">Dla pewności, że alarm zadziała kiedy aplikacja jest wyłączona, w ustawieniach Androida ustaw lokalizację na „Zawsze zezwalaj\".</string>
+
     <!-- Export / Import / Backup -->
     <string name="section_data">Dane</string>
     <string name="export_data">Eksportuj dane</string>

@@ -41,12 +41,46 @@ class AddReminderActivity : BaseActivity() {
     private var recurrence: Recurrence = Recurrence.NONE
     private var customRepeatDays: Int? = null
     private var priority: Priority = Priority.NORMAL
+    private var selectedLatitude: Double? = null
+    private var selectedLongitude: Double? = null
+    private var selectedRadius: Float? = null
+    private var selectedLocationName: String? = null
     private var selectedProjectId: Long? = null
     private val selectedTagIds: MutableList<Long> = mutableListOf()
     private var selectedImageUri: String? = null
 
     // Loaded fresh on each TextWatcher call so Settings changes take effect immediately.
     private val autoSavePhrase get() = AppSettings.getAutoSavePhrase(this)
+
+    // Continuation invoked by the location permission prompt once the
+    // user has made a decision. Set just before launching the prompt
+    // and cleared afterwards so stale callbacks don't leak.
+    private var pendingLocationPermissionAction: ((granted: Boolean) -> Unit)? = null
+
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        pendingLocationPermissionAction?.invoke(granted)
+        pendingLocationPermissionAction = null
+    }
+
+    private val voiceLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != RESULT_OK) return@registerForActivityResult
+        val spoken = result.data
+            ?.getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS)
+            ?.firstOrNull()
+            ?.trim()
+        if (spoken.isNullOrBlank()) return@registerForActivityResult
+        // Append to whatever's already in the label so the TextWatcher
+        // runs natural-date parsing on the combined string. If the
+        // label was empty we get a plain insertion.
+        val current = binding.editLabel.text?.toString().orEmpty().trim()
+        val merged = if (current.isEmpty()) spoken else "$current $spoken"
+        binding.editLabel.setText(merged)
+        binding.editLabel.setSelection(merged.length)
+    }
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -75,6 +109,7 @@ class AddReminderActivity : BaseActivity() {
         binding.toolbar.inflateMenu(R.menu.add_menu)
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
+                R.id.action_voice_input -> { launchVoiceInput(); true }
                 R.id.action_save_as_template -> {
                     showSaveAsTemplateDialog()
                     true
@@ -99,6 +134,10 @@ class AddReminderActivity : BaseActivity() {
                 recurrence = existing.recurrence
                 customRepeatDays = existing.customRepeatDays
                 priority = existing.priority
+                selectedLatitude = existing.latitude
+                selectedLongitude = existing.longitude
+                selectedRadius = existing.radiusMeters
+                selectedLocationName = existing.locationName
                 selectedProjectId = existing.projectId
                 selectedTagIds.clear()
                 selectedTagIds.addAll(existing.tagIds)
@@ -165,6 +204,7 @@ class AddReminderActivity : BaseActivity() {
         updateDateTime()
         updateRecurrenceLabel()
         updatePriorityLabel()
+        updateLocationLabel()
         updateProjectLabel()
         updateTagsLabel()
         updateImagePreview()
@@ -176,6 +216,7 @@ class AddReminderActivity : BaseActivity() {
         binding.rowTime.setOnClickListener { openTimePicker() }
         binding.rowRecurrence.setOnClickListener { showRecurrenceDialog() }
         binding.rowPriority.setOnClickListener { showPriorityDialog() }
+        binding.rowLocation.setOnClickListener { showLocationDialog() }
         binding.rowProject.setOnClickListener { showProjectDialog() }
         binding.rowTags.setOnClickListener { showTagsDialog() }
         binding.rowImage.setOnClickListener { pickImageLauncher.launch(arrayOf("image/*")) }
@@ -192,6 +233,30 @@ class AddReminderActivity : BaseActivity() {
         if (editingId <= 0) {
             binding.editLabel.requestFocus()
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Voice input
+    // ------------------------------------------------------------------
+
+    private fun launchVoiceInput() {
+        val intent = android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(
+                android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
+            putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, "pl-PL")
+            putExtra(
+                android.speech.RecognizerIntent.EXTRA_PROMPT,
+                getString(R.string.voice_prompt)
+            )
+            putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        }
+        try {
+            voiceLauncher.launch(intent)
+        } catch (e: android.content.ActivityNotFoundException) {
+            Toast.makeText(this, R.string.voice_unavailable, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -325,6 +390,18 @@ class AddReminderActivity : BaseActivity() {
             )
         } else {
             binding.priorityValue.setTextColor(priority.color)
+        }
+    }
+
+    private fun updateLocationLabel() {
+        val lat = selectedLatitude
+        val lng = selectedLongitude
+        binding.locationValue.text = when {
+            lat == null || lng == null -> getString(R.string.location_none)
+            !selectedLocationName.isNullOrBlank() ->
+                "${selectedLocationName}  •  ${(selectedRadius ?: 150f).toInt()} m"
+            else ->
+                String.format("%.4f, %.4f  •  %d m", lat, lng, (selectedRadius ?: 150f).toInt())
         }
     }
 
@@ -469,6 +546,130 @@ class AddReminderActivity : BaseActivity() {
             .show()
     }
 
+    // ------------------------------------------------------------------
+    // Location picker
+    // ------------------------------------------------------------------
+
+    private fun showLocationDialog() {
+        val view = layoutInflater.inflate(R.layout.dialog_location_picker, null)
+        val nameInput = view.findViewById<android.widget.EditText>(R.id.locationName)
+        val coordsText = view.findViewById<android.widget.TextView>(R.id.locationCoords)
+        val btnUse = view.findViewById<android.widget.Button>(R.id.btnUseCurrentLocation)
+        val radiusLabel = view.findViewById<android.widget.TextView>(R.id.radiusLabel)
+        val radiusBar = view.findViewById<android.widget.SeekBar>(R.id.radiusBar)
+
+        // Working copies so Cancel leaves everything untouched.
+        var workingLat = selectedLatitude
+        var workingLng = selectedLongitude
+        var workingRadius = (selectedRadius ?: 150f).toInt().coerceIn(50, 1000)
+
+        nameInput.setText(selectedLocationName.orEmpty())
+
+        fun repaintCoords() {
+            coordsText.text = if (workingLat != null && workingLng != null) {
+                String.format("%.5f, %.5f", workingLat, workingLng)
+            } else {
+                getString(R.string.location_no_coords)
+            }
+        }
+        fun repaintRadius() {
+            radiusLabel.text = getString(R.string.location_radius_value, workingRadius)
+        }
+        repaintCoords()
+        // SeekBar max=950 maps to 50..1000m in 1m steps.
+        radiusBar.progress = (workingRadius - 50).coerceAtLeast(0)
+        repaintRadius()
+        radiusBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(sb: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                workingRadius = 50 + progress
+                repaintRadius()
+            }
+            override fun onStartTrackingTouch(sb: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(sb: android.widget.SeekBar?) {}
+        })
+
+        btnUse.setOnClickListener {
+            requestLocationPermissionThen { granted ->
+                if (!granted) {
+                    Toast.makeText(
+                        this, R.string.location_permission_denied, Toast.LENGTH_SHORT
+                    ).show()
+                    return@requestLocationPermissionThen
+                }
+                fetchCurrentLocation { lat, lng ->
+                    workingLat = lat
+                    workingLng = lng
+                    repaintCoords()
+                }
+            }
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.location)
+            .setView(view)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                if (workingLat != null && workingLng != null) {
+                    selectedLatitude = workingLat
+                    selectedLongitude = workingLng
+                    selectedRadius = workingRadius.toFloat()
+                    selectedLocationName = nameInput.text?.toString()?.trim().takeIf { !it.isNullOrBlank() }
+                } else {
+                    // No coords picked → leave location unset.
+                    selectedLatitude = null
+                    selectedLongitude = null
+                    selectedRadius = null
+                    selectedLocationName = null
+                }
+                updateLocationLabel()
+            }
+            .setNeutralButton(R.string.location_clear) { _, _ ->
+                selectedLatitude = null
+                selectedLongitude = null
+                selectedRadius = null
+                selectedLocationName = null
+                updateLocationLabel()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun requestLocationPermissionThen(action: (granted: Boolean) -> Unit) {
+        val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+            this, android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (granted) {
+            action(true)
+            return
+        }
+        pendingLocationPermissionAction = action
+        locationPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    @android.annotation.SuppressLint("MissingPermission")
+    private fun fetchCurrentLocation(callback: (Double, Double) -> Unit) {
+        val fused = com.google.android.gms.location.LocationServices
+            .getFusedLocationProviderClient(this)
+        // getCurrentLocation is the right call even if it's a bit
+        // heavier than getLastLocation — lastLocation is often stale
+        // or null on first device boot.
+        fused.getCurrentLocation(
+            com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+            null
+        ).addOnSuccessListener { loc ->
+            if (loc != null) {
+                callback(loc.latitude, loc.longitude)
+            } else {
+                Toast.makeText(
+                    this, R.string.location_fetch_failed, Toast.LENGTH_SHORT
+                ).show()
+            }
+        }.addOnFailureListener {
+            Toast.makeText(
+                this, R.string.location_fetch_failed, Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     private fun showPriorityDialog() {
         val options = Priority.values()
         val names = options.map {
@@ -565,8 +766,16 @@ class AddReminderActivity : BaseActivity() {
         val label = cleanLabel.ifBlank { rawLabel.trim() }
         val notes = binding.editNotes.text?.toString().orEmpty().trim()
         val vibrateOnly = binding.switchVibrateOnly.isChecked
-        val trigger = cal.timeInMillis
-        if (trigger <= System.currentTimeMillis()) {
+        // Location-based reminders fire on geofence enter, not on a
+        // clock — the "in the past" check doesn't apply to them.
+        val isLocationBased = selectedLatitude != null && selectedLongitude != null
+        val trigger = if (isLocationBased) {
+            // Stamp it with "now" so the item sorts naturally in lists.
+            System.currentTimeMillis()
+        } else {
+            cal.timeInMillis
+        }
+        if (!isLocationBased && trigger <= System.currentTimeMillis()) {
             Toast.makeText(this, R.string.err_past, Toast.LENGTH_SHORT).show()
             return
         }
@@ -584,7 +793,11 @@ class AddReminderActivity : BaseActivity() {
                 tagIds = selectedTagIds.toList(),
                 imageUri = selectedImageUri,
                 priority = priority,
-                customRepeatDays = customRepeatDays
+                customRepeatDays = customRepeatDays,
+                latitude = selectedLatitude,
+                longitude = selectedLongitude,
+                radiusMeters = selectedRadius,
+                locationName = selectedLocationName
             )
         } else {
             Reminder(
@@ -599,7 +812,11 @@ class AddReminderActivity : BaseActivity() {
                 tagIds = selectedTagIds.toList(),
                 imageUri = selectedImageUri,
                 priority = priority,
-                customRepeatDays = customRepeatDays
+                customRepeatDays = customRepeatDays,
+                latitude = selectedLatitude,
+                longitude = selectedLongitude,
+                radiusMeters = selectedRadius,
+                locationName = selectedLocationName
             )
         }
         ReminderStore.save(this, reminder)

@@ -166,7 +166,7 @@ class ReminderAdapter(
         }
 
         // Status row: priority badge (non-normal only) + completed /
-        // vibrate / recurrence markers.
+        // vibrate / recurrence / location markers.
         val statusParts = mutableListOf<String>()
         if (r.priority != Priority.NORMAL) {
             statusParts += "${r.priority.marker}\u00A0${r.priority.displayName}"
@@ -175,6 +175,11 @@ class ReminderAdapter(
         if (r.vibrateOnly) statusParts += ctx.getString(R.string.vibrate_only_tag)
         if (r.isRepeating()) {
             statusParts += "\uD83D\uDD01 ${r.recurrenceDisplayName(ctx)}"
+        }
+        if (r.isLocationBased()) {
+            val name = r.locationName?.takeIf { it.isNotBlank() }
+                ?: ctx.getString(R.string.location_tag_generic)
+            statusParts += "\uD83D\uDCCD $name"
         }
         holder.binding.status.text = statusParts.joinToString("  •  ")
         holder.binding.status.visibility =

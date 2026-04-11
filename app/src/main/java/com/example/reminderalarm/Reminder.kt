@@ -20,13 +20,24 @@ data class Reminder(
      * custom interval. Stored separately from [recurrence] so the legacy
      * enum stays simple and existing serialisation keeps working.
      */
-    val customRepeatDays: Int? = null
+    val customRepeatDays: Int? = null,
+    /** Optional geofence centre — fires on enter instead of by time. */
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    /** Radius in metres. Defaults to 150 m when a location is set. */
+    val radiusMeters: Float? = null,
+    /** Human-readable place name ("Dom", "Praca", "Biedronka") shown in the card. */
+    val locationName: String? = null
 )
 
 /** Convenience: does this reminder repeat at all (standard or custom)? */
 fun Reminder.isRepeating(): Boolean =
     recurrence != Recurrence.NONE ||
         (customRepeatDays != null && customRepeatDays >= 2)
+
+/** True if the reminder fires on entering a geofence rather than at a time. */
+fun Reminder.isLocationBased(): Boolean =
+    latitude != null && longitude != null
 
 /**
  * Advances the trigger time to the next future occurrence. Loops

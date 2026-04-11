@@ -54,6 +54,10 @@ object ExportImportManager {
                     .put("imageUri", r.imageUri ?: JSONObject.NULL)
                     .put("priority", r.priority.id)
                     .put("customRepeatDays", r.customRepeatDays ?: JSONObject.NULL)
+                    .put("latitude", r.latitude ?: JSONObject.NULL)
+                    .put("longitude", r.longitude ?: JSONObject.NULL)
+                    .put("radiusMeters", r.radiusMeters?.toDouble() ?: JSONObject.NULL)
+                    .put("locationName", r.locationName ?: JSONObject.NULL)
             )
         }
         root.put("reminders", remindersArr)
@@ -149,10 +153,21 @@ object ExportImportManager {
                     imageUri = if (o.has("imageUri") && !o.isNull("imageUri")) o.getString("imageUri") else null,
                     priority = Priority.fromId(o.optString("priority", null)),
                     customRepeatDays = if (o.has("customRepeatDays") && !o.isNull("customRepeatDays"))
-                        o.getInt("customRepeatDays") else null
+                        o.getInt("customRepeatDays") else null,
+                    latitude = if (o.has("latitude") && !o.isNull("latitude")) o.getDouble("latitude") else null,
+                    longitude = if (o.has("longitude") && !o.isNull("longitude")) o.getDouble("longitude") else null,
+                    radiusMeters = if (o.has("radiusMeters") && !o.isNull("radiusMeters")) o.getDouble("radiusMeters").toFloat() else null,
+                    locationName = if (o.has("locationName") && !o.isNull("locationName")) o.getString("locationName") else null
                 )
                 ReminderStore.save(context, r)
-                if (r.enabled && r.triggerAtMillis > System.currentTimeMillis()) {
+                // Re-arm time-based alarms in the future, and re-register
+                // geofences for location-based reminders regardless of
+                // their stale triggerAtMillis stamp.
+                val shouldReschedule = r.enabled && (
+                    r.triggerAtMillis > System.currentTimeMillis() ||
+                        r.isLocationBased()
+                    )
+                if (shouldReschedule) {
                     AlarmScheduler.schedule(context, r)
                 }
                 reminderCount++

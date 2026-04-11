@@ -34,7 +34,11 @@ object ReminderStore {
                 imageUri = if (o.has("imageUri") && !o.isNull("imageUri")) o.getString("imageUri") else null,
                 priority = Priority.fromId(o.optString("priority", null)),
                 customRepeatDays = if (o.has("customRepeatDays") && !o.isNull("customRepeatDays"))
-                    o.getInt("customRepeatDays") else null
+                    o.getInt("customRepeatDays") else null,
+                latitude = if (o.has("latitude") && !o.isNull("latitude")) o.getDouble("latitude") else null,
+                longitude = if (o.has("longitude") && !o.isNull("longitude")) o.getDouble("longitude") else null,
+                radiusMeters = if (o.has("radiusMeters") && !o.isNull("radiusMeters")) o.getDouble("radiusMeters").toFloat() else null,
+                locationName = if (o.has("locationName") && !o.isNull("locationName")) o.getString("locationName") else null
             )
         }.sortedBy { it.triggerAtMillis }
     }
@@ -87,6 +91,10 @@ object ReminderStore {
                     .put("imageUri", it.imageUri ?: JSONObject.NULL)
                     .put("priority", it.priority.id)
                     .put("customRepeatDays", it.customRepeatDays ?: JSONObject.NULL)
+                    .put("latitude", it.latitude ?: JSONObject.NULL)
+                    .put("longitude", it.longitude ?: JSONObject.NULL)
+                    .put("radiusMeters", it.radiusMeters?.toDouble() ?: JSONObject.NULL)
+                    .put("locationName", it.locationName ?: JSONObject.NULL)
             )
         }
         prefs(context).edit().putString(KEY, arr.toString()).apply()

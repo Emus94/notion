@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_voice_input"
+        android:icon="@android:drawable/ic_btn_speak_now"
+        android:iconTint="@android:color/white"
+        android:title="@string/voice_input"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_save_as_template"
         android:title="@string/save_as_template"
         app:showAsAction="never" />

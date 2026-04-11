@@ -13,6 +13,14 @@ object AlarmScheduler {
 
     fun schedule(context: Context, reminder: Reminder) {
         if (!reminder.enabled) return
+
+        // Location-based reminders fire on geofence enter, not at a
+        // clock time — hand off to GeofenceHelper and skip AlarmManager.
+        if (reminder.isLocationBased()) {
+            GeofenceHelper.addFor(context, reminder)
+            return
+        }
+
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pi = mainPendingIntent(context, reminder.id)
 
@@ -54,6 +62,8 @@ object AlarmScheduler {
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         am.cancel(mainPendingIntent(context, id))
         am.cancel(snoozePendingIntent(context, id))
+        // Also drop the geofence for this reminder — harmless if none.
+        GeofenceHelper.removeFor(context, id)
     }
 
     private fun mainPendingIntent(context: Context, id: Long): PendingIntent {

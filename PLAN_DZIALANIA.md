@@ -95,9 +95,9 @@ korporacyjne, nie jak produkt konsumencki 2025.
 
 | Punkt | Uzasadnienie | Status |
 |---|---|---|
-| **Lokalizacyjne przypomnienia** | Killer feature, geofencing | ⏳ |
+| **Lokalizacyjne przypomnienia** | Killer feature, geofencing | ✅ |
 | **Własny recurrence** | "Co 3 dni", "1. pon miesiąca", "weekdays only" | ✅ (co N dni) |
-| **Voice input** | "Hej Przypominacz, dentysta jutro o 10" | ⏳ |
+| **Voice input** | "Hej Przypominacz, dentysta jutro o 10" | ✅ |
 | **Subtaski / checklist mode** | "Zakupy" z listą produktów | ⏳ |
 | **Google Calendar import** | Read-only sync ze zdarzeń | ⏳ |
 | **Backup do Google Drive** | Codzienny auto-backup | ✅ (przez SAF) |
