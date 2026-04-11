@@ -14,6 +14,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.IntentCompat
 import androidx.core.graphics.ColorUtils
 import com.example.reminderalarm.databinding.ActivityAddBinding
 import java.text.SimpleDateFormat
@@ -117,6 +118,12 @@ class AddReminderActivity : BaseActivity() {
             }
         })
 
+        // If launched via "Share to ForgetMeNot" from another app, prefill
+        // label/notes/image from the incoming intent.
+        if (editingId <= 0) {
+            handleShareIntent()
+        }
+
         updateDateTime()
         updateRecurrenceLabel()
         updateProjectLabel()
@@ -158,6 +165,81 @@ class AddReminderActivity : BaseActivity() {
             binding.editLabel.requestFocus()
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Share intent handling
+    // ------------------------------------------------------------------
+
+    /**
+     * Populates the form from an incoming [Intent.ACTION_SEND] or
+     * [Intent.ACTION_SEND_MULTIPLE] — the user picked "Udostępnij do
+     * ForgetMeNot" in another app. Supports text/plain (SMS, notes,
+     * links, email subject+body) and image/* (screenshots, photos).
+     */
+    private fun handleShareIntent() {
+        val action = intent?.action ?: return
+        if (action != Intent.ACTION_SEND && action != Intent.ACTION_SEND_MULTIPLE) return
+
+        val type = intent.type.orEmpty()
+
+        // ---------- Image payload ----------
+        if (type.startsWith("image/")) {
+            val imageUri: Uri? = when (action) {
+                Intent.ACTION_SEND ->
+                    IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
+                Intent.ACTION_SEND_MULTIPLE ->
+                    IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
+                        ?.firstOrNull()
+                else -> null
+            }
+            if (imageUri != null) {
+                val copied = ImageStorage.copyToInternal(this, imageUri)
+                if (copied != null) {
+                    selectedImageUri = copied
+                } else {
+                    Toast.makeText(this, R.string.image_load_failed, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        // ---------- Text payload ----------
+        val subject = intent.getStringExtra(Intent.EXTRA_SUBJECT)?.trim().orEmpty()
+        val text = intent.getStringExtra(Intent.EXTRA_TEXT)?.trim().orEmpty()
+
+        val (prefilledLabel, prefilledNotes) = when {
+            // Email-style: subject is a clean title, body goes to notes.
+            subject.isNotEmpty() && text.isNotEmpty() -> subject to text
+            // SMS / snippet: short text becomes the label, long text spills
+            // into notes so the label stays scannable.
+            text.isNotEmpty() && text.length <= 120 -> text to ""
+            text.isNotEmpty() -> text.take(120) to text
+            // Image only, no text.
+            subject.isNotEmpty() -> subject to ""
+            else -> "" to ""
+        }
+
+        if (prefilledLabel.isNotEmpty()) {
+            // Skip TextWatcher side effects while writing, then run the
+            // natural parser manually so "jutro 15:00" in the shared text
+            // still picks a date/time.
+            suppressParsing = true
+            binding.editLabel.setText(prefilledLabel)
+            binding.editLabel.setSelection(prefilledLabel.length)
+            suppressParsing = false
+            applyNaturalParsing(prefilledLabel)
+        }
+        if (prefilledNotes.isNotEmpty()) {
+            binding.editNotes.setText(prefilledNotes)
+        }
+
+        // Consume the intent so rotation / recreation doesn't re-apply it
+        // (and doesn't wipe out edits the user made in the meantime).
+        intent.action = null
+        intent.type = null
+        intent.removeExtra(Intent.EXTRA_TEXT)
+        intent.removeExtra(Intent.EXTRA_SUBJECT)
+        intent.removeExtra(Intent.EXTRA_STREAM)
     }
 
     // ------------------------------------------------------------------

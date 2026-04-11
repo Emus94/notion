@@ -150,4 +150,7 @@
     <string name="clear">Wyczyść</string>
     <string name="backup_folder_saved">Folder zapisany — kopia utworzona</string>
     <string name="backup_folder_cleared">Folder wyczyszczony</string>
+
+    <!-- Share target -->
+    <string name="share_target_label">Dodaj jako przypomnienie</string>
 </resources>
