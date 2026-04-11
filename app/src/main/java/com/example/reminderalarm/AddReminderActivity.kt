@@ -69,8 +69,19 @@ class AddReminderActivity : BaseActivity() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
+        binding.toolbar.inflateMenu(R.menu.add_menu)
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_save_as_template -> {
+                    showSaveAsTemplateDialog()
+                    true
+                }
+                else -> false
+            }
+        }
 
         editingId = intent.getLongExtra(EXTRA_EDIT_ID, -1L)
+        val templateId = intent.getLongExtra(EXTRA_TEMPLATE_ID, -1L)
         if (editingId > 0) {
             val existing = ReminderStore.byId(this, editingId)
             if (existing != null) {
@@ -90,6 +101,25 @@ class AddReminderActivity : BaseActivity() {
                 selectedImageUri = existing.imageUri
             } else {
                 editingId = -1L
+                title = getString(R.string.new_reminder)
+            }
+        } else if (templateId > 0) {
+            // Prefill from a saved template. Time stays at "now + 1 min"
+            // so the user only needs to pick the date/time and save.
+            val tpl = TemplateStore.byId(this, templateId)
+            if (tpl != null) {
+                title = getString(R.string.new_reminder)
+                suppressParsing = true
+                binding.editLabel.setText(tpl.label)
+                suppressParsing = false
+                binding.editNotes.setText(tpl.notes)
+                binding.switchVibrateOnly.isChecked = tpl.vibrateOnly
+                recurrence = tpl.recurrence
+                priority = tpl.priority
+                selectedProjectId = tpl.projectId
+                selectedTagIds.clear()
+                selectedTagIds.addAll(tpl.tagIds)
+            } else {
                 title = getString(R.string.new_reminder)
             }
         } else {
@@ -496,7 +526,66 @@ class AddReminderActivity : BaseActivity() {
 
     override fun onSupportNavigateUp(): Boolean { finish(); return true }
 
+    // ------------------------------------------------------------------
+    // Save as template
+    // ------------------------------------------------------------------
+
+    /**
+     * Pops a small name prompt and saves the current form (label, notes,
+     * vibrate, recurrence, priority, project, tags — but NOT the trigger
+     * time or image) as a reusable [Template].
+     */
+    private fun showSaveAsTemplateDialog() {
+        val rawLabel = binding.editLabel.text?.toString().orEmpty().trim()
+        val rawNotes = binding.editNotes.text?.toString().orEmpty().trim()
+        if (rawLabel.isBlank()) {
+            Toast.makeText(this, R.string.err_empty_label, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val input = android.widget.EditText(this).apply {
+            setText(rawLabel.take(40))
+            setSelection(text?.length ?: 0)
+            setPadding(48, 32, 48, 32)
+            hint = getString(R.string.template_name_hint)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.save_as_template)
+            .setView(input)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val name = input.text.toString().trim()
+                if (name.isBlank()) {
+                    Toast.makeText(this, R.string.err_empty_name, Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                val clash = TemplateStore.all(this).any {
+                    it.name.equals(name, ignoreCase = true)
+                }
+                if (clash) {
+                    Toast.makeText(this, R.string.err_name_taken, Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                TemplateStore.save(
+                    this,
+                    Template(
+                        id = System.currentTimeMillis(),
+                        name = name,
+                        label = rawLabel,
+                        notes = rawNotes,
+                        vibrateOnly = binding.switchVibrateOnly.isChecked,
+                        recurrence = recurrence,
+                        priority = priority,
+                        projectId = selectedProjectId,
+                        tagIds = selectedTagIds.toList()
+                    )
+                )
+                Toast.makeText(this, R.string.template_saved, Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
     companion object {
         const val EXTRA_EDIT_ID = "edit_id"
+        const val EXTRA_TEMPLATE_ID = "template_id"
     }
 }

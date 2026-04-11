@@ -21,6 +21,14 @@
         android:title="@string/tags_title"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_templates"
+        android:title="@string/templates_title"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_stats"
+        android:title="@string/stats_title"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_theme"
         android:title="@string/theme"
         app:showAsAction="never" />

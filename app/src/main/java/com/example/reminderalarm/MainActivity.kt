@@ -20,6 +20,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,6 +37,7 @@ class MainActivity : BaseActivity() {
     private var currentTab: Int = TAB_PLANNED
     private var currentProjectFilter: Long? = null // null = "Wszystkie"
     private var currentSearchQuery: String = ""
+    private var actionMode: ActionMode? = null
 
     private val notifPermLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -64,6 +66,11 @@ class MainActivity : BaseActivity() {
                     startActivity(Intent(this, TagsActivity::class.java))
                     true
                 }
+                R.id.action_templates -> {
+                    startActivity(Intent(this, TemplatesActivity::class.java))
+                    true
+                }
+                R.id.action_stats -> { showStatsDialog(); true }
                 R.id.action_theme -> { showThemeDialog(); true }
                 R.id.action_mode -> { showModeDialog(); true }
                 R.id.action_settings -> {
@@ -89,6 +96,16 @@ class MainActivity : BaseActivity() {
                     putExtra(AddReminderActivity.EXTRA_EDIT_ID, reminder.id)
                 }
                 startActivity(intent)
+            },
+            onLongPress = { reminder -> startSelectionMode(reminder.id) },
+            onSelectionChanged = { ids ->
+                // Close the action mode as soon as the last item gets
+                // unchecked — matches Gmail/Photos muscle memory.
+                if (ids.isEmpty()) {
+                    actionMode?.finish()
+                } else {
+                    actionMode?.title = getString(R.string.bulk_selected, ids.size)
+                }
             }
         )
         binding.list.layoutManager = LinearLayoutManager(this)
@@ -130,6 +147,96 @@ class MainActivity : BaseActivity() {
                 return true
             }
         })
+    }
+
+    // ---------------------------------------------------------------
+    // Selection mode
+    // ---------------------------------------------------------------
+
+    private fun startSelectionMode(firstId: Long) {
+        adapter.enterSelectionMode(firstId)
+        actionMode = startSupportActionMode(object : ActionMode.Callback {
+            override fun onCreateActionMode(mode: ActionMode, menu: android.view.Menu): Boolean {
+                mode.menuInflater.inflate(R.menu.action_mode_menu, menu)
+                mode.title = getString(R.string.bulk_selected, 1)
+                return true
+            }
+            override fun onPrepareActionMode(mode: ActionMode, menu: android.view.Menu) = false
+            override fun onActionItemClicked(mode: ActionMode, item: android.view.MenuItem): Boolean {
+                return when (item.itemId) {
+                    R.id.action_bulk_delete -> { bulkDelete(); mode.finish(); true }
+                    R.id.action_bulk_complete -> { bulkComplete(); mode.finish(); true }
+                    else -> false
+                }
+            }
+            override fun onDestroyActionMode(mode: ActionMode) {
+                adapter.exitSelectionMode()
+                actionMode = null
+            }
+        })
+    }
+
+    private fun bulkDelete() {
+        val selected = adapter.selectedReminders()
+        if (selected.isEmpty()) return
+        AlertDialog.Builder(this)
+            .setTitle(R.string.confirm_delete)
+            .setMessage(getString(R.string.bulk_delete_confirm, selected.size))
+            .setPositiveButton(R.string.delete) { _, _ ->
+                selected.forEach { r ->
+                    AlarmScheduler.cancel(this, r.id)
+                    ReminderStore.delete(this, r.id)
+                    val path = r.imageUri
+                    if (path != null && path.startsWith("/")) ImageStorage.delete(path)
+                }
+                refresh()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun bulkComplete() {
+        val selected = adapter.selectedReminders()
+        if (selected.isEmpty()) return
+        selected.forEach { r ->
+            AlarmScheduler.cancel(this, r.id)
+            ReminderStore.save(this, r.copy(enabled = false))
+        }
+        refresh()
+    }
+
+    private fun showStatsDialog() {
+        val s = StatsCalculator.compute(this)
+        val msg = buildString {
+            append(getString(R.string.stats_week_header))
+            append("\n✅  ")
+            append(getString(R.string.stats_completed_line, s.completedThisWeek))
+            append("\n⏳  ")
+            append(getString(R.string.stats_upcoming_line, s.upcomingThisWeek))
+            if (s.overdue > 0) {
+                append("\n⚠️  ")
+                append(getString(R.string.stats_overdue_line, s.overdue))
+            }
+            append("\n\n")
+            append(getString(R.string.stats_streak_header))
+            append("\n🔥  ")
+            append(
+                resources.getQuantityString(
+                    R.plurals.stats_streak_days,
+                    s.currentStreak,
+                    s.currentStreak
+                )
+            )
+            append("\n🏆  ")
+            append(getString(R.string.stats_longest_line, s.longestStreak))
+            append("\n\n")
+            append(getString(R.string.stats_total_line, s.completedTotal))
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.stats_title)
+            .setMessage(msg)
+            .setPositiveButton(R.string.ok, null)
+            .show()
     }
 
     private fun showSortDialog() {

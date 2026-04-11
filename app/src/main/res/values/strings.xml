@@ -42,8 +42,10 @@
     <string name="hue">Odcień</string>
     <string name="saturation">Nasycenie</string>
     <string name="brightness">Jasność</string>
-    <string name="widget_add_label">Dodaj</string>
+    <string name="widget_add_label">ForgetMeNot — Najbliższe</string>
     <string name="widget_open_label">Otwórz</string>
+    <string name="widget_today_title">Dziś</string>
+    <string name="widget_empty">Brak zaplanowanych przypomnień</string>
     <string name="parsed_hint">✓ Rozpoznano z treści: %1$s</string>
     <string name="overlay_title">Wyświetlanie nad aplikacjami</string>
     <string name="overlay_message">Aby alarm mógł się pokazać na pełnym ekranie nawet gdy używasz innej aplikacji, włącz dla Przypomnień uprawnienie \"Wyświetlanie nad innymi aplikacjami\".</string>
@@ -122,6 +124,38 @@
     <string name="err_empty_name">Podaj nazwę</string>
     <string name="err_name_taken">Ta nazwa jest już zajęta</string>
     <string name="err_snooze_range">Podaj wartość od 1 do %1$d minut</string>
+    <string name="err_empty_label">Podaj treść przypomnienia</string>
+
+    <!-- Templates -->
+    <string name="templates_title">Szablony</string>
+    <string name="templates_empty">Brak szablonów. Stwórz przypomnienie i zapisz je jako szablon, żeby szybko dodawać podobne.</string>
+    <string name="new_template">Nowy szablon</string>
+    <string name="edit_template">Edytuj szablon</string>
+    <string name="confirm_delete_template">Usunąć szablon?</string>
+    <string name="template_name">Nazwa szablonu</string>
+    <string name="template_name_hint">np. Wyrzuć śmieci</string>
+    <string name="template_label">Treść przypomnienia</string>
+    <string name="template_label_hint">Co ma się pokazać w alarmie</string>
+    <string name="template_notes">Notatki</string>
+    <string name="template_notes_hint">opcjonalne</string>
+    <string name="save_as_template">Zapisz jako szablon</string>
+    <string name="template_saved">Szablon zapisany</string>
+
+    <!-- Stats -->
+    <string name="stats_title">Statystyki</string>
+    <string name="stats_week_header">Ten tydzień</string>
+    <string name="stats_completed_line">%1$d zakończonych</string>
+    <string name="stats_upcoming_line">%1$d zaplanowanych</string>
+    <string name="stats_overdue_line">%1$d zaległych (alarm się nie uruchomił)</string>
+    <string name="stats_streak_header">Seria</string>
+    <string name="stats_longest_line">Najdłuższa: %1$d dni</string>
+    <string name="stats_total_line">Łącznie zakończonych: %1$d</string>
+
+    <!-- Bulk actions -->
+    <string name="bulk_selected">%1$d wybranych</string>
+    <string name="bulk_delete">Usuń</string>
+    <string name="bulk_complete">Oznacz zakończone</string>
+    <string name="bulk_delete_confirm">Usunąć %1$d przypomnień?</string>
     <string name="confirm_delete">Potwierdź usunięcie</string>
     <string name="confirm_delete_project">Usunąć projekt? Przypomnienia przestaną być do niego przypisane.</string>
     <string name="confirm_delete_tag">Usunąć tag? Zostanie zdjęty z przypomnień, które go używały.</string>

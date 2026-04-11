@@ -28,7 +28,7 @@ filtrować listy po nich. Cały value-add jest zmarnowany.
 | P1 | Swipe-to-delete z undo (`ItemTouchHelper` + `Snackbar`) | 2h | ✅ |
 | P1 | Swipe-right = oznacz zakończone (bez czekania na alarm) | 1h | ✅ |
 | P1 | Materialowe `Chip` dla tagów w kartach + pickerze | 2h | ✅ |
-| P2 | Long-press = multi-select + bulk actions | 4h | ⏳ |
+| P2 | Long-press = multi-select + bulk actions | 4h | ✅ |
 | P2 | Wyszukiwarka z `SearchView` w toolbar | 2h | ✅ |
 | P2 | Puste stany z ilustracją + CTA button | 1h | ✅ |
 | P3 | Pola sortowania (data/tytuł/projekt) | 1h | ✅ |
@@ -65,7 +65,7 @@ korporacyjne, nie jak produkt konsumencki 2025.
 | P0 | Naprawić hardcoded `#888` → `textColorSecondary` | 5 min | ✅ |
 | P0 | Card corner radius 12dp → 16dp + padding 14dp → 18dp | 15 min | ✅ |
 | P1 | Typografia Inter (free) zamiast systemowej | 30 min | ⏳ |
-| P1 | Delete button 40dp → 48dp (tap target) | 2 min | ⏳ |
+| P1 | Delete button 40dp → 48dp (tap target) | 2 min | ✅ |
 | P2 | Gradient toolbar (`primary → primary+8%`) | 30 min | ✅ |
 | P2 | Material You / Dynamic Colors (Android 12+) | 1h | ⏳ |
 | P2 | FAB micro-animation (scale down on tap) | 20 min | ✅ |
@@ -81,11 +81,11 @@ korporacyjne, nie jak produkt konsumencki 2025.
 | Punkt | Uzasadnienie | Status |
 |---|---|---|
 | **Priorytety** (niski/normalny/wysoki/pilny) | Quick win, wielki impact wizualny | ✅ |
-| **Dashboard widget "Dziś"** | 3 najbliższe przypomnienia z dzisiaj na ekranie głównym | ⏳ |
+| **Dashboard widget "Dziś"** | 3 najbliższe przypomnienia z dzisiaj na ekranie głównym | ✅ |
 | **Export/Import JSON** | Zwiększa zaufanie, umożliwia backup | ✅ |
-| **Streak counter** | Gamifikacja, retencja | ⏳ |
-| **Statystyki tygodnia** | "6 zakończonych, 2 pominięte w tym tygodniu" | ⏳ |
-| **Szablony** | "Wyrzuć śmieci" / "Weź lek" bez żmudnego wpisywania | ⏳ |
+| **Streak counter** | Gamifikacja, retencja | ✅ |
+| **Statystyki tygodnia** | "6 zakończonych, 2 pominięte w tym tygodniu" | ✅ |
+| **Szablony** | "Wyrzuć śmieci" / "Weź lek" bez żmudnego wpisywania | ✅ |
 | **Snooze przez shake** | Potrząśnij telefonem = drzemka 5 min | ⏳ |
 | **Share target** (Android) | Udostępnij tekst / zdjęcie z innej aplikacji | ✅ |
 | **Fraza auto-zapisu** (konfigurowalna) | Wpisujesz magiczną frazę → od razu zapis | ✅ |

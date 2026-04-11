@@ -16,13 +16,46 @@ import java.util.Date
 import java.util.Locale
 
 class ReminderAdapter(
-    private val onClick: (Reminder) -> Unit
+    private val onClick: (Reminder) -> Unit,
+    private val onLongPress: (Reminder) -> Unit = {},
+    private val onSelectionChanged: (Set<Long>) -> Unit = {}
 ) : RecyclerView.Adapter<ReminderAdapter.VH>() {
 
     private val items = mutableListOf<Reminder>()
     private var projectsById: Map<Long, Project> = emptyMap()
     private var tagsById: Map<Long, Tag> = emptyMap()
     private val fmt = SimpleDateFormat("EEE d MMM, HH:mm", Locale.getDefault())
+
+    // --- selection state ---
+    var selectionMode: Boolean = false
+        private set
+    private val selectedIds = mutableSetOf<Long>()
+
+    fun selectedReminders(): List<Reminder> =
+        items.filter { it.id in selectedIds }
+
+    fun enterSelectionMode(initialId: Long) {
+        selectionMode = true
+        selectedIds.clear()
+        selectedIds.add(initialId)
+        notifyDataSetChanged()
+        onSelectionChanged(selectedIds.toSet())
+    }
+
+    fun exitSelectionMode() {
+        if (!selectionMode) return
+        selectionMode = false
+        selectedIds.clear()
+        notifyDataSetChanged()
+        onSelectionChanged(emptySet())
+    }
+
+    fun toggleSelection(id: Long) {
+        if (id in selectedIds) selectedIds.remove(id) else selectedIds.add(id)
+        val idx = items.indexOfFirst { it.id == id }
+        if (idx >= 0) notifyItemChanged(idx)
+        onSelectionChanged(selectedIds.toSet())
+    }
 
     fun submit(
         list: List<Reminder>,
@@ -157,15 +190,41 @@ class ReminderAdapter(
             holder.binding.label.setTextColor(defaultLabelColor)
         }
 
-        holder.itemView.setOnClickListener { onClick(r) }
+        // Visual feedback for selection: a translucent primary-tint
+        // overlay on the card. Using cardBackgroundColor since the root
+        // view is a MaterialCardView.
+        val card = holder.itemView as? com.google.android.material.card.MaterialCardView
+        if (selectionMode && r.id in selectedIds) {
+            card?.setCardBackgroundColor(
+                ColorUtils.setAlphaComponent(ThemeManager.accentColor(ctx), 0x55)
+            )
+        } else {
+            // Reset to the default cardview surface color
+            card?.setCardBackgroundColor(holder.defaultCardColor)
+        }
+
+        holder.itemView.setOnClickListener {
+            if (selectionMode) {
+                toggleSelection(r.id)
+            } else {
+                onClick(r)
+            }
+        }
+        holder.itemView.setOnLongClickListener {
+            if (!selectionMode) onLongPress(r)
+            true
+        }
     }
 
     private fun dp(ctx: android.content.Context, v: Float): Float =
         v * ctx.resources.displayMetrics.density
 
     class VH(val binding: ItemReminderBinding) : RecyclerView.ViewHolder(binding.root) {
-        // Captured at ViewHolder construction so we can restore it after a
-        // HIGH/URGENT priority rebind overrides the label's text color.
+        // Captured at ViewHolder construction so we can restore them after
+        // rebinds that override the label color or card background.
         val defaultLabelColor: Int = binding.label.currentTextColor
+        val defaultCardColor: Int =
+            (binding.root as? com.google.android.material.card.MaterialCardView)
+                ?.cardBackgroundColor?.defaultColor ?: 0
     }
 }

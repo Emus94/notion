@@ -87,6 +87,9 @@ object ReminderStore {
             )
         }
         prefs(context).edit().putString(KEY, arr.toString()).apply()
+        // Keep the "Dziś" home-screen widget in sync with whatever
+        // just changed. No-op if no widget instances are placed.
+        ReminderWidget.requestUpdate(context)
     }
 
     private fun prefs(context: Context) =

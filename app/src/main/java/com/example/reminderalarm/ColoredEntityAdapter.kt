@@ -16,7 +16,18 @@ class ColoredEntityAdapter(
     private val onDelete: (Long) -> Unit
 ) : RecyclerView.Adapter<ColoredEntityAdapter.VH>() {
 
-    data class Entry(val id: Long, val name: String, val color: Int, val count: Int = 0)
+    /**
+     * One entry in the list. [subtitle], if non-null, overrides the
+     * "N zadań" plurals line — used for templates where we want to show
+     * a meta string (recurrence, priority, etc.) instead of a count.
+     */
+    data class Entry(
+        val id: Long,
+        val name: String,
+        val color: Int,
+        val count: Int = 0,
+        val subtitle: String? = null
+    )
 
     private val items = mutableListOf<Entry>()
 
@@ -38,10 +49,11 @@ class ColoredEntityAdapter(
         val ctx = holder.itemView.context
         holder.binding.name.text = e.name
         holder.binding.colorDot.setBackgroundColor(e.color)
-        holder.binding.count.text = ctx.resources.getQuantityString(
-            R.plurals.tasks_count, e.count, e.count
-        )
-        holder.binding.count.visibility = View.VISIBLE
+        val subtitleText = e.subtitle
+            ?: ctx.resources.getQuantityString(R.plurals.tasks_count, e.count, e.count)
+        holder.binding.count.text = subtitleText
+        holder.binding.count.visibility =
+            if (subtitleText.isBlank()) View.GONE else View.VISIBLE
         holder.binding.btnDelete.setOnClickListener { onDelete(e.id) }
         holder.itemView.setOnClickListener { onClick(e.id) }
     }
