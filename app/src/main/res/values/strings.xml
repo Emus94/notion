@@ -84,6 +84,7 @@
     <string name="preview_notes">Przykładowa notatka do przypomnienia — tak będą wyglądać Twoje notatki na ekranie alarmu.</string>
 
     <string name="recurrence">Powtarzanie</string>
+    <string name="priority">Priorytet</string>
 
     <string name="projects_title">Projekty</string>
     <string name="tags_title">Tagi</string>
@@ -119,6 +120,8 @@
     <string name="color">Kolor</string>
     <string name="pick_color">Wybierz kolor</string>
     <string name="err_empty_name">Podaj nazwę</string>
+    <string name="err_name_taken">Ta nazwa jest już zajęta</string>
+    <string name="err_snooze_range">Podaj wartość od 1 do %1$d minut</string>
     <string name="confirm_delete">Potwierdź usunięcie</string>
     <string name="confirm_delete_project">Usunąć projekt? Przypomnienia przestaną być do niego przypisane.</string>
     <string name="confirm_delete_tag">Usunąć tag? Zostanie zdjęty z przypomnień, które go używały.</string>
@@ -153,4 +156,19 @@
 
     <!-- Share target -->
     <string name="share_target_label">Dodaj jako przypomnienie</string>
+
+    <!-- Color picker -->
+    <string name="color_presets">Gotowe kolory</string>
+    <string name="color_favorites">Ulubione</string>
+    <string name="color_favorites_empty">Brak ulubionych. Wybierz kolor i kliknij „+ Dodaj\".</string>
+    <string name="color_fav_add">+ Dodaj</string>
+    <string name="color_fav_added">Dodano do ulubionych</string>
+    <string name="color_fav_removed">Usunięto z ulubionych</string>
+    <string name="color_fav_longpress_hint">Przytrzymaj ulubiony kolor, aby go usunąć.</string>
+    <string name="color_harmony">Pasujące kolory</string>
+    <string name="color_harmony_hint">Kliknij dowolny, aby go użyć</string>
+    <string name="color_fine_tune">Dopracuj (odcień / nasycenie / jasność)</string>
+    <string name="harmony_complementary">Komplement</string>
+    <string name="harmony_analogous">Analogiczne</string>
+    <string name="harmony_triadic">Triada</string>
 </resources>

@@ -52,6 +52,7 @@ object ExportImportManager {
                     .put("projectId", r.projectId ?: JSONObject.NULL)
                     .put("tagIds", tagsArr)
                     .put("imageUri", r.imageUri ?: JSONObject.NULL)
+                    .put("priority", r.priority.id)
             )
         }
         root.put("reminders", remindersArr)
@@ -144,7 +145,8 @@ object ExportImportManager {
                     recurrence = Recurrence.fromId(o.optString("recurrence", null)),
                     projectId = if (o.has("projectId") && !o.isNull("projectId")) o.getLong("projectId") else null,
                     tagIds = tagIds,
-                    imageUri = if (o.has("imageUri") && !o.isNull("imageUri")) o.getString("imageUri") else null
+                    imageUri = if (o.has("imageUri") && !o.isNull("imageUri")) o.getString("imageUri") else null,
+                    priority = Priority.fromId(o.optString("priority", null))
                 )
                 ReminderStore.save(context, r)
                 if (r.enabled && r.triggerAtMillis > System.currentTimeMillis()) {

@@ -22,16 +22,16 @@ filtrować listy po nich. Cały value-add jest zmarnowany.
 
 | Prio | Punkt | Wysiłek | Status |
 |---|---|---|---|
-| P0 | Kolorowy pasek projektu na lewej krawędzi karty (4dp) | 1h | ⏳ |
-| P0 | Filter chipsy nad listą — Wszystkie / projekty / tagi | 3h | ⏳ |
-| P0 | Liczniki w ekranach zarządzania (`Praca • 12 zadań`) | 1h | ⏳ |
-| P1 | Swipe-to-delete z undo (`ItemTouchHelper` + `Snackbar`) | 2h | ⏳ |
-| P1 | Swipe-right = oznacz zakończone (bez czekania na alarm) | 1h | ⏳ |
-| P1 | Materialowe `Chip` dla tagów w kartach + pickerze | 2h | ⏳ |
+| P0 | Kolorowy pasek projektu na lewej krawędzi karty (4dp) | 1h | ✅ |
+| P0 | Filter chipsy nad listą — Wszystkie / projekty / tagi | 3h | ✅ |
+| P0 | Liczniki w ekranach zarządzania (`Praca • 12 zadań`) | 1h | ✅ |
+| P1 | Swipe-to-delete z undo (`ItemTouchHelper` + `Snackbar`) | 2h | ✅ |
+| P1 | Swipe-right = oznacz zakończone (bez czekania na alarm) | 1h | ✅ |
+| P1 | Materialowe `Chip` dla tagów w kartach + pickerze | 2h | ✅ |
 | P2 | Long-press = multi-select + bulk actions | 4h | ⏳ |
-| P2 | Wyszukiwarka z `SearchView` w toolbar | 2h | ⏳ |
-| P2 | Puste stany z ilustracją + CTA button | 1h | ⏳ |
-| P3 | Pola sortowania (data/tytuł/projekt) | 1h | ⏳ |
+| P2 | Wyszukiwarka z `SearchView` w toolbar | 2h | ✅ |
+| P2 | Puste stany z ilustracją + CTA button | 1h | ✅ |
+| P3 | Pola sortowania (data/tytuł/projekt) | 1h | ✅ |
 
 ---
 
@@ -61,16 +61,16 @@ korporacyjne, nie jak produkt konsumencki 2025.
 
 | Prio | Punkt | Wysiłek | Status |
 |---|---|---|---|
-| P0 | 3 nowe palety lekkie: Mgła, Papier, Świt | 1h | ⏳ |
-| P0 | Naprawić hardcoded `#888` → `textColorSecondary` | 5 min | ⏳ |
-| P0 | Card corner radius 12dp → 16dp + padding 14dp → 18dp | 15 min | ⏳ |
+| P0 | 3 nowe palety lekkie: Mgła, Papier, Świt | 1h | ✅ |
+| P0 | Naprawić hardcoded `#888` → `textColorSecondary` | 5 min | ✅ |
+| P0 | Card corner radius 12dp → 16dp + padding 14dp → 18dp | 15 min | ✅ |
 | P1 | Typografia Inter (free) zamiast systemowej | 30 min | ⏳ |
 | P1 | Delete button 40dp → 48dp (tap target) | 2 min | ⏳ |
-| P2 | Gradient toolbar (`primary → primary+8%`) | 30 min | ⏳ |
+| P2 | Gradient toolbar (`primary → primary+8%`) | 30 min | ✅ |
 | P2 | Material You / Dynamic Colors (Android 12+) | 1h | ⏳ |
-| P2 | FAB micro-animation (scale down on tap) | 20 min | ⏳ |
+| P2 | FAB micro-animation (scale down on tap) | 20 min | ✅ |
 | P3 | Empty states z wektorowymi ilustracjami | 2h | ⏳ |
-| P3 | Pozostałe 3 palety: Noc miejska, Las, Ocean | 1h | ⏳ |
+| P3 | Pozostałe 3 palety: Noc miejska, Las, Ocean | 1h | ✅ |
 
 ---
 
@@ -78,26 +78,30 @@ korporacyjne, nie jak produkt konsumencki 2025.
 
 ### Szybkie wygrane (1-3 dni każda)
 
-| Punkt | Uzasadnienie |
-|---|---|
-| **Priorytety** (niski/normalny/wysoki/pilny) | Quick win, wielki impact wizualny |
-| **Dashboard widget "Dziś"** | 3 najbliższe przypomnienia z dzisiaj na ekranie głównym |
-| **Export/Import JSON** | Zwiększa zaufanie, umożliwia backup |
-| **Streak counter** | Gamifikacja, retencja |
-| **Statystyki tygodnia** | "6 zakończonych, 2 pominięte w tym tygodniu" |
-| **Szablony** | "Wyrzuć śmieci" / "Weź lek" bez żmudnego wpisywania |
-| **Snooze przez shake** | Potrząśnij telefonem = drzemka 5 min |
+| Punkt | Uzasadnienie | Status |
+|---|---|---|
+| **Priorytety** (niski/normalny/wysoki/pilny) | Quick win, wielki impact wizualny | ✅ |
+| **Dashboard widget "Dziś"** | 3 najbliższe przypomnienia z dzisiaj na ekranie głównym | ⏳ |
+| **Export/Import JSON** | Zwiększa zaufanie, umożliwia backup | ✅ |
+| **Streak counter** | Gamifikacja, retencja | ⏳ |
+| **Statystyki tygodnia** | "6 zakończonych, 2 pominięte w tym tygodniu" | ⏳ |
+| **Szablony** | "Wyrzuć śmieci" / "Weź lek" bez żmudnego wpisywania | ⏳ |
+| **Snooze przez shake** | Potrząśnij telefonem = drzemka 5 min | ⏳ |
+| **Share target** (Android) | Udostępnij tekst / zdjęcie z innej aplikacji | ✅ |
+| **Fraza auto-zapisu** (konfigurowalna) | Wpisujesz magiczną frazę → od razu zapis | ✅ |
+| **Auto-backup + zewn. folder (SAF / Dysk)** | Kopia przetrwa odinstalowanie | ✅ |
 
 ### Średnie inwestycje (1-2 tyg. każda)
 
-| Punkt | Uzasadnienie |
-|---|---|
-| **Lokalizacyjne przypomnienia** | Killer feature, geofencing |
-| **Własny recurrence** | "Co 3 dni", "1. pon miesiąca", "weekdays only" |
-| **Voice input** | "Hej Przypominacz, dentysta jutro o 10" |
-| **Subtaski / checklist mode** | "Zakupy" z listą produktów |
-| **Google Calendar import** | Read-only sync ze zdarzeń |
-| **Backup do Google Drive** | Codzienny auto-backup |
+| Punkt | Uzasadnienie | Status |
+|---|---|---|
+| **Lokalizacyjne przypomnienia** | Killer feature, geofencing | ⏳ |
+| **Własny recurrence** | "Co 3 dni", "1. pon miesiąca", "weekdays only" | ⏳ |
+| **Voice input** | "Hej Przypominacz, dentysta jutro o 10" | ⏳ |
+| **Subtaski / checklist mode** | "Zakupy" z listą produktów | ⏳ |
+| **Google Calendar import** | Read-only sync ze zdarzeń | ⏳ |
+| **Backup do Google Drive** | Codzienny auto-backup | ✅ (przez SAF) |
+| **Nowy picker kolorów** | Gotowe palety + ulubione + harmonia | ✅ |
 
 ### Ambitne (>2 tyg.)
 
@@ -153,18 +157,18 @@ korporacyjne, nie jak produkt konsumencki 2025.
 
 ### Priorytety fix'ów
 
-| Prio | Fix | Wysiłek |
-|---|---|---|
-| P0 | `#888` → `textColorSecondary` | 2 min |
-| P0 | ImageStorage cleanup przy delete | 5 min |
-| P0 | Snooze max 10080 min validation | 5 min |
-| P0 | Tap target 48dp | 2 min |
-| P1 | Widget initial bg → `colorPrimary` attr | 2 min |
-| P1 | DiffUtil w ReminderAdapter | 30 min |
-| P1 | Unikalność nazw projektów/tagów | 10 min |
-| P2 | Async image loading + cache | 2h |
-| P2 | NaturalDateParser rozszerzenie | 1h |
-| P2 | DatePicker/TimePicker z custom motywem | 30 min |
+| Prio | Fix | Wysiłek | Status |
+|---|---|---|---|
+| P0 | `#888` → `textColorSecondary` | 2 min | ✅ |
+| P0 | ImageStorage cleanup przy delete | 5 min | ✅ |
+| P0 | Snooze max 10080 min validation | 5 min | ✅ |
+| P0 | Tap target 48dp | 2 min | ⏳ |
+| P1 | Widget initial bg → `colorPrimary` attr | 2 min | ⏳ |
+| P1 | DiffUtil w ReminderAdapter | 30 min | ✅ |
+| P1 | Unikalność nazw projektów/tagów | 10 min | ✅ |
+| P2 | Async image loading + cache | 2h | ⏳ |
+| P2 | NaturalDateParser rozszerzenie | 1h | ✅ |
+| P2 | DatePicker/TimePicker z custom motywem | 30 min | ⏳ |
 
 ---
 

@@ -95,6 +95,15 @@ class ProjectsActivity : BaseActivity() {
                     Toast.makeText(this, R.string.err_empty_name, Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
+                // Reject names that collide with another project (case-insensitive).
+                val clash = ProjectStore.all(this).any { other ->
+                    other.id != existing?.id &&
+                        other.name.equals(name, ignoreCase = true)
+                }
+                if (clash) {
+                    Toast.makeText(this, R.string.err_name_taken, Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
                 val project = Project(
                     id = existing?.id ?: System.currentTimeMillis(),
                     name = name,

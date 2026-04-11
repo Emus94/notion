@@ -29,6 +29,7 @@ class AlarmActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_PREVIEW = "preview"
+        private const val MAX_SNOOZE_MINUTES = 10_080L // 7 days
 
         /**
          * Static reference to the currently shown AlarmActivity so the
@@ -298,7 +299,17 @@ class AlarmActivity : AppCompatActivity() {
             .setView(input)
             .setPositiveButton(R.string.ok) { _, _ ->
                 val minutes = input.text.toString().toLongOrNull() ?: return@setPositiveButton
-                if (minutes > 0) snooze(minutes)
+                // Clamp to [1, 10080] (= 1 week) so a stray extra digit
+                // can't push the alarm months into the future.
+                if (minutes in 1..MAX_SNOOZE_MINUTES) {
+                    snooze(minutes)
+                } else {
+                    android.widget.Toast.makeText(
+                        this,
+                        getString(R.string.err_snooze_range, MAX_SNOOZE_MINUTES),
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
             .setNegativeButton(R.string.cancel, null)
             .show()

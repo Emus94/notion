@@ -101,6 +101,15 @@ class TagsActivity : BaseActivity() {
                     Toast.makeText(this, R.string.err_empty_name, Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
+                // Reject names that collide with another tag (case-insensitive).
+                val clash = TagStore.all(this).any { other ->
+                    other.id != existing?.id &&
+                        other.name.equals(name, ignoreCase = true)
+                }
+                if (clash) {
+                    Toast.makeText(this, R.string.err_name_taken, Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
                 val tag = Tag(
                     id = existing?.id ?: System.currentTimeMillis(),
                     name = name,

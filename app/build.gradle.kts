@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.reminderalarm"
         minSdk = 24
         targetSdk = 34
-        versionCode = 34
-        versionName = "1.28.6"
+        versionCode = 35
+        versionName = "1.29"
     }
 
     buildTypes {

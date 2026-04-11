@@ -31,7 +31,8 @@ object ReminderStore {
                 recurrence = Recurrence.fromId(o.optString("recurrence", null)),
                 projectId = if (o.has("projectId") && !o.isNull("projectId")) o.getLong("projectId") else null,
                 tagIds = tagIds,
-                imageUri = if (o.has("imageUri") && !o.isNull("imageUri")) o.getString("imageUri") else null
+                imageUri = if (o.has("imageUri") && !o.isNull("imageUri")) o.getString("imageUri") else null,
+                priority = Priority.fromId(o.optString("priority", null))
             )
         }.sortedBy { it.triggerAtMillis }
     }
@@ -82,6 +83,7 @@ object ReminderStore {
                     .put("projectId", it.projectId ?: JSONObject.NULL)
                     .put("tagIds", tagsArray)
                     .put("imageUri", it.imageUri ?: JSONObject.NULL)
+                    .put("priority", it.priority.id)
             )
         }
         prefs(context).edit().putString(KEY, arr.toString()).apply()

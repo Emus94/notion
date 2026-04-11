@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.graphics.ColorUtils
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.reminderalarm.databinding.ItemReminderBinding
 import com.google.android.material.chip.Chip
@@ -28,11 +29,32 @@ class ReminderAdapter(
         projects: Map<Long, Project> = emptyMap(),
         tags: Map<Long, Tag> = emptyMap()
     ) {
-        items.clear()
-        items.addAll(list)
+        val old = items.toList()
+        val projectsChanged = projects != projectsById
+        val tagsChanged = tags != tagsById
+
         projectsById = projects
         tagsById = tags
-        notifyDataSetChanged()
+        items.clear()
+        items.addAll(list)
+
+        // DiffUtil gives us smooth per-item updates — no flicker on the
+        // full list when a single reminder ticks or the sort changes.
+        // If the project or tag maps changed we fall back to a full
+        // rebind because item content depends on those maps.
+        if (projectsChanged || tagsChanged) {
+            notifyDataSetChanged()
+            return
+        }
+        val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize(): Int = old.size
+            override fun getNewListSize(): Int = list.size
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+                old[oldItemPosition].id == list[newItemPosition].id
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+                old[oldItemPosition] == list[newItemPosition]
+        })
+        diff.dispatchUpdatesTo(this)
     }
 
     fun getAt(position: Int): Reminder? = items.getOrNull(position)
@@ -47,6 +69,7 @@ class ReminderAdapter(
     override fun onBindViewHolder(holder: VH, position: Int) {
         val r = items[position]
         val ctx = holder.itemView.context
+        val defaultLabelColor = holder.defaultLabelColor
         holder.binding.label.text = r.label.ifBlank { ctx.getString(R.string.untitled) }
         holder.binding.time.text = fmt.format(Date(r.triggerAtMillis))
 
@@ -109,16 +132,30 @@ class ReminderAdapter(
             holder.binding.tagsGroup.visibility = View.GONE
         }
 
-        // Status row: completed badge, vibrate-only, recurrence.
+        // Status row: priority badge (non-normal only) + completed /
+        // vibrate / recurrence markers.
         val statusParts = mutableListOf<String>()
+        if (r.priority != Priority.NORMAL) {
+            statusParts += "${r.priority.marker}\u00A0${r.priority.displayName}"
+        }
         if (!r.enabled) statusParts += ctx.getString(R.string.done)
         if (r.vibrateOnly) statusParts += ctx.getString(R.string.vibrate_only_tag)
         if (r.recurrence != Recurrence.NONE) {
             statusParts += "\uD83D\uDD01 ${r.recurrence.displayName}"
         }
-        holder.binding.status.text = statusParts.joinToString(" • ")
+        holder.binding.status.text = statusParts.joinToString("  •  ")
         holder.binding.status.visibility =
             if (statusParts.isEmpty()) View.GONE else View.VISIBLE
+
+        // For HIGH/URGENT, tint the title with the priority color so it
+        // jumps out of the list. NORMAL/LOW keep the default text color —
+        // the ViewHolder is reusable, so always reset to the label's
+        // current theme color for non-priority items.
+        if (r.priority == Priority.URGENT || r.priority == Priority.HIGH) {
+            holder.binding.label.setTextColor(r.priority.color)
+        } else {
+            holder.binding.label.setTextColor(defaultLabelColor)
+        }
 
         holder.itemView.setOnClickListener { onClick(r) }
     }
@@ -126,5 +163,9 @@ class ReminderAdapter(
     private fun dp(ctx: android.content.Context, v: Float): Float =
         v * ctx.resources.displayMetrics.density
 
-    class VH(val binding: ItemReminderBinding) : RecyclerView.ViewHolder(binding.root)
+    class VH(val binding: ItemReminderBinding) : RecyclerView.ViewHolder(binding.root) {
+        // Captured at ViewHolder construction so we can restore it after a
+        // HIGH/URGENT priority rebind overrides the label's text color.
+        val defaultLabelColor: Int = binding.label.currentTextColor
+    }
 }

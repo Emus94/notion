@@ -37,6 +37,7 @@ class AddReminderActivity : BaseActivity() {
     private var suppressParsing: Boolean = false
     private var autoSaveTriggered: Boolean = false
     private var recurrence: Recurrence = Recurrence.NONE
+    private var priority: Priority = Priority.NORMAL
     private var selectedProjectId: Long? = null
     private val selectedTagIds: MutableList<Long> = mutableListOf()
     private var selectedImageUri: String? = null
@@ -82,6 +83,7 @@ class AddReminderActivity : BaseActivity() {
                 binding.switchVibrateOnly.isChecked = existing.vibrateOnly
                 cal.timeInMillis = existing.triggerAtMillis
                 recurrence = existing.recurrence
+                priority = existing.priority
                 selectedProjectId = existing.projectId
                 selectedTagIds.clear()
                 selectedTagIds.addAll(existing.tagIds)
@@ -127,6 +129,7 @@ class AddReminderActivity : BaseActivity() {
 
         updateDateTime()
         updateRecurrenceLabel()
+        updatePriorityLabel()
         updateProjectLabel()
         updateTagsLabel()
         updateImagePreview()
@@ -149,6 +152,7 @@ class AddReminderActivity : BaseActivity() {
             }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), true).show()
         }
         binding.rowRecurrence.setOnClickListener { showRecurrenceDialog() }
+        binding.rowPriority.setOnClickListener { showPriorityDialog() }
         binding.rowProject.setOnClickListener { showProjectDialog() }
         binding.rowTags.setOnClickListener { showTagsDialog() }
         binding.rowImage.setOnClickListener { pickImageLauncher.launch(arrayOf("image/*")) }
@@ -283,6 +287,19 @@ class AddReminderActivity : BaseActivity() {
         binding.recurrenceValue.text = recurrence.displayName
     }
 
+    private fun updatePriorityLabel() {
+        val marker = priority.marker
+        val prefix = if (marker.isEmpty()) "" else "$marker  "
+        binding.priorityValue.text = prefix + priority.displayName
+        if (priority == Priority.NORMAL) {
+            binding.priorityValue.setTextColor(
+                ThemeManager.accentColor(this)
+            )
+        } else {
+            binding.priorityValue.setTextColor(priority.color)
+        }
+    }
+
     private fun updateProjectLabel() {
         val project = selectedProjectId?.let { ProjectStore.byId(this, it) }
         binding.projectValue.text = project?.name ?: getString(R.string.no_project)
@@ -334,6 +351,24 @@ class AddReminderActivity : BaseActivity() {
             .setSingleChoiceItems(names, checked) { dialog, which ->
                 recurrence = options[which]
                 updateRecurrenceLabel()
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun showPriorityDialog() {
+        val options = Priority.values()
+        val names = options.map {
+            if (it.marker.isEmpty()) it.displayName
+            else "${it.marker}  ${it.displayName}"
+        }.toTypedArray()
+        val checked = options.indexOf(priority)
+        AlertDialog.Builder(this)
+            .setTitle(R.string.priority)
+            .setSingleChoiceItems(names, checked) { dialog, which ->
+                priority = options[which]
+                updatePriorityLabel()
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.cancel, null)
@@ -425,11 +460,33 @@ class AddReminderActivity : BaseActivity() {
         }
         val reminder = if (editingId > 0) {
             AlarmScheduler.cancel(this, editingId)
-            Reminder(editingId, label, notes, trigger, true, vibrateOnly, recurrence,
-                selectedProjectId, selectedTagIds.toList(), selectedImageUri)
+            Reminder(
+                id = editingId,
+                label = label,
+                notes = notes,
+                triggerAtMillis = trigger,
+                enabled = true,
+                vibrateOnly = vibrateOnly,
+                recurrence = recurrence,
+                projectId = selectedProjectId,
+                tagIds = selectedTagIds.toList(),
+                imageUri = selectedImageUri,
+                priority = priority
+            )
         } else {
-            Reminder(System.currentTimeMillis(), label, notes, trigger, true, vibrateOnly,
-                recurrence, selectedProjectId, selectedTagIds.toList(), selectedImageUri)
+            Reminder(
+                id = System.currentTimeMillis(),
+                label = label,
+                notes = notes,
+                triggerAtMillis = trigger,
+                enabled = true,
+                vibrateOnly = vibrateOnly,
+                recurrence = recurrence,
+                projectId = selectedProjectId,
+                tagIds = selectedTagIds.toList(),
+                imageUri = selectedImageUri,
+                priority = priority
+            )
         }
         ReminderStore.save(this, reminder)
         AlarmScheduler.schedule(this, reminder)
