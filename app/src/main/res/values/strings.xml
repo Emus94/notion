@@ -122,4 +122,24 @@
     <string name="confirm_delete">Potwierdź usunięcie</string>
     <string name="confirm_delete_project">Usunąć projekt? Przypomnienia przestaną być do niego przypisane.</string>
     <string name="confirm_delete_tag">Usunąć tag? Zostanie zdjęty z przypomnień, które go używały.</string>
+
+    <!-- Quick input -->
+    <string name="section_quick_input">Szybkie wprowadzanie</string>
+    <string name="auto_save_phrase_label">Fraza auto-zapisu</string>
+    <string name="auto_save_phrase_hint">np. „zapisz zapisz"</string>
+    <string name="auto_save_phrase_info">Wpisz dowolną frazę — gdy pojawi się w treści przypomnienia, zostanie ono od razu zapisane. Domyślnie: „zapisz zapisz".</string>
+    <string name="save_phrase">Zapisz frazę</string>
+    <string name="phrase_saved">Fraza zapisana</string>
+
+    <!-- Export / Import / Backup -->
+    <string name="section_data">Dane</string>
+    <string name="export_data">Eksportuj dane</string>
+    <string name="import_data">Importuj dane</string>
+    <string name="export_success">Dane wyeksportowane pomyślnie</string>
+    <string name="export_failed">Błąd podczas eksportu</string>
+    <string name="import_success">Zaimportowano: %1$d przypomnień, %2$d projektów, %3$d tagów</string>
+    <string name="import_failed">Błąd importu — sprawdź format pliku</string>
+    <string name="last_backup">Ostatnia kopia automatyczna:</string>
+    <string name="backup_never">brak</string>
+    <string name="backup_auto_info">Kopia tworzona automatycznie przy każdym uruchomieniu aplikacji (maks. 5 plików, przechowywane lokalnie).</string>
 </resources>

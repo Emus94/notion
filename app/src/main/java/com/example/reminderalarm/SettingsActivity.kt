@@ -7,12 +7,20 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.reminderalarm.databinding.ActivitySettingsBinding
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class SettingsActivity : BaseActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
+
+    // -----------------------------------------------------------------
+    // Activity-result launchers
+    // -----------------------------------------------------------------
 
     private val pickRingtoneLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -26,7 +34,6 @@ class SettingsActivity : BaseActivity() {
         }
     }
 
-    /** Picks any audio file from storage with a persistable read grant. */
     private val pickCustomAudioLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -42,6 +49,43 @@ class SettingsActivity : BaseActivity() {
         }
     }
 
+    private val exportLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument(ExportImportManager.EXPORT_MIME)
+    ) { uri ->
+        if (uri == null) return@registerForActivityResult
+        runCatching {
+            contentResolver.openOutputStream(uri)?.use { out ->
+                ExportImportManager.exportToStream(this, out)
+            }
+            Toast.makeText(this, R.string.export_success, Toast.LENGTH_SHORT).show()
+        }.onFailure {
+            Toast.makeText(this, R.string.export_failed, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val importLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri == null) return@registerForActivityResult
+        runCatching {
+            contentResolver.openInputStream(uri)?.use { input ->
+                val r = ExportImportManager.importFromStream(this, input)
+                Toast.makeText(
+                    this,
+                    getString(R.string.import_success, r.reminders, r.projects, r.tags),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }.onFailure {
+            Toast.makeText(this, R.string.import_failed, Toast.LENGTH_SHORT).show()
+        }
+        updateLastBackupLabel()
+    }
+
+    // -----------------------------------------------------------------
+    // Lifecycle
+    // -----------------------------------------------------------------
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
@@ -54,8 +98,10 @@ class SettingsActivity : BaseActivity() {
         applyPaletteColors()
 
         setupSoundSection()
+        setupQuickInputSection()
         setupThemeColorsSection()
         setupAlarmAppearanceSection()
+        setupDataSection()
         refreshAllPreviews()
     }
 
@@ -128,6 +174,19 @@ class SettingsActivity : BaseActivity() {
             }
         }
         pickRingtoneLauncher.launch(intent)
+    }
+
+    // -----------------------------------------------------------------
+    // Quick input section
+    // -----------------------------------------------------------------
+
+    private fun setupQuickInputSection() {
+        binding.editAutoSavePhrase.setText(AppSettings.getAutoSavePhrase(this))
+        binding.btnSavePhrase.setOnClickListener {
+            val phrase = binding.editAutoSavePhrase.text?.toString().orEmpty().trim()
+            AppSettings.setAutoSavePhrase(this, phrase)
+            Toast.makeText(this, R.string.phrase_saved, Toast.LENGTH_SHORT).show()
+        }
     }
 
     // -----------------------------------------------------------------
@@ -271,6 +330,34 @@ class SettingsActivity : BaseActivity() {
         }
     }
 
+    // -----------------------------------------------------------------
+    // Data section (export / import / backup)
+    // -----------------------------------------------------------------
+
+    private fun setupDataSection() {
+        updateLastBackupLabel()
+        binding.btnExport.setOnClickListener {
+            val ts = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            exportLauncher.launch("forgetmenot_$ts.json")
+        }
+        binding.btnImport.setOnClickListener {
+            importLauncher.launch(arrayOf("application/json", "application/octet-stream", "*/*"))
+        }
+    }
+
+    private fun updateLastBackupLabel() {
+        val time = BackupManager.lastBackupTime(this)
+        binding.lastBackupValue.text = if (time == 0L) {
+            getString(R.string.backup_never)
+        } else {
+            SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date(time))
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // Previews
+    // -----------------------------------------------------------------
+
     private fun refreshAllPreviews() {
         binding.themePrimaryPreview.setBackgroundColor(ThemeManager.primaryColor(this))
         binding.themeDarkPreview.setBackgroundColor(ThemeManager.primaryDarkColor(this))
@@ -295,6 +382,10 @@ class SettingsActivity : BaseActivity() {
         return if (hsv[2] < 0.5f) 0xFFFFFFFF.toInt() else 0xFF000000.toInt()
     }
 
+    // -----------------------------------------------------------------
+    // Palette
+    // -----------------------------------------------------------------
+
     private fun applyPaletteColors() {
         val primary = ThemeManager.primaryColor(this)
         val primaryDark = ThemeManager.primaryDarkColor(this)
@@ -304,6 +395,7 @@ class SettingsActivity : BaseActivity() {
         binding.btnPickSound.backgroundTintList = tint
         binding.btnUploadSound.backgroundTintList = tint
         binding.btnSystemVolume.backgroundTintList = tint
+        binding.btnSavePhrase.backgroundTintList = tint
         binding.btnThemePrimary.backgroundTintList = tint
         binding.btnThemeDark.backgroundTintList = tint
         binding.btnThemeDarkAuto.backgroundTintList = tint
@@ -317,5 +409,7 @@ class SettingsActivity : BaseActivity() {
         binding.btnPickDismiss.backgroundTintList = tint
         binding.btnPickDismissAuto.backgroundTintList = tint
         binding.btnPreview.backgroundTintList = tint
+        binding.btnExport.backgroundTintList = tint
+        binding.btnImport.backgroundTintList = tint
     }
 }

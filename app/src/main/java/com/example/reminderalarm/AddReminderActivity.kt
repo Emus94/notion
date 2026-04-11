@@ -41,7 +41,8 @@ class AddReminderActivity : BaseActivity() {
     private val selectedTagIds: MutableList<Long> = mutableListOf()
     private var selectedImageUri: String? = null
 
-    private val autoSaveRegex = Regex("""zapisz\s+zapisz""", RegexOption.IGNORE_CASE)
+    // Loaded fresh on each TextWatcher call so Settings changes take effect immediately.
+    private val autoSavePhrase get() = AppSettings.getAutoSavePhrase(this)
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -98,10 +99,13 @@ class AddReminderActivity : BaseActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val text = s?.toString().orEmpty()
-                // Magic phrase: typing "zapisz zapisz" auto-submits.
-                if (!autoSaveTriggered && autoSaveRegex.containsMatchIn(text)) {
+                // Magic phrase: typing the configured phrase auto-submits.
+                val phrase = autoSavePhrase
+                if (!autoSaveTriggered && phrase.isNotEmpty() &&
+                    text.contains(phrase, ignoreCase = true)
+                ) {
                     autoSaveTriggered = true
-                    val cleaned = text.replace(autoSaveRegex, "").trim()
+                    val cleaned = text.replace(phrase, "", ignoreCase = true).trim()
                     suppressParsing = true
                     binding.editLabel.setText(cleaned)
                     binding.editLabel.setSelection(cleaned.length)
