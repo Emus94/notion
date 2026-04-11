@@ -111,7 +111,7 @@
     <string name="undo">Cofnij</string>
     <string name="search">Szukaj</string>
     <string name="search_hint">Szukaj w tytułach i notatkach…</string>
-    <string name="empty_search">Brak wyników dla „%1$s"</string>
+    <string name="empty_search">Brak wyników dla \"%1$s\"</string>
     <string name="sort">Sortowanie</string>
     <string name="sort_title">Sortuj według</string>
     <string name="empty_cta_add">Dodaj pierwsze przypomnienie</string>
@@ -126,8 +126,8 @@
     <!-- Quick input -->
     <string name="section_quick_input">Szybkie wprowadzanie</string>
     <string name="auto_save_phrase_label">Fraza auto-zapisu</string>
-    <string name="auto_save_phrase_hint">np. „zapisz zapisz"</string>
-    <string name="auto_save_phrase_info">Wpisz dowolną frazę — gdy pojawi się w treści przypomnienia, zostanie ono od razu zapisane. Domyślnie: „zapisz zapisz".</string>
+    <string name="auto_save_phrase_hint">np. \"zapisz zapisz\"</string>
+    <string name="auto_save_phrase_info">Wpisz dowolną frazę — gdy pojawi się w treści przypomnienia, zostanie ono od razu zapisane. Domyślnie: \"zapisz zapisz\".</string>
     <string name="save_phrase">Zapisz frazę</string>
     <string name="phrase_saved">Fraza zapisana</string>
 
