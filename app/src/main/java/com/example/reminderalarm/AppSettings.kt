@@ -11,6 +11,7 @@ object AppSettings {
     private const val KEY_AUTO_SAVE_PHRASE = "auto_save_phrase"
     private const val KEY_SHAKE_SNOOZE = "shake_snooze_enabled"
     private const val KEY_SHAKE_SNOOZE_MINUTES = "shake_snooze_minutes"
+    private const val KEY_WELCOME_DONE = "welcome_done"
     const val DEFAULT_AUTO_SAVE_PHRASE = "zapisz zapisz"
     const val DEFAULT_SHAKE_SNOOZE_MINUTES = 5
 
@@ -39,6 +40,14 @@ object AppSettings {
 
     fun setShakeSnoozeMinutes(context: Context, minutes: Int) {
         prefs(context).edit().putInt(KEY_SHAKE_SNOOZE_MINUTES, minutes).apply()
+    }
+
+    /** First-launch welcome / permission guide flag. */
+    fun isWelcomeCompleted(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_WELCOME_DONE, false)
+
+    fun setWelcomeCompleted(context: Context, done: Boolean) {
+        prefs(context).edit().putBoolean(KEY_WELCOME_DONE, done).apply()
     }
 
     private fun prefs(context: Context) =

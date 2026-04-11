@@ -572,6 +572,30 @@
 
             </LinearLayout>
 
+            <!-- Welcome / permissions guide re-entry -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/section_permissions"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/welcome_reopen_hint"
+                android:textColor="#888"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnShowWelcome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/welcome_reopen" />
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

@@ -370,6 +370,9 @@ class SettingsActivity : BaseActivity() {
             updateBackupFolderLabel()
             Toast.makeText(this, R.string.backup_folder_cleared, Toast.LENGTH_SHORT).show()
         }
+        binding.btnShowWelcome.setOnClickListener {
+            startActivity(Intent(this, WelcomeActivity::class.java))
+        }
     }
 
     private fun updateLastBackupLabel() {
@@ -445,5 +448,6 @@ class SettingsActivity : BaseActivity() {
         binding.btnImport.backgroundTintList = tint
         binding.btnPickBackupFolder.backgroundTintList = tint
         binding.btnClearBackupFolder.backgroundTintList = tint
+        binding.btnShowWelcome.backgroundTintList = tint
     }
 }

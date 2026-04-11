@@ -196,6 +196,38 @@
     <string name="location_tag_generic">Miejsce</string>
     <string name="location_background_hint">Dla pewności, że alarm zadziała kiedy aplikacja jest wyłączona, w ustawieniach Androida ustaw lokalizację na „Zawsze zezwalaj\".</string>
 
+    <!-- Welcome / onboarding -->
+    <string name="welcome_title">Witaj w ForgetMeNot</string>
+    <string name="welcome_subtitle">Żeby alarmy działały niezawodnie, potrzebujemy kilku uprawnień. Dotknij każdej karty, aby je przyznać.</string>
+    <string name="welcome_required_header">WYMAGANE</string>
+    <string name="welcome_optional_header">OPCJONALNE</string>
+    <string name="welcome_continue">Gotowe, uruchom aplikację</string>
+    <string name="welcome_footer_hint">Zawsze możesz wrócić tu z Ustawień.</string>
+    <string name="welcome_reopen">Pokaż ekran powitalny</string>
+    <string name="welcome_reopen_hint">Sprawdź, czy masz wszystkie potrzebne uprawnienia.</string>
+    <string name="section_permissions">Uprawnienia</string>
+
+    <string name="perm_notif_title">Powiadomienia</string>
+    <string name="perm_notif_desc">Android 13+ wymaga osobnej zgody na powiadomienia. Bez niej alarm się nie pojawi.</string>
+
+    <string name="perm_exact_title">Dokładne alarmy</string>
+    <string name="perm_exact_desc">Żeby alarm uruchomił się dokładnie o wybranej godzinie, a nie za kilka minut.</string>
+
+    <string name="perm_fullscreen_title">Alarm na pełnym ekranie</string>
+    <string name="perm_fullscreen_desc">Android 14+ wymaga zgody, żeby aplikacja mogła pokazać się na całym ekranie przy dzwoniącym alarmie.</string>
+
+    <string name="perm_overlay_title">Wyświetlanie nad innymi aplikacjami</string>
+    <string name="perm_overlay_desc">Żeby alarm pokazał się nawet gdy używasz innej aplikacji lub gier.</string>
+
+    <string name="perm_battery_title">Wyłącz oszczędzanie baterii</string>
+    <string name="perm_battery_desc">Android bez tego może zamknąć aplikację w tle — alarm wtedy nie zadzwoni.</string>
+
+    <string name="perm_location_title">Lokalizacja</string>
+    <string name="perm_location_desc">Wymagane tylko dla przypomnień uruchamianych po wejściu w określone miejsce (np. „kup mleko w Biedronce\").</string>
+
+    <string name="perm_mic_title">Mikrofon</string>
+    <string name="perm_mic_desc">Wymagane tylko dla funkcji dyktowania treści przypomnień.</string>
+
     <!-- Export / Import / Backup -->
     <string name="section_data">Dane</string>
     <string name="export_data">Eksportuj dane</string>

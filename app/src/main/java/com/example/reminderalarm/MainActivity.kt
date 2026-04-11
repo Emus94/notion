@@ -43,6 +43,16 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // First-launch: send the user through the permission guide.
+        // When they come back via "Kontynuuj" the flag is set and we
+        // skip this branch on subsequent launches.
+        if (!AppSettings.isWelcomeCompleted(this)) {
+            startActivity(Intent(this, WelcomeActivity::class.java))
+            finish()
+            return
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

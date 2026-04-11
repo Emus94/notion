@@ -38,6 +38,10 @@
         </activity>
 
         <activity
+            android:name=".WelcomeActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".AddReminderActivity"
             android:exported="true"
             android:parentActivityName=".MainActivity">
