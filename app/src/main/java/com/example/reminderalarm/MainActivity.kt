@@ -286,8 +286,8 @@ class MainActivity : BaseActivity() {
 
     private fun refresh() {
         val all = ReminderStore.all(this)
-        val planned = all.filter { it.enabled && it.recurrence == Recurrence.NONE }
-        val recurring = all.filter { it.enabled && it.recurrence != Recurrence.NONE }
+        val planned = all.filter { it.enabled && !it.isRepeating() }
+        val recurring = all.filter { it.enabled && it.isRepeating() }
         // "Zakończone" always show newest-first regardless of user sort.
         val completed = all.filter { !it.enabled }.sortedByDescending { it.triggerAtMillis }
 

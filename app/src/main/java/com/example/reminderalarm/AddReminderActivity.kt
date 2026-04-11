@@ -37,6 +37,7 @@ class AddReminderActivity : BaseActivity() {
     private var suppressParsing: Boolean = false
     private var autoSaveTriggered: Boolean = false
     private var recurrence: Recurrence = Recurrence.NONE
+    private var customRepeatDays: Int? = null
     private var priority: Priority = Priority.NORMAL
     private var selectedProjectId: Long? = null
     private val selectedTagIds: MutableList<Long> = mutableListOf()
@@ -94,6 +95,7 @@ class AddReminderActivity : BaseActivity() {
                 binding.switchVibrateOnly.isChecked = existing.vibrateOnly
                 cal.timeInMillis = existing.triggerAtMillis
                 recurrence = existing.recurrence
+                customRepeatDays = existing.customRepeatDays
                 priority = existing.priority
                 selectedProjectId = existing.projectId
                 selectedTagIds.clear()
@@ -115,6 +117,7 @@ class AddReminderActivity : BaseActivity() {
                 binding.editNotes.setText(tpl.notes)
                 binding.switchVibrateOnly.isChecked = tpl.vibrateOnly
                 recurrence = tpl.recurrence
+                customRepeatDays = null
                 priority = tpl.priority
                 selectedProjectId = tpl.projectId
                 selectedTagIds.clear()
@@ -314,7 +317,12 @@ class AddReminderActivity : BaseActivity() {
     }
 
     private fun updateRecurrenceLabel() {
-        binding.recurrenceValue.text = recurrence.displayName
+        val days = customRepeatDays
+        binding.recurrenceValue.text = if (days != null && days >= 2) {
+            resources.getQuantityString(R.plurals.every_n_days, days, days)
+        } else {
+            recurrence.displayName
+        }
     }
 
     private fun updatePriorityLabel() {
@@ -373,15 +381,59 @@ class AddReminderActivity : BaseActivity() {
     // ------------------------------------------------------------------
 
     private fun showRecurrenceDialog() {
-        val options = Recurrence.values()
-        val names = options.map { it.displayName }.toTypedArray()
-        val checked = options.indexOf(recurrence)
+        val standard = Recurrence.values().toList()
+        val names = (standard.map { it.displayName } + getString(R.string.recurrence_custom))
+            .toTypedArray()
+        // A custom interval is shown as the "custom" row even if the
+        // underlying enum is NONE — that's the whole point of override.
+        val checked = when {
+            customRepeatDays != null && customRepeatDays!! >= 2 -> standard.size
+            else -> standard.indexOf(recurrence).coerceAtLeast(0)
+        }
         AlertDialog.Builder(this)
             .setTitle(R.string.recurrence)
             .setSingleChoiceItems(names, checked) { dialog, which ->
-                recurrence = options[which]
+                if (which == standard.size) {
+                    dialog.dismiss()
+                    showCustomRecurrenceDialog()
+                } else {
+                    recurrence = standard[which]
+                    customRepeatDays = null
+                    updateRecurrenceLabel()
+                    dialog.dismiss()
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun showCustomRecurrenceDialog() {
+        val input = android.widget.EditText(this).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            hint = getString(R.string.recurrence_custom_hint)
+            setPadding(48, 32, 48, 32)
+            setText((customRepeatDays ?: 3).toString())
+            setSelection(text?.length ?: 0)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.recurrence_custom)
+            .setView(input)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val n = input.text.toString().toIntOrNull()
+                if (n == null || n < 2 || n > 365) {
+                    Toast.makeText(
+                        this,
+                        R.string.err_custom_days_range,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+                customRepeatDays = n
+                // Force a non-NONE sentinel so isRepeating() works via
+                // either branch; we pick DAILY arbitrarily — the value
+                // is only used when customRepeatDays is null.
+                recurrence = Recurrence.NONE
                 updateRecurrenceLabel()
-                dialog.dismiss()
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
@@ -501,7 +553,8 @@ class AddReminderActivity : BaseActivity() {
                 projectId = selectedProjectId,
                 tagIds = selectedTagIds.toList(),
                 imageUri = selectedImageUri,
-                priority = priority
+                priority = priority,
+                customRepeatDays = customRepeatDays
             )
         } else {
             Reminder(
@@ -515,7 +568,8 @@ class AddReminderActivity : BaseActivity() {
                 projectId = selectedProjectId,
                 tagIds = selectedTagIds.toList(),
                 imageUri = selectedImageUri,
-                priority = priority
+                priority = priority,
+                customRepeatDays = customRepeatDays
             )
         }
         ReminderStore.save(this, reminder)

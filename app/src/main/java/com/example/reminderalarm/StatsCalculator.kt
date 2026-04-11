@@ -55,7 +55,7 @@ object StatsCalculator {
                 if (r.triggerAtMillis in startOfWeek until endOfWeek) completedThisWeek++
             } else {
                 if (r.triggerAtMillis > now && r.triggerAtMillis < endOfWeek) upcomingThisWeek++
-                if (r.triggerAtMillis <= now && r.recurrence == Recurrence.NONE) overdue++
+                if (r.triggerAtMillis <= now && !r.isRepeating()) overdue++
             }
         }
 

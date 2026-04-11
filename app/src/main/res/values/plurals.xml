@@ -13,4 +13,11 @@
         <item quantity="many">%d dni z rzędu</item>
         <item quantity="other">%d dni z rzędu</item>
     </plurals>
+
+    <plurals name="every_n_days">
+        <item quantity="one">Codziennie</item>
+        <item quantity="few">Co %d dni</item>
+        <item quantity="many">Co %d dni</item>
+        <item quantity="other">Co %d dni</item>
+    </plurals>
 </resources>

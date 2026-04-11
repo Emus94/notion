@@ -32,7 +32,9 @@ object ReminderStore {
                 projectId = if (o.has("projectId") && !o.isNull("projectId")) o.getLong("projectId") else null,
                 tagIds = tagIds,
                 imageUri = if (o.has("imageUri") && !o.isNull("imageUri")) o.getString("imageUri") else null,
-                priority = Priority.fromId(o.optString("priority", null))
+                priority = Priority.fromId(o.optString("priority", null)),
+                customRepeatDays = if (o.has("customRepeatDays") && !o.isNull("customRepeatDays"))
+                    o.getInt("customRepeatDays") else null
             )
         }.sortedBy { it.triggerAtMillis }
     }
@@ -84,6 +86,7 @@ object ReminderStore {
                     .put("tagIds", tagsArray)
                     .put("imageUri", it.imageUri ?: JSONObject.NULL)
                     .put("priority", it.priority.id)
+                    .put("customRepeatDays", it.customRepeatDays ?: JSONObject.NULL)
             )
         }
         prefs(context).edit().putString(KEY, arr.toString()).apply()

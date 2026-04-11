@@ -200,6 +200,11 @@ class SettingsActivity : BaseActivity() {
             AppSettings.setAutoSavePhrase(this, phrase)
             Toast.makeText(this, R.string.phrase_saved, Toast.LENGTH_SHORT).show()
         }
+
+        binding.switchShakeSnooze.isChecked = AppSettings.isShakeSnoozeEnabled(this)
+        binding.switchShakeSnooze.setOnCheckedChangeListener { _, checked ->
+            AppSettings.setShakeSnoozeEnabled(this, checked)
+        }
     }
 
     // -----------------------------------------------------------------

@@ -86,6 +86,9 @@
     <string name="preview_notes">Przykładowa notatka do przypomnienia — tak będą wyglądać Twoje notatki na ekranie alarmu.</string>
 
     <string name="recurrence">Powtarzanie</string>
+    <string name="recurrence_custom">Dostosuj…</string>
+    <string name="recurrence_custom_hint">Co ile dni (2–365)</string>
+    <string name="err_custom_days_range">Podaj liczbę od 2 do 365</string>
     <string name="priority">Priorytet</string>
 
     <string name="projects_title">Projekty</string>
@@ -167,6 +170,8 @@
     <string name="auto_save_phrase_info">Wpisz dowolną frazę — gdy pojawi się w treści przypomnienia, zostanie ono od razu zapisane. Domyślnie: \"zapisz zapisz\".</string>
     <string name="save_phrase">Zapisz frazę</string>
     <string name="phrase_saved">Fraza zapisana</string>
+    <string name="shake_snooze_label">Drzemka przez potrząśnięcie</string>
+    <string name="shake_snooze_hint">Mocne potrząśnięcie telefonu podczas alarmu = drzemka 5 minut.</string>
 
     <!-- Export / Import / Backup -->
     <string name="section_data">Dane</string>

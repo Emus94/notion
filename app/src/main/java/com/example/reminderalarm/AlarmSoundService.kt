@@ -51,7 +51,7 @@ class AlarmSoundService : Service() {
         val reminder = ReminderStore.byId(this, id)
         val snoozedAt = System.currentTimeMillis() + AUTO_SNOOZE_MINUTES * 60_000L
         if (reminder != null) {
-            if (reminder.recurrence == Recurrence.NONE) {
+            if (!reminder.isRepeating()) {
                 val updated = reminder.copy(triggerAtMillis = snoozedAt, enabled = true)
                 ReminderStore.save(this, updated)
                 AlarmScheduler.schedule(this, updated)

@@ -86,7 +86,7 @@ korporacyjne, nie jak produkt konsumencki 2025.
 | **Streak counter** | Gamifikacja, retencja | ✅ |
 | **Statystyki tygodnia** | "6 zakończonych, 2 pominięte w tym tygodniu" | ✅ |
 | **Szablony** | "Wyrzuć śmieci" / "Weź lek" bez żmudnego wpisywania | ✅ |
-| **Snooze przez shake** | Potrząśnij telefonem = drzemka 5 min | ⏳ |
+| **Snooze przez shake** | Potrząśnij telefonem = drzemka 5 min | ✅ |
 | **Share target** (Android) | Udostępnij tekst / zdjęcie z innej aplikacji | ✅ |
 | **Fraza auto-zapisu** (konfigurowalna) | Wpisujesz magiczną frazę → od razu zapis | ✅ |
 | **Auto-backup + zewn. folder (SAF / Dysk)** | Kopia przetrwa odinstalowanie | ✅ |
@@ -96,7 +96,7 @@ korporacyjne, nie jak produkt konsumencki 2025.
 | Punkt | Uzasadnienie | Status |
 |---|---|---|
 | **Lokalizacyjne przypomnienia** | Killer feature, geofencing | ⏳ |
-| **Własny recurrence** | "Co 3 dni", "1. pon miesiąca", "weekdays only" | ⏳ |
+| **Własny recurrence** | "Co 3 dni", "1. pon miesiąca", "weekdays only" | ✅ (co N dni) |
 | **Voice input** | "Hej Przypominacz, dentysta jutro o 10" | ⏳ |
 | **Subtaski / checklist mode** | "Zakupy" z listą produktów | ⏳ |
 | **Google Calendar import** | Read-only sync ze zdarzeń | ⏳ |
@@ -163,10 +163,10 @@ korporacyjne, nie jak produkt konsumencki 2025.
 | P0 | ImageStorage cleanup przy delete | 5 min | ✅ |
 | P0 | Snooze max 10080 min validation | 5 min | ✅ |
 | P0 | Tap target 48dp | 2 min | ⏳ |
-| P1 | Widget initial bg → `colorPrimary` attr | 2 min | ⏳ |
+| P1 | Widget initial bg → `colorPrimary` attr | 2 min | ✅ |
 | P1 | DiffUtil w ReminderAdapter | 30 min | ✅ |
 | P1 | Unikalność nazw projektów/tagów | 10 min | ✅ |
-| P2 | Async image loading + cache | 2h | ⏳ |
+| P2 | Async image loading + cache | 2h | ✅ |
 | P2 | NaturalDateParser rozszerzenie | 1h | ✅ |
 | P2 | DatePicker/TimePicker z custom motywem | 30 min | ⏳ |
 

@@ -4,6 +4,10 @@ import android.app.AlertDialog
 import android.app.KeyguardManager
 import android.content.Context
 import android.graphics.Color
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
@@ -20,16 +24,31 @@ import com.example.reminderalarm.databinding.ActivityAlarmBinding
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.sqrt
 
-class AlarmActivity : AppCompatActivity() {
+class AlarmActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var binding: ActivityAlarmBinding
     private var reminderId: Long = -1L
     private var isPreview: Boolean = false
 
+    // --- shake-to-snooze ---
+    private var sensorManager: SensorManager? = null
+    private var accelerometer: Sensor? = null
+    private var shakeRegistered: Boolean = false
+    private var lastShakeMillis: Long = 0L
+
     companion object {
         const val EXTRA_PREVIEW = "preview"
         private const val MAX_SNOOZE_MINUTES = 10_080L // 7 days
+
+        // Shake detection tuning — a ~1.8g peak above gravity feels
+        // intentional without being triggered by walking or handing
+        // off the phone. 1.5s cooldown prevents a single shake from
+        // firing twice.
+        private const val SHAKE_THRESHOLD_G = 1.8f
+        private const val SHAKE_COOLDOWN_MS = 1_500L
 
         /**
          * Static reference to the currently shown AlarmActivity so the
@@ -243,7 +262,58 @@ class AlarmActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         applyImmersive()
+        startShakeDetectionIfEnabled()
     }
+
+    override fun onPause() {
+        super.onPause()
+        stopShakeDetection()
+    }
+
+    // ------------------------------------------------------------------
+    // Shake-to-snooze
+    // ------------------------------------------------------------------
+
+    private fun startShakeDetectionIfEnabled() {
+        if (isPreview) return
+        if (!AppSettings.isShakeSnoozeEnabled(this)) return
+        if (shakeRegistered) return
+        val sm = sensorManager
+            ?: (getSystemService(Context.SENSOR_SERVICE) as? SensorManager)
+                ?.also { sensorManager = it }
+            ?: return
+        val sensor = accelerometer
+            ?: sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+                ?.also { accelerometer = it }
+            ?: return
+        sm.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+        shakeRegistered = true
+    }
+
+    private fun stopShakeDetection() {
+        if (!shakeRegistered) return
+        sensorManager?.unregisterListener(this)
+        shakeRegistered = false
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event == null || event.sensor?.type != Sensor.TYPE_ACCELEROMETER) return
+        val gx = event.values[0] / SensorManager.GRAVITY_EARTH
+        val gy = event.values[1] / SensorManager.GRAVITY_EARTH
+        val gz = event.values[2] / SensorManager.GRAVITY_EARTH
+        // Magnitude in g, minus 1 to isolate the non-gravity component.
+        val delta = abs(sqrt(gx * gx + gy * gy + gz * gz) - 1f)
+        if (delta < SHAKE_THRESHOLD_G) return
+        val now = System.currentTimeMillis()
+        if (now - lastShakeMillis < SHAKE_COOLDOWN_MS) return
+        lastShakeMillis = now
+        // Extra guard: only react while an alarm is actually alive
+        if (reminderId <= 0 || isPreview) return
+        val minutes = AppSettings.shakeSnoozeMinutes(this).coerceAtLeast(1).toLong()
+        snooze(minutes)
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) { /* ignored */ }
 
     private fun applyImmersive() {
         WindowInsetsControllerCompat(window, window.decorView).apply {
@@ -257,7 +327,7 @@ class AlarmActivity : AppCompatActivity() {
         AlarmSoundService.stop(this)
         if (reminderId > 0) {
             val reminder = ReminderStore.byId(this, reminderId)
-            if (reminder != null && reminder.recurrence == Recurrence.NONE) {
+            if (reminder != null && !reminder.isRepeating()) {
                 ReminderStore.save(this, reminder.copy(enabled = false))
             }
             // For recurring reminders the receiver already advanced to
@@ -319,7 +389,7 @@ class AlarmActivity : AppCompatActivity() {
         AlarmSoundService.stop(this)
         val reminder = ReminderStore.byId(this, reminderId) ?: run { finish(); return }
         val snoozedAt = System.currentTimeMillis() + minutes * 60_000L
-        if (reminder.recurrence == Recurrence.NONE) {
+        if (!reminder.isRepeating()) {
             // One-shot: bounce the reminder itself to the snoozed time.
             val updated = reminder.copy(triggerAtMillis = snoozedAt, enabled = true)
             ReminderStore.save(this, updated)

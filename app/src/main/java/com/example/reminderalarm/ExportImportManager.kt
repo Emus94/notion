@@ -53,6 +53,7 @@ object ExportImportManager {
                     .put("tagIds", tagsArr)
                     .put("imageUri", r.imageUri ?: JSONObject.NULL)
                     .put("priority", r.priority.id)
+                    .put("customRepeatDays", r.customRepeatDays ?: JSONObject.NULL)
             )
         }
         root.put("reminders", remindersArr)
@@ -146,7 +147,9 @@ object ExportImportManager {
                     projectId = if (o.has("projectId") && !o.isNull("projectId")) o.getLong("projectId") else null,
                     tagIds = tagIds,
                     imageUri = if (o.has("imageUri") && !o.isNull("imageUri")) o.getString("imageUri") else null,
-                    priority = Priority.fromId(o.optString("priority", null))
+                    priority = Priority.fromId(o.optString("priority", null)),
+                    customRepeatDays = if (o.has("customRepeatDays") && !o.isNull("customRepeatDays"))
+                        o.getInt("customRepeatDays") else null
                 )
                 ReminderStore.save(context, r)
                 if (r.enabled && r.triggerAtMillis > System.currentTimeMillis()) {

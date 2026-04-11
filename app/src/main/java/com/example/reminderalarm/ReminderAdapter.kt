@@ -106,14 +106,14 @@ class ReminderAdapter(
         holder.binding.label.text = r.label.ifBlank { ctx.getString(R.string.untitled) }
         holder.binding.time.text = fmt.format(Date(r.triggerAtMillis))
 
-        // Thumbnail
-        val bitmap = ImageLoader.loadSampled(ctx, r.imageUri, 200)
-        if (bitmap != null) {
-            holder.binding.thumbnail.setImageBitmap(bitmap)
-            holder.binding.thumbnail.visibility = View.VISIBLE
-        } else {
+        // Thumbnail — async so scrolling never blocks on big JPEGs.
+        if (r.imageUri.isNullOrBlank()) {
+            holder.binding.thumbnail.tag = null
             holder.binding.thumbnail.setImageBitmap(null)
             holder.binding.thumbnail.visibility = View.GONE
+        } else {
+            holder.binding.thumbnail.visibility = View.VISIBLE
+            ImageLoader.loadAsync(ctx, r.imageUri, 200, holder.binding.thumbnail)
         }
 
         // Notes
@@ -173,8 +173,8 @@ class ReminderAdapter(
         }
         if (!r.enabled) statusParts += ctx.getString(R.string.done)
         if (r.vibrateOnly) statusParts += ctx.getString(R.string.vibrate_only_tag)
-        if (r.recurrence != Recurrence.NONE) {
-            statusParts += "\uD83D\uDD01 ${r.recurrence.displayName}"
+        if (r.isRepeating()) {
+            statusParts += "\uD83D\uDD01 ${r.recurrenceDisplayName(ctx)}"
         }
         holder.binding.status.text = statusParts.joinToString("  •  ")
         holder.binding.status.visibility =

@@ -56,8 +56,8 @@ class AlarmReceiver : BroadcastReceiver() {
             // Normal fire (not a detour from snooze): either advance the
             // recurring schedule or mark one-shot as completed.
             ReminderStore.byId(context, id)?.let { reminder ->
-                if (reminder.recurrence != Recurrence.NONE) {
-                    val next = reminder.recurrence.nextAfter(reminder.triggerAtMillis)
+                if (reminder.isRepeating()) {
+                    val next = reminder.computeNextTrigger()
                     val advanced = reminder.copy(triggerAtMillis = next, enabled = true)
                     ReminderStore.save(context, advanced)
                     AlarmScheduler.schedule(context, advanced)
