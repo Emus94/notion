@@ -20,7 +20,8 @@ object AppModeManager {
         SYSTEM("system", "Systemowy", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
 
         companion object {
-            fun fromId(id: String?): Mode = values().firstOrNull { it.id == id } ?: SYSTEM
+            /** Fresh installs default to the light mode. */
+            fun fromId(id: String?): Mode = values().firstOrNull { it.id == id } ?: LIGHT
         }
     }
 

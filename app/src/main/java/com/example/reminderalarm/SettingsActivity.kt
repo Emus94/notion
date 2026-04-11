@@ -82,6 +82,19 @@ class SettingsActivity : BaseActivity() {
         updateLastBackupLabel()
     }
 
+    private val pickBackupFolderLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        if (uri == null) return@registerForActivityResult
+        BackupManager.setExternalFolder(this, uri)
+        // Kick off an immediate backup so the user sees confirmation
+        // that writing to the picked folder actually works.
+        BackupManager.backup(this)
+        updateBackupFolderLabel()
+        updateLastBackupLabel()
+        Toast.makeText(this, R.string.backup_folder_saved, Toast.LENGTH_SHORT).show()
+    }
+
     // -----------------------------------------------------------------
     // Lifecycle
     // -----------------------------------------------------------------
@@ -336,12 +349,21 @@ class SettingsActivity : BaseActivity() {
 
     private fun setupDataSection() {
         updateLastBackupLabel()
+        updateBackupFolderLabel()
         binding.btnExport.setOnClickListener {
             val ts = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
             exportLauncher.launch("forgetmenot_$ts.json")
         }
         binding.btnImport.setOnClickListener {
             importLauncher.launch(arrayOf("application/json", "application/octet-stream", "*/*"))
+        }
+        binding.btnPickBackupFolder.setOnClickListener {
+            runCatching { pickBackupFolderLauncher.launch(null) }
+        }
+        binding.btnClearBackupFolder.setOnClickListener {
+            BackupManager.setExternalFolder(this, null)
+            updateBackupFolderLabel()
+            Toast.makeText(this, R.string.backup_folder_cleared, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -352,6 +374,11 @@ class SettingsActivity : BaseActivity() {
         } else {
             SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date(time))
         }
+    }
+
+    private fun updateBackupFolderLabel() {
+        val name = BackupManager.getExternalFolderName(this)
+        binding.backupFolderValue.text = name ?: getString(R.string.backup_folder_none)
     }
 
     // -----------------------------------------------------------------
@@ -411,5 +438,7 @@ class SettingsActivity : BaseActivity() {
         binding.btnPreview.backgroundTintList = tint
         binding.btnExport.backgroundTintList = tint
         binding.btnImport.backgroundTintList = tint
+        binding.btnPickBackupFolder.backgroundTintList = tint
+        binding.btnClearBackupFolder.backgroundTintList = tint
     }
 }

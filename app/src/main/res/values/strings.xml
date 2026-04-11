@@ -142,4 +142,12 @@
     <string name="last_backup">Ostatnia kopia automatyczna:</string>
     <string name="backup_never">brak</string>
     <string name="backup_auto_info">Kopia tworzona automatycznie przy każdym uruchomieniu aplikacji (maks. 5 plików, przechowywane lokalnie).</string>
+    <string name="backup_external_title">Zewnętrzny folder kopii</string>
+    <string name="backup_external_info">Wybierz folder, do którego aplikacja będzie zapisywać kopie zapasowe. Dzięki temu przetrwają odinstalowanie aplikacji. Jeśli masz zainstalowanego Dysk Google, możesz wybrać folder z Dysku w systemowym oknie wyboru.</string>
+    <string name="backup_folder_label">Folder:</string>
+    <string name="backup_folder_none">nie wybrano</string>
+    <string name="pick_backup_folder">Wybierz folder</string>
+    <string name="clear">Wyczyść</string>
+    <string name="backup_folder_saved">Folder zapisany — kopia utworzona</string>
+    <string name="backup_folder_cleared">Folder wyczyszczony</string>
 </resources>
