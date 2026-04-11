@@ -14,7 +14,6 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.IntentCompat
 import androidx.core.graphics.ColorUtils
 import com.example.reminderalarm.databinding.ActivityAddBinding
 import java.text.SimpleDateFormat
@@ -179,16 +178,16 @@ class AddReminderActivity : BaseActivity() {
      * text/plain (SMS, notes, links, email subject+body) and image/*
      * (screenshots, photos).
      */
+    @Suppress("DEPRECATION")
     private fun handleShareIntent() {
-        val receivedIntent = intent ?: return
-        if (receivedIntent.action != Intent.ACTION_SEND) return
+        val action = intent.action
+        if (action != Intent.ACTION_SEND) return
 
-        val type = receivedIntent.type.orEmpty()
+        val type = intent.type ?: ""
 
         // ---------- Image payload ----------
         if (type.startsWith("image/")) {
-            val imageUri: Uri? =
-                IntentCompat.getParcelableExtra(receivedIntent, Intent.EXTRA_STREAM, Uri::class.java)
+            val imageUri: Uri? = intent.getParcelableExtra(Intent.EXTRA_STREAM)
             if (imageUri != null) {
                 val copied = ImageStorage.copyToInternal(this, imageUri)
                 if (copied != null) {
@@ -200,25 +199,30 @@ class AddReminderActivity : BaseActivity() {
         }
 
         // ---------- Text payload ----------
-        val subject = receivedIntent.getStringExtra(Intent.EXTRA_SUBJECT)?.trim().orEmpty()
-        val text = receivedIntent.getStringExtra(Intent.EXTRA_TEXT)?.trim().orEmpty()
+        val rawSubject = intent.getStringExtra(Intent.EXTRA_SUBJECT)
+        val rawText = intent.getStringExtra(Intent.EXTRA_TEXT)
+        val subject = rawSubject?.trim() ?: ""
+        val text = rawText?.trim() ?: ""
 
-        val (prefilledLabel, prefilledNotes) = when {
+        var prefilledLabel = ""
+        var prefilledNotes = ""
+        if (subject.isNotEmpty() && text.isNotEmpty()) {
             // Email-style: subject is a clean title, body goes to notes.
-            subject.isNotEmpty() && text.isNotEmpty() -> subject to text
-            // SMS / snippet: short text becomes the label, long text spills
-            // into notes so the label stays scannable.
-            text.isNotEmpty() && text.length <= 120 -> text to ""
-            text.isNotEmpty() -> text.take(120) to text
-            // Image only, no text.
-            subject.isNotEmpty() -> subject to ""
-            else -> "" to ""
+            prefilledLabel = subject
+            prefilledNotes = text
+        } else if (text.isNotEmpty() && text.length <= 120) {
+            // Short SMS/snippet becomes the label directly.
+            prefilledLabel = text
+        } else if (text.isNotEmpty()) {
+            // Long text: first 120 chars as label, full text as notes.
+            prefilledLabel = text.take(120)
+            prefilledNotes = text
+        } else if (subject.isNotEmpty()) {
+            // Image only, but with a subject (rare).
+            prefilledLabel = subject
         }
 
         if (prefilledLabel.isNotEmpty()) {
-            // Skip TextWatcher side effects while writing, then run the
-            // natural parser manually so "jutro 15:00" in the shared text
-            // still picks a date/time.
             suppressParsing = true
             binding.editLabel.setText(prefilledLabel)
             binding.editLabel.setSelection(prefilledLabel.length)
