@@ -25,6 +25,10 @@
         android:title="@string/templates_title"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_places"
+        android:title="@string/places_title"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_stats"
         android:title="@string/stats_title"
         app:showAsAction="never" />

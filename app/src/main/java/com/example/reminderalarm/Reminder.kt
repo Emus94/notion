@@ -27,7 +27,10 @@ data class Reminder(
     /** Radius in metres. Defaults to 150 m when a location is set. */
     val radiusMeters: Float? = null,
     /** Human-readable place name ("Dom", "Praca", "Biedronka") shown in the card. */
-    val locationName: String? = null
+    val locationName: String? = null,
+    /** Minutes to wait after entering the geofence before the alarm fires
+     *  (0 = fire immediately on enter, >0 = dwell mode). */
+    val locationDelayMinutes: Int = 0
 )
 
 /** Convenience: does this reminder repeat at all (standard or custom)? */

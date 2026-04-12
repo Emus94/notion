@@ -20,7 +20,9 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val event = GeofencingEvent.fromIntent(intent) ?: return
         if (event.hasError()) return
-        if (event.geofenceTransition != Geofence.GEOFENCE_TRANSITION_ENTER) return
+        val transition = event.geofenceTransition
+        if (transition != Geofence.GEOFENCE_TRANSITION_ENTER &&
+            transition != Geofence.GEOFENCE_TRANSITION_DWELL) return
         val triggered = event.triggeringGeofences ?: return
 
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager

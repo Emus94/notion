@@ -58,6 +58,7 @@ object ExportImportManager {
                     .put("longitude", r.longitude ?: JSONObject.NULL)
                     .put("radiusMeters", r.radiusMeters?.toDouble() ?: JSONObject.NULL)
                     .put("locationName", r.locationName ?: JSONObject.NULL)
+                    .put("locationDelayMinutes", r.locationDelayMinutes)
             )
         }
         root.put("reminders", remindersArr)
@@ -157,7 +158,8 @@ object ExportImportManager {
                     latitude = if (o.has("latitude") && !o.isNull("latitude")) o.getDouble("latitude") else null,
                     longitude = if (o.has("longitude") && !o.isNull("longitude")) o.getDouble("longitude") else null,
                     radiusMeters = if (o.has("radiusMeters") && !o.isNull("radiusMeters")) o.getDouble("radiusMeters").toFloat() else null,
-                    locationName = if (o.has("locationName") && !o.isNull("locationName")) o.getString("locationName") else null
+                    locationName = if (o.has("locationName") && !o.isNull("locationName")) o.getString("locationName") else null,
+                    locationDelayMinutes = o.optInt("locationDelayMinutes", 0)
                 )
                 ReminderStore.save(context, r)
                 // Re-arm time-based alarms in the future, and re-register

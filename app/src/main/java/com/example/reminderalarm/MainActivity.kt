@@ -78,6 +78,10 @@ class MainActivity : BaseActivity() {
                     startActivity(Intent(this, TemplatesActivity::class.java))
                     true
                 }
+                R.id.action_places -> {
+                    startActivity(Intent(this, PlacesActivity::class.java))
+                    true
+                }
                 R.id.action_stats -> { showStatsDialog(); true }
                 R.id.action_theme -> { showThemeDialog(); true }
                 R.id.action_mode -> { showModeDialog(); true }

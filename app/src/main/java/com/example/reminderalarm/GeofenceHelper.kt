@@ -65,16 +65,35 @@ object GeofenceHelper {
         val radius = reminder.radiusMeters ?: 150f
         if (!hasLocationPermission(context)) return
 
-        val geofence = Geofence.Builder()
+        // When the user specified a delay (e.g. "5 min after entering")
+        // switch from ENTER to DWELL and set the loitering delay so the
+        // alarm only fires once the device has stayed inside the radius
+        // for at least that many minutes. Zero delay = fire immediately.
+        val delay = reminder.locationDelayMinutes
+        val transitionType: Int
+        val loiteringMs: Int
+        val initialTrigger: Int
+        if (delay > 0) {
+            transitionType = Geofence.GEOFENCE_TRANSITION_DWELL
+            loiteringMs = delay * 60_000
+            initialTrigger = GeofencingRequest.INITIAL_TRIGGER_DWELL
+        } else {
+            transitionType = Geofence.GEOFENCE_TRANSITION_ENTER
+            loiteringMs = 0
+            initialTrigger = GeofencingRequest.INITIAL_TRIGGER_ENTER
+        }
+
+        val builder = Geofence.Builder()
             .setRequestId(requestId(reminder.id))
             .setCircularRegion(lat, lng, radius)
             .setExpirationDuration(Geofence.NEVER_EXPIRE)
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+            .setTransitionTypes(transitionType)
             .setNotificationResponsiveness(0)
-            .build()
+        if (loiteringMs > 0) builder.setLoiteringDelay(loiteringMs)
+        val geofence = builder.build()
 
         val request = GeofencingRequest.Builder()
-            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            .setInitialTrigger(initialTrigger)
             .addGeofence(geofence)
             .build()
 

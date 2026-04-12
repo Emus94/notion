@@ -74,6 +74,11 @@
             android:parentActivityName=".MainActivity" />
 
         <activity
+            android:name=".PlacesActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
             android:name=".AlarmActivity"
             android:exported="false"
             android:launchMode="singleInstance"

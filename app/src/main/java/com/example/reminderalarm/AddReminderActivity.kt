@@ -45,6 +45,7 @@ class AddReminderActivity : BaseActivity() {
     private var selectedLongitude: Double? = null
     private var selectedRadius: Float? = null
     private var selectedLocationName: String? = null
+    private var selectedLocationDelay: Int = 0
     private var selectedProjectId: Long? = null
     private val selectedTagIds: MutableList<Long> = mutableListOf()
     private var selectedImageUri: String? = null
@@ -106,17 +107,6 @@ class AddReminderActivity : BaseActivity() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
-        binding.toolbar.inflateMenu(R.menu.add_menu)
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_voice_input -> { launchVoiceInput(); true }
-                R.id.action_save_as_template -> {
-                    showSaveAsTemplateDialog()
-                    true
-                }
-                else -> false
-            }
-        }
 
         editingId = intent.getLongExtra(EXTRA_EDIT_ID, -1L)
         val templateId = intent.getLongExtra(EXTRA_TEMPLATE_ID, -1L)
@@ -138,6 +128,7 @@ class AddReminderActivity : BaseActivity() {
                 selectedLongitude = existing.longitude
                 selectedRadius = existing.radiusMeters
                 selectedLocationName = existing.locationName
+                selectedLocationDelay = existing.locationDelayMinutes
                 selectedProjectId = existing.projectId
                 selectedTagIds.clear()
                 selectedTagIds.addAll(existing.tagIds)
@@ -190,6 +181,21 @@ class AddReminderActivity : BaseActivity() {
                     return
                 }
                 applyNaturalParsing(text)
+                // Auto-attach a saved place if its name appears in the
+                // label: "kup mleko biedronka" → geofence on Biedronka.
+                if (selectedLatitude == null) {
+                    val place = PlaceStore.findInText(this@AddReminderActivity, text)
+                    if (place != null) {
+                        selectedLatitude = place.latitude
+                        selectedLongitude = place.longitude
+                        selectedRadius = place.radiusMeters
+                        selectedLocationName = place.name
+                        updateLocationLabel()
+                        binding.labelLayout.helperText =
+                            (binding.labelLayout.helperText?.toString().orEmpty() +
+                                "\n\uD83D\uDCCD ${place.name}").trim()
+                    }
+                }
             }
         })
 
@@ -555,13 +561,19 @@ class AddReminderActivity : BaseActivity() {
         val nameInput = view.findViewById<android.widget.EditText>(R.id.locationName)
         val coordsText = view.findViewById<android.widget.TextView>(R.id.locationCoords)
         val btnUse = view.findViewById<android.widget.Button>(R.id.btnUseCurrentLocation)
+        val btnSearch = view.findViewById<android.widget.Button>(R.id.btnSearchAddress)
         val radiusLabel = view.findViewById<android.widget.TextView>(R.id.radiusLabel)
         val radiusBar = view.findViewById<android.widget.SeekBar>(R.id.radiusBar)
+        val delayLabel = view.findViewById<android.widget.TextView>(R.id.delayLabel)
+        val delayBar = view.findViewById<android.widget.SeekBar>(R.id.delayBar)
+        val placesContainer = view.findViewById<android.widget.LinearLayout>(R.id.savedPlacesContainer)
+        val noPlaces = view.findViewById<android.widget.TextView>(R.id.noSavedPlaces)
 
         // Working copies so Cancel leaves everything untouched.
         var workingLat = selectedLatitude
         var workingLng = selectedLongitude
         var workingRadius = (selectedRadius ?: 150f).toInt().coerceIn(50, 1000)
+        var workingDelay = selectedLocationDelay.coerceIn(0, 30)
 
         nameInput.setText(selectedLocationName.orEmpty())
 
@@ -575,8 +587,14 @@ class AddReminderActivity : BaseActivity() {
         fun repaintRadius() {
             radiusLabel.text = getString(R.string.location_radius_value, workingRadius)
         }
+        fun repaintDelay() {
+            delayLabel.text = if (workingDelay == 0) {
+                getString(R.string.location_delay_none)
+            } else {
+                getString(R.string.location_delay_value, workingDelay)
+            }
+        }
         repaintCoords()
-        // SeekBar max=950 maps to 50..1000m in 1m steps.
         radiusBar.progress = (workingRadius - 50).coerceAtLeast(0)
         repaintRadius()
         radiusBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
@@ -587,20 +605,56 @@ class AddReminderActivity : BaseActivity() {
             override fun onStartTrackingTouch(sb: android.widget.SeekBar?) {}
             override fun onStopTrackingTouch(sb: android.widget.SeekBar?) {}
         })
+        delayBar.progress = workingDelay
+        repaintDelay()
+        delayBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(sb: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                workingDelay = progress
+                repaintDelay()
+            }
+            override fun onStartTrackingTouch(sb: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(sb: android.widget.SeekBar?) {}
+        })
+
+        // Saved places chips — tap to pick instantly.
+        val savedPlaces = PlaceStore.all(this)
+        if (savedPlaces.isEmpty()) {
+            noPlaces.visibility = android.view.View.VISIBLE
+        } else {
+            noPlaces.visibility = android.view.View.GONE
+            savedPlaces.forEach { place ->
+                val chip = com.google.android.material.chip.Chip(this).apply {
+                    text = place.name
+                    isCheckable = false
+                    setOnClickListener {
+                        workingLat = place.latitude
+                        workingLng = place.longitude
+                        workingRadius = place.radiusMeters.toInt()
+                        nameInput.setText(place.name)
+                        repaintCoords()
+                        radiusBar.progress = (workingRadius - 50).coerceAtLeast(0)
+                        repaintRadius()
+                    }
+                }
+                placesContainer.addView(chip)
+            }
+        }
 
         btnUse.setOnClickListener {
             requestLocationPermissionThen { granted ->
                 if (!granted) {
-                    Toast.makeText(
-                        this, R.string.location_permission_denied, Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this, R.string.location_permission_denied, Toast.LENGTH_SHORT).show()
                     return@requestLocationPermissionThen
                 }
                 fetchCurrentLocation { lat, lng ->
-                    workingLat = lat
-                    workingLng = lng
-                    repaintCoords()
+                    workingLat = lat; workingLng = lng; repaintCoords()
                 }
+            }
+        }
+
+        btnSearch.setOnClickListener {
+            showAddressSearchDialog { lat, lng ->
+                workingLat = lat; workingLng = lng; repaintCoords()
             }
         }
 
@@ -612,13 +666,15 @@ class AddReminderActivity : BaseActivity() {
                     selectedLatitude = workingLat
                     selectedLongitude = workingLng
                     selectedRadius = workingRadius.toFloat()
-                    selectedLocationName = nameInput.text?.toString()?.trim().takeIf { !it.isNullOrBlank() }
+                    selectedLocationName = nameInput.text?.toString()?.trim()
+                        .takeIf { !it.isNullOrBlank() }
+                    selectedLocationDelay = workingDelay
                 } else {
-                    // No coords picked → leave location unset.
                     selectedLatitude = null
                     selectedLongitude = null
                     selectedRadius = null
                     selectedLocationName = null
+                    selectedLocationDelay = 0
                 }
                 updateLocationLabel()
             }
@@ -627,7 +683,36 @@ class AddReminderActivity : BaseActivity() {
                 selectedLongitude = null
                 selectedRadius = null
                 selectedLocationName = null
+                selectedLocationDelay = 0
                 updateLocationLabel()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun showAddressSearchDialog(onResult: (Double, Double) -> Unit) {
+        val input = android.widget.EditText(this).apply {
+            hint = getString(R.string.search_address_hint)
+            setPadding(48, 32, 48, 32)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.search_address)
+            .setView(input)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val query = input.text.toString().trim()
+                if (query.isBlank()) return@setPositiveButton
+                @Suppress("DEPRECATION")
+                try {
+                    val gc = android.location.Geocoder(this, java.util.Locale.getDefault())
+                    val results = gc.getFromLocationName(query, 1)
+                    if (!results.isNullOrEmpty()) {
+                        onResult(results[0].latitude, results[0].longitude)
+                    } else {
+                        Toast.makeText(this, R.string.geocode_no_results, Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this, R.string.geocode_failed, Toast.LENGTH_SHORT).show()
+                }
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
@@ -797,7 +882,8 @@ class AddReminderActivity : BaseActivity() {
                 latitude = selectedLatitude,
                 longitude = selectedLongitude,
                 radiusMeters = selectedRadius,
-                locationName = selectedLocationName
+                locationName = selectedLocationName,
+                locationDelayMinutes = selectedLocationDelay
             )
         } else {
             Reminder(
@@ -816,13 +902,27 @@ class AddReminderActivity : BaseActivity() {
                 latitude = selectedLatitude,
                 longitude = selectedLongitude,
                 radiusMeters = selectedRadius,
-                locationName = selectedLocationName
+                locationName = selectedLocationName,
+                locationDelayMinutes = selectedLocationDelay
             )
         }
         ReminderStore.save(this, reminder)
         AlarmScheduler.schedule(this, reminder)
         Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show()
         finish()
+    }
+
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+        menuInflater.inflate(R.menu.add_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_voice_input -> { launchVoiceInput(); true }
+            R.id.action_save_as_template -> { showSaveAsTemplateDialog(); true }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean { finish(); return true }

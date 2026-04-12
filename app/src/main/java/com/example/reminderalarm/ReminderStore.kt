@@ -38,7 +38,8 @@ object ReminderStore {
                 latitude = if (o.has("latitude") && !o.isNull("latitude")) o.getDouble("latitude") else null,
                 longitude = if (o.has("longitude") && !o.isNull("longitude")) o.getDouble("longitude") else null,
                 radiusMeters = if (o.has("radiusMeters") && !o.isNull("radiusMeters")) o.getDouble("radiusMeters").toFloat() else null,
-                locationName = if (o.has("locationName") && !o.isNull("locationName")) o.getString("locationName") else null
+                locationName = if (o.has("locationName") && !o.isNull("locationName")) o.getString("locationName") else null,
+                locationDelayMinutes = o.optInt("locationDelayMinutes", 0)
             )
         }.sortedBy { it.triggerAtMillis }
     }
@@ -95,6 +96,7 @@ object ReminderStore {
                     .put("longitude", it.longitude ?: JSONObject.NULL)
                     .put("radiusMeters", it.radiusMeters?.toDouble() ?: JSONObject.NULL)
                     .put("locationName", it.locationName ?: JSONObject.NULL)
+                    .put("locationDelayMinutes", it.locationDelayMinutes)
             )
         }
         prefs(context).edit().putString(KEY, arr.toString()).apply()

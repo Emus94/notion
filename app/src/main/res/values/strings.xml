@@ -194,6 +194,22 @@
     <string name="location_permission_denied">Brak uprawnień do lokalizacji</string>
     <string name="location_fetch_failed">Nie udało się pobrać lokalizacji — sprawdź GPS</string>
     <string name="location_tag_generic">Miejsce</string>
+    <string name="location_delay">Opóźnienie (minuty w lokalizacji)</string>
+    <string name="location_delay_none">Brak (alarm natychmiast)</string>
+    <string name="location_delay_value">%1$d min po wejściu</string>
+    <string name="search_address">Szukaj adresu</string>
+    <string name="search_address_hint">np. Biedronka Słowackiego Kraków</string>
+    <string name="geocode_no_results">Nie znaleziono adresu</string>
+    <string name="geocode_failed">Błąd geokodowania</string>
+    <string name="saved_places">Zapisane miejsca</string>
+    <string name="no_saved_places">Brak zapisanych. Dodaj w menu → Miejsca.</string>
+    <string name="places_title">Miejsca</string>
+    <string name="places_empty">Brak zapisanych miejsc. Dodaj swoje ulubione lokalizacje (Dom, Praca, sklep) żeby szybko przypisywać je do przypomnień.</string>
+    <string name="new_place">Nowe miejsce</string>
+    <string name="edit_place">Edytuj miejsce</string>
+    <string name="confirm_delete_place">Usunąć to miejsce?</string>
+    <string name="place_name_hint">np. Dom, Praca, Biedronka Słowackiego</string>
+    <string name="err_no_coords">Podaj współrzędne (GPS lub wyszukaj adres)</string>
     <string name="location_background_hint">Dla pewności, że alarm zadziała kiedy aplikacja jest wyłączona, w ustawieniach Androida ustaw lokalizację na „Zawsze zezwalaj\".</string>
 
     <!-- Welcome / onboarding -->
