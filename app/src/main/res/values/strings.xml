@@ -224,6 +224,11 @@
     <string name="welcome_footer_hint">Zawsze możesz wrócić tu z Ustawień.</string>
     <string name="welcome_reopen">Pokaż ekran powitalny</string>
     <string name="welcome_reopen_hint">Sprawdź, czy masz wszystkie potrzebne uprawnienia.</string>
+    <string name="section_display_colors">Kolory wyświetlania</string>
+    <string name="display_colors_hint">Zmień kolor tła dla trybu jasnego i ciemnego. Domyślnie: biały / ciemny szary.</string>
+    <string name="display_light_bg">Tło trybu jasnego</string>
+    <string name="display_dark_bg">Tło trybu ciemnego</string>
+
     <string name="section_permissions">Uprawnienia</string>
 
     <string name="perm_notif_title">Powiadomienia</string>

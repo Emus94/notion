@@ -572,6 +572,91 @@
 
             </LinearLayout>
 
+            <!-- DISPLAY MODE COLORS -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/section_display_colors"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/display_colors_hint"
+                android:textColor="#888"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/display_light_bg" />
+
+                <View
+                    android:id="@+id/lightBgPreview"
+                    android:layout_width="36dp"
+                    android:layout_height="24dp" />
+
+                <Button
+                    android:id="@+id/btnLightBg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/change" />
+
+                <Button
+                    android:id="@+id/btnLightBgReset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/auto" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/display_dark_bg" />
+
+                <View
+                    android:id="@+id/darkBgPreview"
+                    android:layout_width="36dp"
+                    android:layout_height="24dp" />
+
+                <Button
+                    android:id="@+id/btnDarkBg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/change" />
+
+                <Button
+                    android:id="@+id/btnDarkBgReset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/auto" />
+
+            </LinearLayout>
+
             <!-- Welcome / permissions guide re-entry -->
             <TextView
                 android:layout_width="wrap_content"

@@ -10,6 +10,11 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/action_preview_alarm"
+        android:title="@string/preview_alarm"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_save_as_template"
         android:title="@string/save_as_template"
         app:showAsAction="never" />

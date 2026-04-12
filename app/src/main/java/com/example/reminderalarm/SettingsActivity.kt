@@ -373,6 +373,50 @@ class SettingsActivity : BaseActivity() {
         binding.btnShowWelcome.setOnClickListener {
             startActivity(Intent(this, WelcomeActivity::class.java))
         }
+        setupDisplayColorsSection()
+    }
+
+    // -----------------------------------------------------------------
+    // Display mode background colours
+    // -----------------------------------------------------------------
+
+    private fun setupDisplayColorsSection() {
+        refreshDisplayPreviews()
+        binding.btnLightBg.setOnClickListener {
+            val current = AppSettings.getCustomLightBg(this) ?: 0xFFFFFFFF.toInt()
+            ColorPickerHelper.show(this, getString(R.string.display_light_bg), current) { color ->
+                AppSettings.setCustomLightBg(this, color)
+                refreshDisplayPreviews()
+                recreate()
+            }
+        }
+        binding.btnLightBgReset.setOnClickListener {
+            AppSettings.setCustomLightBg(this, null)
+            refreshDisplayPreviews()
+            recreate()
+        }
+        binding.btnDarkBg.setOnClickListener {
+            val current = AppSettings.getCustomDarkBg(this) ?: 0xFF121212.toInt()
+            ColorPickerHelper.show(this, getString(R.string.display_dark_bg), current) { color ->
+                AppSettings.setCustomDarkBg(this, color)
+                refreshDisplayPreviews()
+                recreate()
+            }
+        }
+        binding.btnDarkBgReset.setOnClickListener {
+            AppSettings.setCustomDarkBg(this, null)
+            refreshDisplayPreviews()
+            recreate()
+        }
+    }
+
+    private fun refreshDisplayPreviews() {
+        binding.lightBgPreview.setBackgroundColor(
+            AppSettings.getCustomLightBg(this) ?: 0xFFFFFFFF.toInt()
+        )
+        binding.darkBgPreview.setBackgroundColor(
+            AppSettings.getCustomDarkBg(this) ?: 0xFF121212.toInt()
+        )
     }
 
     private fun updateLastBackupLabel() {
@@ -449,5 +493,9 @@ class SettingsActivity : BaseActivity() {
         binding.btnPickBackupFolder.backgroundTintList = tint
         binding.btnClearBackupFolder.backgroundTintList = tint
         binding.btnShowWelcome.backgroundTintList = tint
+        binding.btnLightBg.backgroundTintList = tint
+        binding.btnLightBgReset.backgroundTintList = tint
+        binding.btnDarkBg.backgroundTintList = tint
+        binding.btnDarkBgReset.backgroundTintList = tint
     }
 }

@@ -42,6 +42,32 @@ object AppSettings {
         prefs(context).edit().putInt(KEY_SHAKE_SNOOZE_MINUTES, minutes).apply()
     }
 
+    // Custom background tints for light/dark display modes.
+    private const val KEY_LIGHT_BG = "custom_light_bg"
+    private const val KEY_DARK_BG = "custom_dark_bg"
+
+    fun getCustomLightBg(context: Context): Int? {
+        val p = prefs(context)
+        return if (p.contains(KEY_LIGHT_BG)) p.getInt(KEY_LIGHT_BG, 0) else null
+    }
+
+    fun setCustomLightBg(context: Context, color: Int?) {
+        val e = prefs(context).edit()
+        if (color == null) e.remove(KEY_LIGHT_BG) else e.putInt(KEY_LIGHT_BG, color)
+        e.apply()
+    }
+
+    fun getCustomDarkBg(context: Context): Int? {
+        val p = prefs(context)
+        return if (p.contains(KEY_DARK_BG)) p.getInt(KEY_DARK_BG, 0) else null
+    }
+
+    fun setCustomDarkBg(context: Context, color: Int?) {
+        val e = prefs(context).edit()
+        if (color == null) e.remove(KEY_DARK_BG) else e.putInt(KEY_DARK_BG, color)
+        e.apply()
+    }
+
     /** First-launch welcome / permission guide flag. */
     fun isWelcomeCompleted(context: Context): Boolean =
         prefs(context).getBoolean(KEY_WELCOME_DONE, false)

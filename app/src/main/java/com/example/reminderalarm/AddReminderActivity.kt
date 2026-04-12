@@ -962,9 +962,27 @@ class AddReminderActivity : BaseActivity() {
     override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_voice_input -> { launchVoiceInput(); true }
+            R.id.action_preview_alarm -> { previewAlarm(); true }
             R.id.action_save_as_template -> { showSaveAsTemplateDialog(); true }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun previewAlarm() {
+        val intent = Intent(this, AlarmActivity::class.java).apply {
+            addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+            )
+            putExtra(AlarmActivity.EXTRA_PREVIEW, true)
+            // If editing an existing reminder, pass its ID so the preview
+            // shows that reminder's label / notes / image.
+            if (editingId > 0) {
+                putExtra(AlarmScheduler.EXTRA_ID, editingId)
+            }
+        }
+        startActivity(intent)
     }
 
     override fun onSupportNavigateUp(): Boolean { finish(); return true }

@@ -22,14 +22,16 @@
             android:layout_weight="1"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <AutoCompleteTextView
                 android:id="@+id/searchInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/search_address_hint"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:completionThreshold="3"
+                android:dropDownWidth="match_parent" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
