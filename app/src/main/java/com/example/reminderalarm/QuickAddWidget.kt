@@ -43,13 +43,26 @@ class QuickAddWidget : AppWidgetProvider() {
             )
             views.setOnClickPendingIntent(R.id.quickOpenSection, openPi)
 
-            // Right "+": new reminder
+            // Centre "🎤": open reminder form and immediately start voice
+            val voiceIntent = Intent(context, AddReminderActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                putExtra(AddReminderActivity.EXTRA_START_VOICE, true)
+            }
+            val voicePi = PendingIntent.getActivity(
+                context,
+                id * 4 + 2,
+                voiceIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            views.setOnClickPendingIntent(R.id.quickVoiceSection, voicePi)
+
+            // Right "+": new reminder (normal, no voice)
             val addIntent = Intent(context, AddReminderActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             }
             val addPi = PendingIntent.getActivity(
                 context,
-                id * 2 + 1,
+                id * 4 + 3,
                 addIntent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )

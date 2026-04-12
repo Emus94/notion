@@ -20,14 +20,46 @@
             android:layout_height="wrap_content"
             android:text="⌂"
             android:textColor="#FFFFFF"
-            android:textSize="24sp" />
+            android:textSize="22sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_open_label"
             android:textColor="#FFFFFF"
-            android:textSize="11sp" />
+            android:textSize="10sp" />
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:background="#55FFFFFF" />
+
+    <LinearLayout
+        android:id="@+id/quickVoiceSection"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="6dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎤"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/voice_input"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp" />
 
     </LinearLayout>
 
@@ -52,7 +84,7 @@
             android:layout_height="wrap_content"
             android:text="+"
             android:textColor="#FFFFFF"
-            android:textSize="24sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
         <TextView
@@ -60,7 +92,7 @@
             android:layout_height="wrap_content"
             android:text="@string/widget_quick_add_label"
             android:textColor="#FFFFFF"
-            android:textSize="11sp" />
+            android:textSize="10sp" />
 
     </LinearLayout>
 

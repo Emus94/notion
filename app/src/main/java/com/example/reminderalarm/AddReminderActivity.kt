@@ -222,6 +222,13 @@ class AddReminderActivity : BaseActivity() {
             handleShareIntent()
         }
 
+        // If opened from the voice widget, fire the mic immediately so
+        // the user goes tap → speak → form in one fluid motion.
+        if (savedInstanceState == null && intent.getBooleanExtra(EXTRA_START_VOICE, false)) {
+            intent.removeExtra(EXTRA_START_VOICE) // don't re-fire on rotation
+            binding.editLabel.postDelayed({ launchVoiceInput() }, 300)
+        }
+
         updateDateTime()
         updateRecurrenceLabel()
         updatePriorityLabel()
@@ -1023,5 +1030,6 @@ class AddReminderActivity : BaseActivity() {
     companion object {
         const val EXTRA_EDIT_ID = "edit_id"
         const val EXTRA_TEMPLATE_ID = "template_id"
+        const val EXTRA_START_VOICE = "start_voice"
     }
 }

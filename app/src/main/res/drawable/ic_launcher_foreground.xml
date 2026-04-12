@@ -5,44 +5,62 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <!--
-      Forget-me-not flower in the 3D-pastel style from the user's
-      reference image: filled blue petals with a warm yellow centre.
-      No stem — just the flower head, centred in the 72dp safe zone
-      (18,18 → 90,90) of the 108dp adaptive-icon canvas.
+      Forget-me-not flower: five round circular petals arranged
+      symmetrically around a golden centre. Petals are simple circles
+      positioned at 72-degree intervals, giving the characteristic
+      puffy 5-petal look from the reference icon.
+      Centre at (54, 48), petal radius 13, distance from centre 13.
     -->
 
-    <!-- Petal 1 — top (filled blue) -->
+    <!-- Petal 1 — top -->
     <path
-        android:fillColor="#5BC0EB"
-        android:pathData="M54,28 C48,22 40,22 37,28 C34,34 38,42 46,44 C49,45 52,44 54,42 C56,44 59,45 62,44 C70,42 74,34 71,28 C68,22 60,22 54,28Z" />
+        android:fillColor="#5BBFE8"
+        android:pathData="M54,35 m-13,0 a13,13 0,1,1 26,0 a13,13 0,1,1 -26,0" />
 
-    <!-- Petal 2 — top-right -->
+    <!-- Petal 2 — top right -->
     <path
-        android:fillColor="#3DA5D9"
-        android:pathData="M65,36 C71,30 79,30 82,36 C85,42 81,50 73,52 C70,53 67,52 65,50 C67,52 67,57 66,59 C60,64 52,60 52,53 C52,46 58,40 65,36Z" />
+        android:fillColor="#4AAFE0"
+        android:pathData="M66.4,44 m-13,0 a13,13 0,1,1 26,0 a13,13 0,1,1 -26,0" />
 
-    <!-- Petal 3 — bottom-right -->
+    <!-- Petal 3 — bottom right -->
     <path
-        android:fillColor="#5BC0EB"
-        android:pathData="M62,57 C68,62 72,70 68,76 C64,82 56,82 51,77 C48,74 48,70 51,67 C48,70 44,72 41,70 C36,66 38,58 45,54 C52,50 58,52 62,57Z" />
+        android:fillColor="#5BBFE8"
+        android:pathData="M61.6,58.5 m-13,0 a13,13 0,1,1 26,0 a13,13 0,1,1 -26,0" />
 
-    <!-- Petal 4 — bottom-left -->
+    <!-- Petal 4 — bottom left -->
     <path
-        android:fillColor="#3DA5D9"
-        android:pathData="M46,57 C40,62 36,70 40,76 C44,82 52,82 57,77 C60,74 60,70 57,67 C60,70 64,72 67,70 C72,66 70,58 63,54 C56,50 50,52 46,57Z" />
+        android:fillColor="#4AAFE0"
+        android:pathData="M46.4,58.5 m-13,0 a13,13 0,1,1 26,0 a13,13 0,1,1 -26,0" />
 
-    <!-- Petal 5 — top-left -->
+    <!-- Petal 5 — top left -->
     <path
-        android:fillColor="#5BC0EB"
-        android:pathData="M43,36 C37,30 29,30 26,36 C23,42 27,50 35,52 C38,53 41,52 43,50 C41,52 41,57 42,59 C48,64 56,60 56,53 C56,46 50,40 43,36Z" />
+        android:fillColor="#5BBFE8"
+        android:pathData="M41.6,44 m-13,0 a13,13 0,1,1 26,0 a13,13 0,1,1 -26,0" />
 
-    <!-- Centre — golden yellow flower-like circle -->
+    <!-- Golden centre — outer ring -->
     <path
         android:fillColor="#FFC107"
-        android:pathData="M54,48 m-7,0 a7,7 0,1 1,14 0 a7,7 0,1 1,-14 0" />
+        android:pathData="M54,48 m-7,0 a7,7 0,1,1 14,0 a7,7 0,1,1 -14,0" />
 
-    <!-- Inner centre dot — warm orange -->
+    <!-- Small yellow petals around centre (decorative detail) -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M54,41.5 m-2,0 a2,2 0,1,1 4,0 a2,2 0,1,1 -4,0" />
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M60,45.5 m-2,0 a2,2 0,1,1 4,0 a2,2 0,1,1 -4,0" />
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M58,52 m-2,0 a2,2 0,1,1 4,0 a2,2 0,1,1 -4,0" />
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M50,52 m-2,0 a2,2 0,1,1 4,0 a2,2 0,1,1 -4,0" />
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M48,45.5 m-2,0 a2,2 0,1,1 4,0 a2,2 0,1,1 -4,0" />
+
+    <!-- Orange inner dot -->
     <path
         android:fillColor="#FF8F00"
-        android:pathData="M54,48 m-3,0 a3,3 0,1 1,6 0 a3,3 0,1 1,-6 0" />
+        android:pathData="M54,48 m-3,0 a3,3 0,1,1 6,0 a3,3 0,1,1 -6,0" />
 </vector>
