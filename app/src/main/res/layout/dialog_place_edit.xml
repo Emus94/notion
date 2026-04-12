@@ -49,4 +49,12 @@
 
     </LinearLayout>
 
+    <Button
+        android:id="@+id/btnPlaceMap"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/pick_on_map"
+        android:textSize="13sp" />
+
 </LinearLayout>

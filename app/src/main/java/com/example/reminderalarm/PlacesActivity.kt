@@ -37,6 +37,18 @@ class PlacesActivity : BaseActivity() {
     }
     private var pendingGpsAction: ((Boolean) -> Unit)? = null
 
+    private var mapResultCallback: ((Double, Double) -> Unit)? = null
+    private val mapPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val lat = result.data?.getDoubleExtra(MapPickerActivity.EXTRA_LAT, 0.0) ?: return@registerForActivityResult
+            val lng = result.data?.getDoubleExtra(MapPickerActivity.EXTRA_LNG, 0.0) ?: return@registerForActivityResult
+            mapResultCallback?.invoke(lat, lng)
+        }
+        mapResultCallback = null
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityEntitiesBinding.inflate(layoutInflater)
@@ -131,6 +143,20 @@ class PlacesActivity : BaseActivity() {
                 workLat = lat; workLng = lng
                 repaintCoords()
             }
+        }
+
+        val btnMap = view.findViewById<Button>(R.id.btnPlaceMap)
+        btnMap.setOnClickListener {
+            mapResultCallback = { lat, lng ->
+                workLat = lat; workLng = lng
+                repaintCoords()
+            }
+            val intent = android.content.Intent(this, MapPickerActivity::class.java)
+            if (workLat != null && workLng != null) {
+                intent.putExtra(MapPickerActivity.EXTRA_LAT, workLat!!)
+                intent.putExtra(MapPickerActivity.EXTRA_LNG, workLng!!)
+            }
+            mapPickerLauncher.launch(intent)
         }
 
         AlertDialog.Builder(this)

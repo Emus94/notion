@@ -67,6 +67,14 @@
 
         </LinearLayout>
 
+        <Button
+            android:id="@+id/btnPickOnMap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@string/pick_on_map"
+            android:textSize="13sp" />
+
         <!-- Saved places quick-pick -->
         <TextView
             android:layout_width="wrap_content"

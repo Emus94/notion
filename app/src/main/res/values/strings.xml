@@ -210,6 +210,9 @@
     <string name="confirm_delete_place">Usunąć to miejsce?</string>
     <string name="place_name_hint">np. Dom, Praca, Biedronka Słowackiego</string>
     <string name="err_no_coords">Podaj współrzędne (GPS lub wyszukaj adres)</string>
+    <string name="pick_on_map">Wybierz na mapie</string>
+    <string name="map_tap_hint">Dotknij mapę, żeby postawić pinezkę</string>
+    <string name="map_confirm">Potwierdź lokalizację</string>
     <string name="location_background_hint">Dla pewności, że alarm zadziała kiedy aplikacja jest wyłączona, w ustawieniach Androida ustaw lokalizację na „Zawsze zezwalaj\".</string>
 
     <!-- Welcome / onboarding -->

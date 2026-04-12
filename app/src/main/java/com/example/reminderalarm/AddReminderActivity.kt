@@ -58,6 +58,21 @@ class AddReminderActivity : BaseActivity() {
     // and cleared afterwards so stale callbacks don't leak.
     private var pendingLocationPermissionAction: ((granted: Boolean) -> Unit)? = null
 
+    // Map picker returns lat/lng via activity result. The lambda is set
+    // by the dialog that opened the map so the right "repaint" runs.
+    private var mapResultCallback: ((Double, Double) -> Unit)? = null
+
+    private val mapPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val lat = result.data?.getDoubleExtra(MapPickerActivity.EXTRA_LAT, 0.0) ?: return@registerForActivityResult
+            val lng = result.data?.getDoubleExtra(MapPickerActivity.EXTRA_LNG, 0.0) ?: return@registerForActivityResult
+            mapResultCallback?.invoke(lat, lng)
+        }
+        mapResultCallback = null
+    }
+
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -656,6 +671,26 @@ class AddReminderActivity : BaseActivity() {
             showAddressSearchDialog { lat, lng ->
                 workingLat = lat; workingLng = lng; repaintCoords()
             }
+        }
+
+        val btnMap = view.findViewById<android.widget.Button>(R.id.btnPickOnMap)
+        btnMap.setOnClickListener {
+            // Dismiss the dialog first, then open the map. After the
+            // map returns, re-open the location dialog with the new
+            // coordinates pre-filled via selectedLat/Lng.
+            mapResultCallback = { lat, lng ->
+                selectedLatitude = lat
+                selectedLongitude = lng
+                updateLocationLabel()
+                // Re-open the dialog so user can set name + radius.
+                showLocationDialog()
+            }
+            val intent = android.content.Intent(this, MapPickerActivity::class.java)
+            if (workingLat != null && workingLng != null) {
+                intent.putExtra(MapPickerActivity.EXTRA_LAT, workingLat!!)
+                intent.putExtra(MapPickerActivity.EXTRA_LNG, workingLng!!)
+            }
+            mapPickerLauncher.launch(intent)
         }
 
         AlertDialog.Builder(this)
