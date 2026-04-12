@@ -5,68 +5,44 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <!--
-      Minimalist forget-me-not flower — five rounded petals
-      around a small centre dot. Black stroked lines on the
-      transparent foreground layer; the mustard background
-      shows through from ic_launcher_background.
-
-      The flower sits centered in the 72dp safe zone
+      Forget-me-not flower in the 3D-pastel style from the user's
+      reference image: filled blue petals with a warm yellow centre.
+      No stem — just the flower head, centred in the 72dp safe zone
       (18,18 → 90,90) of the 108dp adaptive-icon canvas.
     -->
 
-    <!-- Petal 1 — top -->
+    <!-- Petal 1 — top (filled blue) -->
     <path
-        android:fillColor="#00000000"
-        android:strokeColor="#1A1A1A"
-        android:strokeWidth="2.4"
-        android:pathData="M54,33 C49,28 44,28 42,33 C40,38 44,43 49,44 C50,44 53,44 54,42 C55,44 58,44 59,44 C64,43 68,38 66,33 C64,28 59,28 54,33Z" />
+        android:fillColor="#5BC0EB"
+        android:pathData="M54,28 C48,22 40,22 37,28 C34,34 38,42 46,44 C49,45 52,44 54,42 C56,44 59,45 62,44 C70,42 74,34 71,28 C68,22 60,22 54,28Z" />
 
     <!-- Petal 2 — top-right -->
     <path
-        android:fillColor="#00000000"
-        android:strokeColor="#1A1A1A"
-        android:strokeWidth="2.4"
-        android:pathData="M62,38 C66,34 70,34 72,38 C74,42 72,47 68,50 C66,52 63,52 62,50 C64,52 64,56 63,57 C59,60 54,58 54,53 C54,48 58,42 62,38Z" />
+        android:fillColor="#3DA5D9"
+        android:pathData="M65,36 C71,30 79,30 82,36 C85,42 81,50 73,52 C70,53 67,52 65,50 C67,52 67,57 66,59 C60,64 52,60 52,53 C52,46 58,40 65,36Z" />
 
     <!-- Petal 3 — bottom-right -->
     <path
-        android:fillColor="#00000000"
-        android:strokeColor="#1A1A1A"
-        android:strokeWidth="2.4"
-        android:pathData="M59,55 C64,58 66,62 63,66 C60,70 55,70 52,67 C50,65 50,62 52,60 C50,62 47,63 45,62 C42,59 43,54 48,52 C53,50 58,51 59,55Z" />
+        android:fillColor="#5BC0EB"
+        android:pathData="M62,57 C68,62 72,70 68,76 C64,82 56,82 51,77 C48,74 48,70 51,67 C48,70 44,72 41,70 C36,66 38,58 45,54 C52,50 58,52 62,57Z" />
 
     <!-- Petal 4 — bottom-left -->
     <path
-        android:fillColor="#00000000"
-        android:strokeColor="#1A1A1A"
-        android:strokeWidth="2.4"
-        android:pathData="M49,55 C44,58 42,62 45,66 C48,70 53,70 56,67 C58,65 58,62 56,60 C58,62 61,63 63,62 C66,59 65,54 60,52 C55,50 50,51 49,55Z" />
+        android:fillColor="#3DA5D9"
+        android:pathData="M46,57 C40,62 36,70 40,76 C44,82 52,82 57,77 C60,74 60,70 57,67 C60,70 64,72 67,70 C72,66 70,58 63,54 C56,50 50,52 46,57Z" />
 
     <!-- Petal 5 — top-left -->
     <path
-        android:fillColor="#00000000"
-        android:strokeColor="#1A1A1A"
-        android:strokeWidth="2.4"
-        android:pathData="M46,38 C42,34 38,34 36,38 C34,42 36,47 40,50 C42,52 45,52 46,50 C44,52 44,56 45,57 C49,60 54,58 54,53 C54,48 50,42 46,38Z" />
+        android:fillColor="#5BC0EB"
+        android:pathData="M43,36 C37,30 29,30 26,36 C23,42 27,50 35,52 C38,53 41,52 43,50 C41,52 41,57 42,59 C48,64 56,60 56,53 C56,46 50,40 43,36Z" />
 
-    <!-- Centre dot -->
+    <!-- Centre — golden yellow flower-like circle -->
     <path
-        android:fillColor="#1A1A1A"
-        android:pathData="M54,47 m-4,0 a4,4 0,1 1,8 0 a4,4 0,1 1,-8 0" />
+        android:fillColor="#FFC107"
+        android:pathData="M54,48 m-7,0 a7,7 0,1 1,14 0 a7,7 0,1 1,-14 0" />
 
-    <!-- Stem — thin line going down from centre -->
+    <!-- Inner centre dot — warm orange -->
     <path
-        android:fillColor="#00000000"
-        android:strokeColor="#1A1A1A"
-        android:strokeWidth="2"
-        android:strokeLineCap="round"
-        android:pathData="M54,51 C54,60 50,68 46,75" />
-
-    <!-- Small leaf on the stem -->
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#1A1A1A"
-        android:strokeWidth="1.8"
-        android:strokeLineCap="round"
-        android:pathData="M50,65 C54,62 58,64 56,68" />
+        android:fillColor="#FF8F00"
+        android:pathData="M54,48 m-3,0 a3,3 0,1 1,6 0 a3,3 0,1 1,-6 0" />
 </vector>
