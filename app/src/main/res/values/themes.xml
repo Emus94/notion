@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Alias used in the manifest. Default is Granat (Navy Blue). -->
-    <style name="Theme.ReminderAlarm" parent="Theme.ReminderAlarm.Blue" />
+    <!-- Alias used in the manifest. Default is Niezapominajka (lavender). -->
+    <style name="Theme.ReminderAlarm" parent="Theme.ReminderAlarm.ForgetMeNot" />
+
+    <style name="Theme.ReminderAlarm.ForgetMeNot" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#C4ADE8</item>
+        <item name="colorPrimaryDark">#8B70B8</item>
+        <item name="colorAccent">#5BC0EB</item>
+        <item name="colorSecondary">#5BC0EB</item>
+    </style>
 
     <!-- Typography overrides shared by every palette: medium weight for
          headlines/titles (closer to Inter's "Medium") and regular for

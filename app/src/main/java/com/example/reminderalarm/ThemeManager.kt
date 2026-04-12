@@ -25,6 +25,10 @@ object ThemeManager {
         val primaryDark: Int,
         val accent: Int
     ) {
+        FORGET_ME_NOT(
+            "forget_me_not", "Niezapominajka", R.style.Theme_ReminderAlarm_ForgetMeNot,
+            0xFFC4ADE8.toInt(), 0xFF8B70B8.toInt(), 0xFF5BC0EB.toInt()
+        ),
         BLUE(
             "blue", "Granat", R.style.Theme_ReminderAlarm_Blue,
             0xFF1D3557.toInt(), 0xFF0D1B2A.toInt(), 0xFFE63946.toInt()
@@ -76,7 +80,7 @@ object ThemeManager {
         );
 
         companion object {
-            fun fromId(id: String?): Palette = values().firstOrNull { it.id == id } ?: BLUE
+            fun fromId(id: String?): Palette = values().firstOrNull { it.id == id } ?: FORGET_ME_NOT
         }
     }
 
