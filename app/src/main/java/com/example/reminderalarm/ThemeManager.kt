@@ -73,6 +73,10 @@ object ThemeManager {
             "ocean", "Ocean", R.style.Theme_ReminderAlarm_Ocean,
             0xFF4FC3F7.toInt(), 0xFF0277BD.toInt(), 0xFFFF6F61.toInt()
         ),
+        RETRO_SUNSET(
+            "retro_sunset", "Zachód słońca", R.style.Theme_ReminderAlarm_RetroSunset,
+            0xFFBE5103.toInt(), 0xFF7A3502.toInt(), 0xFFFFCE1B.toInt()
+        ),
 
         CUSTOM(
             "custom", "Własny…", R.style.Theme_ReminderAlarm_Blue,

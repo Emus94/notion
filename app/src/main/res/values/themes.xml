@@ -102,6 +102,13 @@
         <item name="colorSecondary">#FF6F61</item>
     </style>
 
+    <style name="Theme.ReminderAlarm.RetroSunset" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#BE5103</item>
+        <item name="colorPrimaryDark">#7A3502</item>
+        <item name="colorAccent">#FFCE1B</item>
+        <item name="colorSecondary">#FFCE1B</item>
+    </style>
+
     <!-- Fullscreen alarm screen keeps its own dark style regardless of theme. -->
     <style name="Theme.ReminderAlarm.Fullscreen" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:windowFullscreen">true</item>
