@@ -135,6 +135,15 @@ class MainActivity : BaseActivity() {
             }.start()
             startActivity(Intent(this, AddReminderActivity::class.java))
         }
+        binding.fabVoice.setOnClickListener { v ->
+            v.animate().scaleX(0.9f).scaleY(0.9f).setDuration(70).withEndAction {
+                v.animate().scaleX(1f).scaleY(1f).setDuration(70).start()
+            }.start()
+            startActivity(
+                Intent(this, AddReminderActivity::class.java)
+                    .putExtra(AddReminderActivity.EXTRA_START_VOICE, true)
+            )
+        }
         binding.emptyCta.setOnClickListener {
             startActivity(Intent(this, AddReminderActivity::class.java))
         }
@@ -624,6 +633,7 @@ class MainActivity : BaseActivity() {
         binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
         binding.tabs.setBackgroundColor(Color.TRANSPARENT)
         binding.fabAdd.backgroundTintList = ColorStateList.valueOf(accent)
+        binding.fabVoice.backgroundTintList = ColorStateList.valueOf(accent)
         binding.emptyCta.backgroundTintList = ColorStateList.valueOf(accent)
         window.statusBarColor = primaryDark
     }
