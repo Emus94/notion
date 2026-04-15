@@ -3,12 +3,15 @@ package com.example.reminderalarm
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.util.LruCache
 import android.widget.ImageView
+import androidx.exifinterface.media.ExifInterface
 import java.io.File
+import java.io.InputStream
 import java.util.concurrent.Executors
 
 /**
@@ -109,7 +112,17 @@ object ImageLoader {
         val decodeOpts = BitmapFactory.Options().apply {
             inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight, maxDim)
         }
-        return BitmapFactory.decodeFile(path, decodeOpts)
+        val raw = BitmapFactory.decodeFile(path, decodeOpts) ?: return null
+        // EXIF orientation: camera JPEGs are stored landscape even when
+        // the phone was held portrait. Rotate to match the intended
+        // viewing orientation.
+        val orientation = runCatching {
+            ExifInterface(path).getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
+        }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
+        return applyExifOrientation(raw, orientation)
     }
 
     private fun decodeUri(context: Context, uri: Uri, maxDim: Int): Bitmap? {
@@ -121,9 +134,57 @@ object ImageLoader {
         val decodeOpts = BitmapFactory.Options().apply {
             inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight, maxDim)
         }
-        return context.contentResolver.openInputStream(uri)?.use {
+        val raw = context.contentResolver.openInputStream(uri)?.use {
             BitmapFactory.decodeStream(it, null, decodeOpts)
+        } ?: return null
+        // Read EXIF from a fresh stream (ExifInterface consumes it).
+        val orientation = readOrientation(context, uri)
+        return applyExifOrientation(raw, orientation)
+    }
+
+    private fun readOrientation(context: Context, uri: Uri): Int {
+        return runCatching {
+            context.contentResolver.openInputStream(uri)?.use { stream: InputStream ->
+                ExifInterface(stream).getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL
+                )
+            } ?: ExifInterface.ORIENTATION_NORMAL
+        }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
+    }
+
+    /**
+     * Rotates / mirrors [src] to match the EXIF orientation. Returns the
+     * same [src] when orientation is NORMAL so we don't allocate an
+     * identical bitmap copy for the common case.
+     */
+    private fun applyExifOrientation(src: Bitmap, orientation: Int): Bitmap {
+        if (orientation == ExifInterface.ORIENTATION_NORMAL ||
+            orientation == ExifInterface.ORIENTATION_UNDEFINED
+        ) return src
+        val matrix = Matrix()
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.postScale(-1f, 1f)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.postScale(1f, -1f)
+            ExifInterface.ORIENTATION_TRANSPOSE -> {
+                matrix.postRotate(90f); matrix.postScale(-1f, 1f)
+            }
+            ExifInterface.ORIENTATION_TRANSVERSE -> {
+                matrix.postRotate(270f); matrix.postScale(-1f, 1f)
+            }
+            else -> return src
         }
+        return runCatching {
+            val rotated = Bitmap.createBitmap(
+                src, 0, 0, src.width, src.height, matrix, true
+            )
+            // Free the original if a new bitmap was allocated.
+            if (rotated != src) src.recycle()
+            rotated
+        }.getOrDefault(src)
     }
 
     private fun sampleSize(width: Int, height: Int, maxDim: Int): Int {
