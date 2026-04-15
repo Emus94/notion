@@ -12,6 +12,8 @@ object AppSettings {
     private const val KEY_SHAKE_SNOOZE = "shake_snooze_enabled"
     private const val KEY_SHAKE_SNOOZE_MINUTES = "shake_snooze_minutes"
     private const val KEY_WELCOME_DONE = "welcome_done"
+    private const val KEY_DYNAMIC_COLORS = "dynamic_colors_enabled"
+    private const val KEY_PREALARM_MINUTES = "prealarm_minutes"
     const val DEFAULT_AUTO_SAVE_PHRASE = "zapisz zapisz"
     const val DEFAULT_SHAKE_SNOOZE_MINUTES = 5
 
@@ -66,6 +68,22 @@ object AppSettings {
         val e = prefs(context).edit()
         if (color == null) e.remove(KEY_DARK_BG) else e.putInt(KEY_DARK_BG, color)
         e.apply()
+    }
+
+    /** Material You — pulls the palette from the system wallpaper on Android 12+. */
+    fun isDynamicColorsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_DYNAMIC_COLORS, false)
+
+    fun setDynamicColorsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_DYNAMIC_COLORS, enabled).apply()
+    }
+
+    /** Minutes before the alarm to show a "coming up" heads-up notification. 0 = off. */
+    fun prealarmMinutes(context: Context): Int =
+        prefs(context).getInt(KEY_PREALARM_MINUTES, 0)
+
+    fun setPrealarmMinutes(context: Context, minutes: Int) {
+        prefs(context).edit().putInt(KEY_PREALARM_MINUTES, minutes).apply()
     }
 
     /** First-launch welcome / permission guide flag. */

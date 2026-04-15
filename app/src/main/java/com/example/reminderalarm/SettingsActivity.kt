@@ -1,5 +1,6 @@
 package com.example.reminderalarm
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.media.AudioManager
@@ -374,6 +375,45 @@ class SettingsActivity : BaseActivity() {
             startActivity(Intent(this, WelcomeActivity::class.java))
         }
         setupDisplayColorsSection()
+        setupDynamicColorsSwitch()
+        setupPrealarmPicker()
+    }
+
+    private fun setupDynamicColorsSwitch() {
+        binding.switchDynamicColors.isChecked = AppSettings.isDynamicColorsEnabled(this)
+        binding.switchDynamicColors.setOnCheckedChangeListener { _, checked ->
+            AppSettings.setDynamicColorsEnabled(this, checked)
+        }
+    }
+
+    private fun setupPrealarmPicker() {
+        fun paintValue() {
+            val mins = AppSettings.prealarmMinutes(this)
+            binding.prealarmValue.text = if (mins == 0) {
+                getString(R.string.prealarm_off)
+            } else {
+                getString(R.string.prealarm_value, mins)
+            }
+        }
+        paintValue()
+        binding.prealarmValue.setOnClickListener {
+            val options = intArrayOf(0, 5, 10, 15, 30, 60)
+            val labels = options.map {
+                if (it == 0) getString(R.string.prealarm_off)
+                else getString(R.string.prealarm_value, it)
+            }.toTypedArray()
+            val current = AppSettings.prealarmMinutes(this)
+            val checked = options.indexOf(current).coerceAtLeast(0)
+            AlertDialog.Builder(this)
+                .setTitle(R.string.prealarm_pick_title)
+                .setSingleChoiceItems(labels, checked) { dialog, which ->
+                    AppSettings.setPrealarmMinutes(this, options[which])
+                    paintValue()
+                    dialog.dismiss()
+                }
+                .setNegativeButton(R.string.cancel, null)
+                .show()
+        }
     }
 
     // -----------------------------------------------------------------

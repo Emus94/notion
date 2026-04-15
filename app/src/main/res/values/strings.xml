@@ -237,6 +237,39 @@
     <string name="display_light_bg">Tło trybu jasnego</string>
     <string name="display_dark_bg">Tło trybu ciemnego</string>
 
+    <!-- Material You -->
+    <string name="section_material_you">Material You (Android 12+)</string>
+    <string name="dynamic_colors_label">Użyj kolorów z tapety</string>
+    <string name="dynamic_colors_hint">Automatycznie dopasowuje paletę do koloru tapety. Wymaga restartu aplikacji.</string>
+
+    <!-- Pre-alarm -->
+    <string name="section_prealarm">Powiadomienie wyprzedzające</string>
+    <string name="prealarm_hint">Cicha notyfikacja \"Nadchodzi: …\" na N minut przed dzwoniącym alarmem. Kliknij, żeby wybrać ile minut.</string>
+    <string name="prealarm_off">Wyłączone</string>
+    <string name="prealarm_value">%1$d minut przed alarmem</string>
+    <string name="prealarm_title">Nadchodzi o %1$s</string>
+    <string name="prealarm_channel_name">Powiadomienie wyprzedzające</string>
+    <string name="prealarm_channel_desc">Cicha notyfikacja kilka minut przed alarmem</string>
+    <string name="prealarm_pick_title">Na ile minut przed?</string>
+
+    <!-- App shortcuts -->
+    <string name="shortcut_new_short">Dodaj</string>
+    <string name="shortcut_new_long">Nowe przypomnienie</string>
+    <string name="shortcut_voice_short">Dyktuj</string>
+    <string name="shortcut_voice_long">Podyktuj przypomnienie</string>
+    <string name="shortcut_today_short">Dziś</string>
+    <string name="shortcut_today_long">Otwórz dzisiejsze</string>
+
+    <!-- Day buckets on the list -->
+    <string name="bucket_overdue">ZALEGŁE</string>
+    <string name="bucket_today">DZIŚ</string>
+    <string name="bucket_tomorrow">JUTRO</string>
+    <string name="bucket_this_week">W TYM TYGODNIU</string>
+    <string name="bucket_later">PÓŹNIEJ</string>
+
+    <!-- Image viewer -->
+    <string name="image_viewer_hint">Szczypnij aby powiększyć • Dwuklik resetuje</string>
+
     <!-- Theme editor -->
     <string name="theme_editor_title">Edytor motywu</string>
     <string name="theme_editor_preview">Podgląd</string>

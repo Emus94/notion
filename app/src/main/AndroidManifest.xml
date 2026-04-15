@@ -37,6 +37,9 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <activity
@@ -85,6 +88,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".ImageViewerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ReminderAlarm.Fullscreen" />
+
+        <activity
             android:name=".ThemeEditorActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
@@ -101,6 +109,10 @@
 
         <receiver
             android:name=".AlarmReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".PreAlarmReceiver"
             android:exported="false" />
 
         <receiver

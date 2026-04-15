@@ -367,7 +367,7 @@ class MainActivity : BaseActivity() {
 
         val projectsMap = ProjectStore.all(this).associateBy { it.id }
         val tagsMap = TagStore.all(this).associateBy { it.id }
-        adapter.submit(filtered, projectsMap, tagsMap)
+        adapter.submit(buildGroupedRows(filtered), projectsMap, tagsMap)
 
         binding.tabs.getTabAt(TAB_PLANNED)?.text =
             getString(R.string.tab_planned) + " (" + planned.size + ")"
@@ -389,6 +389,65 @@ class MainActivity : BaseActivity() {
             if (currentTab == TAB_PLANNED && query.isEmpty()) View.VISIBLE else View.GONE
 
         rebuildFilterChips(projectsMap.values.toList())
+    }
+
+    /**
+     * Buckets the list into "Zaległe", "Dziś", "Jutro", "Ten tydzień",
+     * "Później" and emits them as header + item rows for
+     * [ReminderAdapter]. Empty buckets are skipped.
+     */
+    private fun buildGroupedRows(reminders: List<Reminder>): List<ReminderAdapter.Row> {
+        if (reminders.isEmpty()) return emptyList()
+
+        val now = System.currentTimeMillis()
+        val cal = java.util.Calendar.getInstance()
+        fun startOfDay(millis: Long): Long {
+            cal.timeInMillis = millis
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 0)
+            cal.set(java.util.Calendar.MINUTE, 0)
+            cal.set(java.util.Calendar.SECOND, 0)
+            cal.set(java.util.Calendar.MILLISECOND, 0)
+            return cal.timeInMillis
+        }
+        val todayStart = startOfDay(now)
+        val tomorrowStart = todayStart + 24 * 60 * 60 * 1000L
+        val dayAfterTomorrow = tomorrowStart + 24 * 60 * 60 * 1000L
+        val weekEnd = todayStart + 7 * 24 * 60 * 60 * 1000L
+
+        val overdue = mutableListOf<Reminder>()
+        val today = mutableListOf<Reminder>()
+        val tomorrow = mutableListOf<Reminder>()
+        val thisWeek = mutableListOf<Reminder>()
+        val later = mutableListOf<Reminder>()
+
+        for (r in reminders) {
+            val t = r.triggerAtMillis
+            when {
+                // Completed or location-only reminders go under "Dziś"
+                // as a default bucket — they don't have a meaningful
+                // clock time to sort by.
+                !r.enabled -> today += r
+                r.isLocationBased() -> today += r
+                t < todayStart -> overdue += r
+                t < tomorrowStart -> today += r
+                t < dayAfterTomorrow -> tomorrow += r
+                t < weekEnd -> thisWeek += r
+                else -> later += r
+            }
+        }
+
+        val rows = mutableListOf<ReminderAdapter.Row>()
+        fun addBucket(titleRes: Int, bucket: List<Reminder>) {
+            if (bucket.isEmpty()) return
+            rows += ReminderAdapter.Row.Header(getString(titleRes), bucket.size)
+            bucket.forEach { rows += ReminderAdapter.Row.Item(it) }
+        }
+        addBucket(R.string.bucket_overdue, overdue)
+        addBucket(R.string.bucket_today, today)
+        addBucket(R.string.bucket_tomorrow, tomorrow)
+        addBucket(R.string.bucket_this_week, thisWeek)
+        addBucket(R.string.bucket_later, later)
+        return rows
     }
 
     private fun rebuildFilterChips(projects: List<Project>) {
@@ -449,6 +508,13 @@ class MainActivity : BaseActivity() {
                 vh: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
             ): Boolean = false
+
+            // Headers (day buckets) aren't swipeable.
+            override fun getSwipeDirs(
+                rv: RecyclerView,
+                vh: RecyclerView.ViewHolder
+            ): Int = if (vh is ReminderAdapter.HeaderVH) 0
+                else super.getSwipeDirs(rv, vh)
 
             override fun onSwiped(vh: RecyclerView.ViewHolder, direction: Int) {
                 val reminder = adapter.getAt(vh.bindingAdapterPosition) ?: run {

@@ -463,6 +463,13 @@ class AddReminderActivity : BaseActivity() {
             binding.imagePreview.visibility = View.VISIBLE
             binding.btnClearImage.visibility = View.VISIBLE
             binding.imageStatus.text = getString(R.string.image_attached)
+            // Tap preview → open full-screen viewer.
+            binding.imagePreview.setOnClickListener {
+                startActivity(
+                    Intent(this, ImageViewerActivity::class.java)
+                        .putExtra(ImageViewerActivity.EXTRA_PATH, pathOrUri)
+                )
+            }
         } else {
             binding.imagePreview.visibility = View.GONE
             binding.btnClearImage.visibility = View.GONE

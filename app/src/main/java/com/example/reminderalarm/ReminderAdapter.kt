@@ -7,21 +7,32 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.graphics.ColorUtils
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.example.reminderalarm.databinding.ItemDayHeaderBinding
 import com.example.reminderalarm.databinding.ItemReminderBinding
 import com.google.android.material.chip.Chip
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Mixed-list adapter: day-bucket headers ("Dziś", "Jutro", "Ten
+ * tydzień", "Później", "Zaległe") interleaved with the reminder
+ * cards that belong to each bucket. Grouping happens in
+ * [MainActivity] which feeds the adapter already-ordered items.
+ */
 class ReminderAdapter(
     private val onClick: (Reminder) -> Unit,
     private val onLongPress: (Reminder) -> Unit = {},
     private val onSelectionChanged: (Set<Long>) -> Unit = {}
-) : RecyclerView.Adapter<ReminderAdapter.VH>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val items = mutableListOf<Reminder>()
+    sealed class Row {
+        data class Header(val title: String, val count: Int) : Row()
+        data class Item(val reminder: Reminder) : Row()
+    }
+
+    private val rows = mutableListOf<Row>()
     private var projectsById: Map<Long, Project> = emptyMap()
     private var tagsById: Map<Long, Tag> = emptyMap()
     private val fmt = SimpleDateFormat("EEE d MMM, HH:mm", Locale.getDefault())
@@ -58,49 +69,55 @@ class ReminderAdapter(
     }
 
     fun submit(
-        list: List<Reminder>,
+        newRows: List<Row>,
         projects: Map<Long, Project> = emptyMap(),
         tags: Map<Long, Tag> = emptyMap()
     ) {
-        val old = items.toList()
-        val projectsChanged = projects != projectsById
-        val tagsChanged = tags != tagsById
-
         projectsById = projects
         tagsById = tags
-        items.clear()
-        items.addAll(list)
+        rows.clear()
+        rows.addAll(newRows)
+        // Headers aren't DiffUtil-friendly (they carry counts that shift
+        // as items move between buckets), so we just re-render the whole
+        // list on every submit. The adapter list is always small (hundreds
+        // at most) and the animations are nicer than flicker from a bad
+        // diff of mixed types.
+        notifyDataSetChanged()
+    }
 
-        // DiffUtil gives us smooth per-item updates — no flicker on the
-        // full list when a single reminder ticks or the sort changes.
-        // If the project or tag maps changed we fall back to a full
-        // rebind because item content depends on those maps.
-        if (projectsChanged || tagsChanged) {
-            notifyDataSetChanged()
-            return
+    /** Reminder at [position] if it's a reminder row, else null (header). */
+    fun getAt(position: Int): Reminder? =
+        (rows.getOrNull(position) as? Row.Item)?.reminder
+
+    override fun getItemViewType(position: Int): Int = when (rows[position]) {
+        is Row.Header -> TYPE_HEADER
+        is Row.Item -> TYPE_ITEM
+    }
+
+    override fun getItemCount(): Int = rows.size
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        return if (viewType == TYPE_HEADER) {
+            HeaderVH(ItemDayHeaderBinding.inflate(inflater, parent, false))
+        } else {
+            VH(ItemReminderBinding.inflate(inflater, parent, false))
         }
-        val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-            override fun getOldListSize(): Int = old.size
-            override fun getNewListSize(): Int = list.size
-            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                old[oldItemPosition].id == list[newItemPosition].id
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                old[oldItemPosition] == list[newItemPosition]
-        })
-        diff.dispatchUpdatesTo(this)
     }
 
-    fun getAt(position: Int): Reminder? = items.getOrNull(position)
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val b = ItemReminderBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return VH(b)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val row = rows[position]) {
+            is Row.Header -> bindHeader(holder as HeaderVH, row)
+            is Row.Item -> bindItem(holder as VH, row.reminder)
+        }
     }
 
-    override fun getItemCount(): Int = items.size
+    private fun bindHeader(holder: HeaderVH, row: Row.Header) {
+        holder.binding.headerTitle.text = row.title
+        holder.binding.headerCount.text = row.count.toString()
+    }
 
-    override fun onBindViewHolder(holder: VH, position: Int) {
-        val r = items[position]
+    private fun bindItem(holder: VH, r: Reminder) {
         val ctx = holder.itemView.context
         val defaultLabelColor = holder.defaultLabelColor
         holder.binding.label.text = r.label.ifBlank { ctx.getString(R.string.untitled) }
@@ -111,9 +128,17 @@ class ReminderAdapter(
             holder.binding.thumbnail.tag = null
             holder.binding.thumbnail.setImageBitmap(null)
             holder.binding.thumbnail.visibility = View.GONE
+            holder.binding.thumbnail.setOnClickListener(null)
+            holder.binding.thumbnail.isClickable = false
         } else {
             holder.binding.thumbnail.visibility = View.VISIBLE
             ImageLoader.loadAsync(ctx, r.imageUri, 200, holder.binding.thumbnail)
+            holder.binding.thumbnail.isClickable = true
+            holder.binding.thumbnail.setOnClickListener {
+                val intent = android.content.Intent(ctx, ImageViewerActivity::class.java)
+                    .putExtra(ImageViewerActivity.EXTRA_PATH, r.imageUri)
+                ctx.startActivity(intent)
+            }
         }
 
         // Notes
@@ -231,5 +256,12 @@ class ReminderAdapter(
         val defaultCardColor: Int =
             (binding.root as? com.google.android.material.card.MaterialCardView)
                 ?.cardBackgroundColor?.defaultColor ?: 0
+    }
+
+    class HeaderVH(val binding: ItemDayHeaderBinding) : RecyclerView.ViewHolder(binding.root)
+
+    companion object {
+        private const val TYPE_HEADER = 0
+        private const val TYPE_ITEM = 1
     }
 }

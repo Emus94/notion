@@ -34,7 +34,40 @@ object AlarmScheduler {
             AlarmManager.AlarmClockInfo(reminder.triggerAtMillis, showPi),
             pi
         )
+
+        // Optional pre-alarm heads-up notification N minutes earlier.
+        schedulePreAlarm(context, reminder, am)
     }
+
+    private fun schedulePreAlarm(
+        context: Context,
+        reminder: Reminder,
+        am: AlarmManager
+    ) {
+        val offsetMinutes = AppSettings.prealarmMinutes(context)
+        if (offsetMinutes <= 0) return
+        val preTrigger = reminder.triggerAtMillis - offsetMinutes * 60_000L
+        if (preTrigger <= System.currentTimeMillis()) return
+        val pi = prePendingIntent(context, reminder.id)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !am.canScheduleExactAlarms()) {
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, preTrigger, pi)
+        } else {
+            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, preTrigger, pi)
+        }
+    }
+
+    private fun prePendingIntent(context: Context, id: Long): PendingIntent {
+        val intent = Intent(context, PreAlarmReceiver::class.java).apply {
+            putExtra(EXTRA_ID, id)
+        }
+        return PendingIntent.getBroadcast(
+            context, prealarmRequestCode(id), intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+    }
+
+    private fun prealarmRequestCode(id: Long): Int = id.toInt() xor 0x3C3C3C3C.toInt()
 
     /**
      * Schedules a side alarm for the snooze of a recurring reminder.
@@ -62,6 +95,7 @@ object AlarmScheduler {
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         am.cancel(mainPendingIntent(context, id))
         am.cancel(snoozePendingIntent(context, id))
+        am.cancel(prePendingIntent(context, id))
         // Also drop the geofence for this reminder — harmless if none.
         GeofenceHelper.removeFor(context, id)
     }
