@@ -229,6 +229,39 @@
     <string name="display_light_bg">Tło trybu jasnego</string>
     <string name="display_dark_bg">Tło trybu ciemnego</string>
 
+    <!-- Theme editor -->
+    <string name="theme_editor_title">Edytor motywu</string>
+    <string name="theme_editor_preview">Podgląd</string>
+    <string name="theme_editor_preview_hint">Dotknij elementu, żeby zmienić jego kolor.</string>
+    <string name="theme_editor_elements">Elementy do edycji</string>
+    <string name="theme_editor_alarm_preview">Ekran alarmu</string>
+    <string name="theme_editor_reset">Przywróć domyślne</string>
+    <string name="theme_editor_reset_confirm">Wszystkie własne kolory zostaną usunięte. Kontynuować?</string>
+
+    <string name="theme_el_primary">Kolor główny</string>
+    <string name="theme_el_primary_desc">Toolbar, zakładki, nagłówki</string>
+    <string name="theme_el_primary_dark">Pasek stanu</string>
+    <string name="theme_el_primary_dark_desc">Ciemniejszy wariant koloru głównego</string>
+    <string name="theme_el_accent">Akcent</string>
+    <string name="theme_el_accent_desc">FAB, Zapisz, aktywne elementy</string>
+    <string name="theme_el_light_bg">Tło jasne</string>
+    <string name="theme_el_light_bg_desc">Tło aplikacji w trybie jasnym</string>
+    <string name="theme_el_dark_bg">Tło ciemne</string>
+    <string name="theme_el_dark_bg_desc">Tło aplikacji w trybie ciemnym</string>
+    <string name="theme_el_alarm_bg">Alarm — tło</string>
+    <string name="theme_el_alarm_bg_desc">Kolor ekranu dzwoniącego alarmu</string>
+    <string name="theme_el_alarm_text">Alarm — tekst</string>
+    <string name="theme_el_alarm_text_desc">Kolor godziny i treści</string>
+    <string name="theme_el_alarm_snooze">Alarm — przycisk Drzemka</string>
+    <string name="theme_el_alarm_snooze_desc">Zielony / dowolny kolor</string>
+    <string name="theme_el_alarm_dismiss">Alarm — przycisk Wyłącz</string>
+    <string name="theme_el_alarm_dismiss_desc">Czerwony / dowolny kolor</string>
+
+    <!-- Navigation drawer -->
+    <string name="nav_header_subtitle">Budzik z przypomnieniami</string>
+    <string name="nav_group_customize">Personalizacja</string>
+    <string name="nav_group_more">Więcej</string>
+
     <string name="section_permissions">Uprawnienia</string>
 
     <string name="perm_notif_title">Powiadomienia</string>

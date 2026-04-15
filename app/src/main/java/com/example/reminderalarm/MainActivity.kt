@@ -20,11 +20,14 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.reminderalarm.databinding.ActivityMainBinding
 import com.google.android.material.chip.Chip
+import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 
@@ -63,6 +66,7 @@ class MainActivity : BaseActivity() {
 
         binding.toolbar.inflateMenu(R.menu.main_menu)
         setupSearch()
+        setupNavigationDrawer()
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_sort -> { showSortDialog(); true }
@@ -137,6 +141,41 @@ class MainActivity : BaseActivity() {
 
         applyPaletteColors()
         ensurePermissions()
+    }
+
+    // ---------------------------------------------------------------
+    // Navigation drawer (hamburger)
+    // ---------------------------------------------------------------
+
+    private fun setupNavigationDrawer() {
+        binding.toolbar.setNavigationOnClickListener {
+            binding.drawerLayout.openDrawer(GravityCompat.START)
+        }
+        binding.navView.setNavigationItemSelectedListener { item ->
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+            when (item.itemId) {
+                R.id.nav_templates -> startActivity(Intent(this, TemplatesActivity::class.java))
+                R.id.nav_projects -> startActivity(Intent(this, ProjectsActivity::class.java))
+                R.id.nav_tags -> startActivity(Intent(this, TagsActivity::class.java))
+                R.id.nav_places -> startActivity(Intent(this, PlacesActivity::class.java))
+                R.id.nav_theme_editor -> startActivity(Intent(this, ThemeEditorActivity::class.java))
+                R.id.nav_theme -> showThemeDialog()
+                R.id.nav_mode -> showModeDialog()
+                R.id.nav_stats -> showStatsDialog()
+                R.id.nav_settings -> startActivity(Intent(this, SettingsActivity::class.java))
+                R.id.nav_welcome -> startActivity(Intent(this, WelcomeActivity::class.java))
+            }
+            true
+        }
+    }
+
+    override fun onBackPressed() {
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        } else {
+            @Suppress("DEPRECATION")
+            super.onBackPressed()
+        }
     }
 
     private fun setupSearch() {
