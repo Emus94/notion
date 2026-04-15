@@ -179,6 +179,14 @@
     <string name="voice_input">Dyktuj</string>
     <string name="voice_prompt">Podyktuj treść przypomnienia</string>
     <string name="voice_unavailable">Rozpoznawanie mowy niedostępne na tym telefonie</string>
+    <string name="voice_listening">Słucham…</string>
+    <string name="voice_speaking">Mów dalej…</string>
+    <string name="voice_processing">Przetwarzam…</string>
+    <string name="voice_partial_placeholder">🗣️</string>
+    <string name="voice_stop">Stop</string>
+    <string name="voice_hint">Możesz robić przerwy — dyktowanie kończy się dopiero po kliknięciu „Stop\".</string>
+    <string name="voice_no_mic_permission">Brak uprawnień do mikrofonu</string>
+    <string name="voice_error_generic">Problem z rozpoznawaniem — spróbuj jeszcze raz</string>
 
     <!-- Location / geofencing -->
     <string name="location">Lokalizacja</string>

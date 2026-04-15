@@ -80,22 +80,18 @@ class AddReminderActivity : BaseActivity() {
         pendingLocationPermissionAction = null
     }
 
-    private val voiceLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode != RESULT_OK) return@registerForActivityResult
-        val spoken = result.data
-            ?.getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS)
-            ?.firstOrNull()
-            ?.trim()
-        if (spoken.isNullOrBlank()) return@registerForActivityResult
-        // Append to whatever's already in the label so the TextWatcher
-        // runs natural-date parsing on the combined string. If the
-        // label was empty we get a plain insertion.
-        val current = binding.editLabel.text?.toString().orEmpty().trim()
-        val merged = if (current.isEmpty()) spoken else "$current $spoken"
-        binding.editLabel.setText(merged)
-        binding.editLabel.setSelection(merged.length)
+    // Runtime RECORD_AUDIO prompt for the voice dictation flow.
+    private var pendingMicAction: (() -> Unit)? = null
+    private val micPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        val action = pendingMicAction
+        pendingMicAction = null
+        if (granted && action != null) {
+            action()
+        } else if (!granted) {
+            Toast.makeText(this, R.string.voice_no_mic_permission, Toast.LENGTH_LONG).show()
+        }
     }
 
     private val pickImageLauncher = registerForActivityResult(
@@ -269,23 +265,26 @@ class AddReminderActivity : BaseActivity() {
     // ------------------------------------------------------------------
 
     private fun launchVoiceInput() {
-        val intent = android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(
-                android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-            )
-            putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, "pl-PL")
-            putExtra(
-                android.speech.RecognizerIntent.EXTRA_PROMPT,
-                getString(R.string.voice_prompt)
-            )
-            putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        // Our custom dialog uses SpeechRecognizer directly so pauses
+        // don't cut the user off — they tap "Stop" when they're done.
+        // Needs RECORD_AUDIO at runtime; ask for it first if missing.
+        val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+            this, android.Manifest.permission.RECORD_AUDIO
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (!granted) {
+            pendingMicAction = { VoiceDictation.start(this) { appendSpoken(it) } }
+            micPermissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+            return
         }
-        try {
-            voiceLauncher.launch(intent)
-        } catch (e: android.content.ActivityNotFoundException) {
-            Toast.makeText(this, R.string.voice_unavailable, Toast.LENGTH_SHORT).show()
-        }
+        VoiceDictation.start(this) { appendSpoken(it) }
+    }
+
+    private fun appendSpoken(spoken: String) {
+        if (spoken.isBlank()) return
+        val current = binding.editLabel.text?.toString().orEmpty().trim()
+        val merged = if (current.isEmpty()) spoken else "$current $spoken"
+        binding.editLabel.setText(merged)
+        binding.editLabel.setSelection(merged.length)
     }
 
     // ------------------------------------------------------------------
