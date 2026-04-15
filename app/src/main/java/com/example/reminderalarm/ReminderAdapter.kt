@@ -43,7 +43,11 @@ class ReminderAdapter(
     private val selectedIds = mutableSetOf<Long>()
 
     fun selectedReminders(): List<Reminder> =
-        items.filter { it.id in selectedIds }
+        rows.asSequence()
+            .filterIsInstance<Row.Item>()
+            .map { it.reminder }
+            .filter { it.id in selectedIds }
+            .toList()
 
     fun enterSelectionMode(initialId: Long) {
         selectionMode = true
@@ -63,7 +67,7 @@ class ReminderAdapter(
 
     fun toggleSelection(id: Long) {
         if (id in selectedIds) selectedIds.remove(id) else selectedIds.add(id)
-        val idx = items.indexOfFirst { it.id == id }
+        val idx = rows.indexOfFirst { it is Row.Item && it.reminder.id == id }
         if (idx >= 0) notifyItemChanged(idx)
         onSelectionChanged(selectedIds.toSet())
     }
