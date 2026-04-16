@@ -150,12 +150,21 @@ class AlarmSoundService : Service() {
         )
 
         // Actionable buttons — visible on lockscreen AND Android Auto.
-        val snoozeIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = AlarmActionReceiver.ACTION_SNOOZE
+        val snooze5Intent = Intent(this, AlarmActionReceiver::class.java).apply {
+            action = AlarmActionReceiver.ACTION_SNOOZE_5
             putExtra(AlarmScheduler.EXTRA_ID, id)
         }
-        val snoozePi = PendingIntent.getBroadcast(
-            this, (id xor 0xBBBBBBBBL).toInt(), snoozeIntent,
+        val snooze5Pi = PendingIntent.getBroadcast(
+            this, (id xor 0xBBBBBBBBL).toInt(), snooze5Intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val snooze60Intent = Intent(this, AlarmActionReceiver::class.java).apply {
+            action = AlarmActionReceiver.ACTION_SNOOZE_60
+            putExtra(AlarmScheduler.EXTRA_ID, id)
+        }
+        val snooze60Pi = PendingIntent.getBroadcast(
+            this, (id xor 0xAAAAAAAAL).toInt(), snooze60Intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
@@ -177,7 +186,8 @@ class AlarmSoundService : Service() {
             .setOngoing(true)
             .setFullScreenIntent(openPi, true)
             .setContentIntent(openPi)
-            .addAction(0, getString(R.string.snooze_btn), snoozePi)
+            .addAction(0, getString(R.string.notif_snooze_5), snooze5Pi)
+            .addAction(0, getString(R.string.notif_snooze_60), snooze60Pi)
             .addAction(0, getString(R.string.dismiss), dismissPi)
             .build()
     }

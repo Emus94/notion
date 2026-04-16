@@ -14,6 +14,8 @@
     <string name="vibrate_only">Tylko wibracje (bez dźwięku)</string>
     <string name="vibrate_only_tag">Wibracje</string>
     <string name="snooze_btn">Drzemka</string>
+    <string name="notif_snooze_5">⏰ 5 min</string>
+    <string name="notif_snooze_60">⏰ 1 godz.</string>
     <string name="snooze_title">Odłóż na…</string>
     <string name="snooze_5m">5 minut</string>
     <string name="snooze_10m">10 minut</string>
