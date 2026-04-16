@@ -149,6 +149,25 @@ class AlarmSoundService : Service() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
+        // Actionable buttons — visible on lockscreen AND Android Auto.
+        val snoozeIntent = Intent(this, AlarmActionReceiver::class.java).apply {
+            action = AlarmActionReceiver.ACTION_SNOOZE
+            putExtra(AlarmScheduler.EXTRA_ID, id)
+        }
+        val snoozePi = PendingIntent.getBroadcast(
+            this, (id xor 0xBBBBBBBBL).toInt(), snoozeIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val dismissIntent = Intent(this, AlarmActionReceiver::class.java).apply {
+            action = AlarmActionReceiver.ACTION_DISMISS
+            putExtra(AlarmScheduler.EXTRA_ID, id)
+        }
+        val dismissPi = PendingIntent.getBroadcast(
+            this, (id xor 0xCCCCCCCCL).toInt(), dismissIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle(title)
@@ -158,6 +177,8 @@ class AlarmSoundService : Service() {
             .setOngoing(true)
             .setFullScreenIntent(openPi, true)
             .setContentIntent(openPi)
+            .addAction(0, getString(R.string.snooze_btn), snoozePi)
+            .addAction(0, getString(R.string.dismiss), dismissPi)
             .build()
     }
 
