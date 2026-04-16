@@ -30,6 +30,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ReminderAlarm">
 
+        <!-- Android Auto metadata -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -133,6 +138,16 @@
             android:name=".AlarmSoundService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
+
+        <!-- Android Auto car app — shows reminders on the head unit -->
+        <service
+            android:name=".ReminderCarAppService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="androidx.car.app.CarAppService" />
+                <category android:name="androidx.car.app.category.IOT" />
+            </intent-filter>
+        </service>
 
         <receiver
             android:name=".ReminderWidget"

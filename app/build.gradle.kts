@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.reminderalarm"
         minSdk = 24
         targetSdk = 34
-        versionCode = 54
-        versionName = "1.47"
+        versionCode = 55
+        versionName = "1.48"
     }
 
     buildTypes {
@@ -43,4 +43,5 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("org.osmdroid:osmdroid-android:6.1.18")
     implementation("androidx.exifinterface:exifinterface:1.3.7")
+    implementation("androidx.car.app:app:1.4.0")
 }
