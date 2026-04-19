@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ForgetMeNot</string>
+    <string name="add">Dodaj przypomnienie</string>
+    <string name="delete">Usuń</string>
+    <string name="save">Zapisz</string>
+    <string name="save_changes">Zapisz zmiany</string>
+    <string name="empty_hint">Brak przypomnień. Dotknij +, aby dodać.</string>
+    <string name="empty_completed">Brak zakończonych przypomnień.</string>
+    <string name="label_hint">Treść przypomnienia</string>
+    <string name="notes_hint">Notatki (opcjonalne)</string>
+    <string name="pick_date">Data</string>
+    <string name="pick_time">Godzina</string>
+    <string name="vibrate_only">Tylko wibracje (bez dźwięku)</string>
+    <string name="vibrate_only_tag">Wibracje</string>
+    <string name="snooze_btn">Drzemka</string>
+    <string name="notif_snooze_5">⏰ 5 min</string>
+    <string name="notif_snooze_60">⏰ 1 godz.</string>
+    <string name="snooze_title">Odłóż na…</string>
+    <string name="snooze_5m">5 minut</string>
+    <string name="snooze_10m">10 minut</string>
+    <string name="snooze_1h">1 godzina</string>
+    <string name="snooze_4h">4 godziny</string>
+    <string name="snooze_custom">Ustaw sam…</string>
+    <string name="custom_minutes_hint">Ile minut?</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Anuluj</string>
+    <string name="dismiss">Wyłącz alarm</string>
+    <string name="alarm_ringing">Przypomnienie</string>
+    <string name="err_past">Wybierz czas w przyszłości</string>
+    <string name="saved">Zapisano</string>
+    <string name="untitled">(bez nazwy)</string>
+    <string name="done">Zakończone</string>
+    <string name="new_reminder">Nowe przypomnienie</string>
+    <string name="edit_reminder">Edytuj przypomnienie</string>
+    <string name="tab_planned">Zaplanowane</string>
+    <string name="tab_recurring">Cykliczne</string>
+    <string name="tab_completed">Zakończone</string>
+    <string name="empty_recurring">Brak zadań cyklicznych.</string>
+    <string name="theme">Motyw</string>
+    <string name="theme_title">Wybierz motyw</string>
+    <string name="mode_title">Tryb wyświetlania</string>
+    <string name="custom_color_title">Własny kolor</string>
+    <string name="hue">Odcień</string>
+    <string name="saturation">Nasycenie</string>
+    <string name="brightness">Jasność</string>
+    <string name="widget_add_label">ForgetMeNot — Najbliższe</string>
+    <string name="widget_quick_label">ForgetMeNot — Szybki dodaj</string>
+    <string name="widget_quick_add_label">Dodaj</string>
+    <string name="widget_open_label">Otwórz</string>
+    <string name="widget_today_title">Dziś</string>
+    <string name="widget_empty">Brak zaplanowanych przypomnień</string>
+    <string name="parsed_hint">✓ Rozpoznano z treści: %1$s</string>
+    <string name="overlay_title">Wyświetlanie nad aplikacjami</string>
+    <string name="overlay_message">Aby alarm mógł się pokazać na pełnym ekranie nawet gdy używasz innej aplikacji, włącz dla Przypomnień uprawnienie \"Wyświetlanie nad innymi aplikacjami\".</string>
+    <string name="overlay_open_settings">Otwórz ustawienia</string>
+    <string name="overlay_warning_banner">Alarm nie pojawi się nad innymi aplikacjami. Dotknij, aby włączyć uprawnienie.</string>
+
+    <string name="settings_title">Ustawienia</string>
+    <string name="section_sound">Dźwięk</string>
+    <string name="section_alarm_screen">Wygląd alarmu</string>
+    <string name="alarm_sound">Dzwonek alarmu</string>
+    <string name="pick_sound">Wybierz systemowy</string>
+    <string name="upload_sound">Wgraj plik</string>
+    <string name="sound_system_default">Domyślny systemowy</string>
+    <string name="volume">Głośność</string>
+    <string name="volume_system">Używaj głośności systemowej</string>
+    <string name="volume_pct">%1$d%%</string>
+    <string name="use_system_volume">Użyj głośności systemowej</string>
+    <string name="layout_preset">Układ ekranu</string>
+    <string name="layout_time_focus">Godzina jako główna (domyślnie)</string>
+    <string name="layout_task_focus">Zadanie jako główne</string>
+    <string name="layout_minimal">Minimalny (bez godziny)</string>
+    <string name="bg_color">Kolor tła</string>
+    <string name="text_color">Kolor tekstu</string>
+    <string name="snooze_color">Kolor przycisku Drzemka</string>
+    <string name="dismiss_color">Kolor przycisku Wyłącz</string>
+    <string name="pick_bg_color">Wybierz kolor tła</string>
+    <string name="preview_alarm">Podgląd alarmu</string>
+    <string name="section_theme_colors">Kolory motywu</string>
+    <string name="theme_colors_hint">Zmiana koloru automatycznie przełącza motyw na własny.</string>
+    <string name="theme_primary">Główny (toolbar, zakładki)</string>
+    <string name="theme_dark">Ciemny (pasek stanu)</string>
+    <string name="theme_accent">Akcent (FAB, Zapisz)</string>
+    <string name="change">Zmień</string>
+    <string name="auto">Auto</string>
+
+    <string name="preview_header">Podgląd</string>
+    <string name="preview_label">Przykładowe zadanie</string>
+    <string name="preview_notes">Przykładowa notatka do przypomnienia — tak będą wyglądać Twoje notatki na ekranie alarmu.</string>
+
+    <string name="recurrence">Powtarzanie</string>
+    <string name="recurrence_custom">Dostosuj…</string>
+    <string name="recurrence_custom_hint">Co ile dni (2–365)</string>
+    <string name="err_custom_days_range">Podaj liczbę od 2 do 365</string>
+    <string name="priority">Priorytet</string>
+
+    <string name="projects_title">Projekty</string>
+    <string name="tags_title">Tagi</string>
+    <string name="no_projects">Brak projektów. Dotknij +, aby dodać.</string>
+    <string name="no_tags">Brak tagów. Dotknij +, aby dodać.</string>
+    <string name="new_project">Nowy projekt</string>
+    <string name="edit_project">Edytuj projekt</string>
+    <string name="new_tag">Nowy tag</string>
+    <string name="edit_tag">Edytuj tag</string>
+    <string name="project">Projekt</string>
+    <string name="tags">Tagi</string>
+    <string name="no_project">(Brak)</string>
+    <string name="no_tags_selected">(Brak)</string>
+    <string name="no_tags_defined">Najpierw dodaj tagi w menu → Tagi</string>
+    <string name="image_optional">Zdjęcie (opcjonalne)</string>
+    <string name="image_label">Zdjęcie</string>
+    <string name="add_image">Dodaj zdjęcie</string>
+    <string name="add_image_short">Dodaj</string>
+    <string name="image_attached">✓ Załączono</string>
+    <string name="change_image">Zmień zdjęcie</string>
+    <string name="image_load_failed">Nie udało się załadować zdjęcia</string>
+    <string name="filter_all">Wszystkie</string>
+    <string name="reminder_deleted">Przypomnienie usunięte</string>
+    <string name="reminder_completed">Oznaczono jako zakończone</string>
+    <string name="undo">Cofnij</string>
+    <string name="search">Szukaj</string>
+    <string name="search_hint">Szukaj w tytułach i notatkach…</string>
+    <string name="empty_search">Brak wyników dla \"%1$s\"</string>
+    <string name="sort">Sortowanie</string>
+    <string name="sort_title">Sortuj według</string>
+    <string name="empty_cta_add">Dodaj pierwsze przypomnienie</string>
+    <string name="name">Nazwa</string>
+    <string name="color">Kolor</string>
+    <string name="pick_color">Wybierz kolor</string>
+    <string name="err_empty_name">Podaj nazwę</string>
+    <string name="err_name_taken">Ta nazwa jest już zajęta</string>
+    <string name="err_snooze_range">Podaj wartość od 1 do %1$d minut</string>
+    <string name="err_empty_label">Podaj treść przypomnienia</string>
+
+    <!-- Templates -->
+    <string name="templates_title">Szablony</string>
+    <string name="templates_empty">Brak szablonów. Stwórz przypomnienie i zapisz je jako szablon, żeby szybko dodawać podobne.</string>
+    <string name="new_template">Nowy szablon</string>
+    <string name="edit_template">Edytuj szablon</string>
+    <string name="confirm_delete_template">Usunąć szablon?</string>
+    <string name="template_name">Nazwa szablonu</string>
+    <string name="template_name_hint">np. Wyrzuć śmieci</string>
+    <string name="template_label">Treść przypomnienia</string>
+    <string name="template_label_hint">Co ma się pokazać w alarmie</string>
+    <string name="template_notes">Notatki</string>
+    <string name="template_notes_hint">opcjonalne</string>
+    <string name="save_as_template">Zapisz jako szablon</string>
+    <string name="template_saved">Szablon zapisany</string>
+
+    <!-- Stats -->
+    <string name="stats_title">Statystyki</string>
+    <string name="stats_week_header">Ten tydzień</string>
+    <string name="stats_completed_line">%1$d zakończonych</string>
+    <string name="stats_upcoming_line">%1$d zaplanowanych</string>
+    <string name="stats_overdue_line">%1$d zaległych (alarm się nie uruchomił)</string>
+    <string name="stats_streak_header">Seria</string>
+    <string name="stats_longest_line">Najdłuższa: %1$d dni</string>
+    <string name="stats_total_line">Łącznie zakończonych: %1$d</string>
+
+    <!-- Bulk actions -->
+    <string name="bulk_selected">%1$d wybranych</string>
+    <string name="bulk_delete">Usuń</string>
+    <string name="bulk_complete">Oznacz zakończone</string>
+    <string name="bulk_delete_confirm">Usunąć %1$d przypomnień?</string>
+    <string name="confirm_delete">Potwierdź usunięcie</string>
+    <string name="confirm_delete_project">Usunąć projekt? Przypomnienia przestaną być do niego przypisane.</string>
+    <string name="confirm_delete_tag">Usunąć tag? Zostanie zdjęty z przypomnień, które go używały.</string>
+
+    <!-- Quick input -->
+    <string name="section_quick_input">Szybkie wprowadzanie</string>
+    <string name="auto_save_phrase_label">Fraza auto-zapisu</string>
+    <string name="auto_save_phrase_hint">np. \"zapisz zapisz\"</string>
+    <string name="auto_save_phrase_info">Wpisz dowolną frazę — gdy pojawi się w treści przypomnienia, zostanie ono od razu zapisane. Domyślnie: \"zapisz zapisz\".</string>
+    <string name="save_phrase">Zapisz frazę</string>
+    <string name="phrase_saved">Fraza zapisana</string>
+    <string name="shake_snooze_label">Drzemka przez potrząśnięcie</string>
+    <string name="shake_snooze_hint">Mocne potrząśnięcie telefonu podczas alarmu = drzemka 5 minut.</string>
+
+    <!-- Voice input -->
+    <string name="voice_input">Dyktuj</string>
+    <string name="voice_prompt">Podyktuj treść przypomnienia</string>
+    <string name="voice_unavailable">Rozpoznawanie mowy niedostępne na tym telefonie</string>
+    <string name="voice_listening">Słucham…</string>
+    <string name="voice_speaking">Mów dalej…</string>
+    <string name="voice_processing">Przetwarzam…</string>
+    <string name="voice_partial_placeholder">🗣️</string>
+    <string name="voice_stop">Stop</string>
+    <string name="voice_hint">Możesz robić przerwy — dyktowanie kończy się dopiero po kliknięciu „Stop\".</string>
+    <string name="voice_no_mic_permission">Brak uprawnień do mikrofonu</string>
+    <string name="voice_error_generic">Problem z rozpoznawaniem — spróbuj jeszcze raz</string>
+
+    <!-- Location / geofencing -->
+    <string name="location">Lokalizacja</string>
+    <string name="location_none">(brak — alarm według czasu)</string>
+    <string name="location_name">Nazwa miejsca</string>
+    <string name="location_name_hint">np. Dom, Praca, Biedronka</string>
+    <string name="location_coords">Współrzędne</string>
+    <string name="location_no_coords">— nie wybrano —</string>
+    <string name="use_current_location">Użyj obecnej lokalizacji</string>
+    <string name="location_radius">Promień</string>
+    <string name="location_radius_value">%1$d metrów</string>
+    <string name="location_clear">Wyczyść</string>
+    <string name="location_permission_denied">Brak uprawnień do lokalizacji</string>
+    <string name="location_fetch_failed">Nie udało się pobrać lokalizacji — sprawdź GPS</string>
+    <string name="location_tag_generic">Miejsce</string>
+    <string name="location_delay">Opóźnienie (minuty w lokalizacji)</string>
+    <string name="location_delay_none">Brak (alarm natychmiast)</string>
+    <string name="location_delay_value">%1$d min po wejściu</string>
+    <string name="search_address">Szukaj adresu</string>
+    <string name="search_address_hint">np. Biedronka Słowackiego Kraków</string>
+    <string name="geocode_no_results">Nie znaleziono adresu</string>
+    <string name="geocode_failed">Błąd geokodowania</string>
+    <string name="saved_places">Zapisane miejsca</string>
+    <string name="no_saved_places">Brak zapisanych. Dodaj w menu → Miejsca.</string>
+    <string name="places_title">Miejsca</string>
+    <string name="places_empty">Brak zapisanych miejsc. Dodaj swoje ulubione lokalizacje (Dom, Praca, sklep) żeby szybko przypisywać je do przypomnień.</string>
+    <string name="new_place">Nowe miejsce</string>
+    <string name="edit_place">Edytuj miejsce</string>
+    <string name="confirm_delete_place">Usunąć to miejsce?</string>
+    <string name="place_name_hint">np. Dom, Praca, Biedronka Słowackiego</string>
+    <string name="err_no_coords">Podaj współrzędne (GPS lub wyszukaj adres)</string>
+    <string name="pick_on_map">Wybierz na mapie</string>
+    <string name="map_tap_hint">Dotknij mapę, żeby postawić pinezkę</string>
+    <string name="map_confirm">Potwierdź lokalizację</string>
+    <string name="location_background_hint">Dla pewności, że alarm zadziała kiedy aplikacja jest wyłączona, w ustawieniach Androida ustaw lokalizację na „Zawsze zezwalaj\".</string>
+
+    <!-- Welcome / onboarding -->
+    <string name="welcome_title">Witaj w ForgetMeNot</string>
+    <string name="welcome_subtitle">Żeby alarmy działały niezawodnie, potrzebujemy kilku uprawnień. Dotknij każdej karty, aby je przyznać.</string>
+    <string name="welcome_required_header">WYMAGANE</string>
+    <string name="welcome_optional_header">OPCJONALNE</string>
+    <string name="welcome_continue">Gotowe, uruchom aplikację</string>
+    <string name="welcome_footer_hint">Zawsze możesz wrócić tu z Ustawień.</string>
+    <string name="welcome_reopen">Pokaż ekran powitalny</string>
+    <string name="welcome_reopen_hint">Sprawdź, czy masz wszystkie potrzebne uprawnienia.</string>
+    <string name="section_display_colors">Kolory wyświetlania</string>
+    <string name="section_appearance">Wygląd</string>
+    <string name="display_colors_hint">Zmień kolor tła dla trybu jasnego i ciemnego. Domyślnie: biały / ciemny szary.</string>
+    <string name="display_light_bg">Tło trybu jasnego</string>
+    <string name="display_dark_bg">Tło trybu ciemnego</string>
+
+    <!-- Material You -->
+    <string name="section_material_you">Material You (Android 12+)</string>
+    <string name="dynamic_colors_label">Użyj kolorów z tapety</string>
+    <string name="dynamic_colors_hint">Automatycznie dopasowuje paletę do koloru tapety. Wymaga restartu aplikacji.</string>
+
+    <!-- Pre-alarm -->
+    <string name="section_prealarm">Powiadomienie wyprzedzające</string>
+    <string name="prealarm_hint">Cicha notyfikacja \"Nadchodzi: …\" na N minut przed dzwoniącym alarmem. Kliknij, żeby wybrać ile minut.</string>
+    <string name="prealarm_off">Wyłączone</string>
+    <string name="prealarm_value">%1$d minut przed alarmem</string>
+    <string name="prealarm_title">Nadchodzi o %1$s</string>
+    <string name="prealarm_channel_name">Powiadomienie wyprzedzające</string>
+    <string name="prealarm_channel_desc">Cicha notyfikacja kilka minut przed alarmem</string>
+    <string name="prealarm_pick_title">Na ile minut przed?</string>
+
+    <!-- App shortcuts -->
+    <string name="shortcut_new_short">Dodaj</string>
+    <string name="shortcut_new_long">Nowe przypomnienie</string>
+    <string name="shortcut_voice_short">Dyktuj</string>
+    <string name="shortcut_voice_long">Podyktuj przypomnienie</string>
+    <string name="shortcut_today_short">Dziś</string>
+    <string name="shortcut_today_long">Otwórz dzisiejsze</string>
+
+    <!-- Day buckets on the list -->
+    <string name="bucket_overdue">ZALEGŁE</string>
+    <string name="bucket_today">DZIŚ</string>
+    <string name="bucket_tomorrow">JUTRO</string>
+    <string name="bucket_this_week">W TYM TYGODNIU</string>
+    <string name="bucket_later">PÓŹNIEJ</string>
+
+    <!-- Image viewer -->
+    <string name="image_viewer_hint">Szczypnij aby powiększyć • Dwuklik resetuje</string>
+
+    <!-- Theme editor -->
+    <string name="theme_editor_title">Edytor motywu</string>
+    <string name="theme_editor_preview">Podgląd</string>
+    <string name="theme_editor_preview_hint">Dotknij elementu, żeby zmienić jego kolor.</string>
+    <string name="theme_editor_elements">Elementy do edycji</string>
+    <string name="theme_editor_alarm_preview">Ekran alarmu</string>
+    <string name="theme_editor_reset">Przywróć domyślne</string>
+    <string name="theme_editor_reset_confirm">Wszystkie własne kolory zostaną usunięte. Kontynuować?</string>
+
+    <string name="theme_el_primary">Kolor główny</string>
+    <string name="theme_el_primary_desc">Toolbar, zakładki, nagłówki</string>
+    <string name="theme_el_primary_dark">Pasek stanu</string>
+    <string name="theme_el_primary_dark_desc">Ciemniejszy wariant koloru głównego</string>
+    <string name="theme_el_accent">Akcent</string>
+    <string name="theme_el_accent_desc">FAB, Zapisz, aktywne elementy</string>
+    <string name="theme_el_light_bg">Tło jasne</string>
+    <string name="theme_el_light_bg_desc">Tło aplikacji w trybie jasnym</string>
+    <string name="theme_el_dark_bg">Tło ciemne</string>
+    <string name="theme_el_dark_bg_desc">Tło aplikacji w trybie ciemnym</string>
+    <string name="theme_el_alarm_bg">Alarm — tło</string>
+    <string name="theme_el_alarm_bg_desc">Kolor ekranu dzwoniącego alarmu</string>
+    <string name="theme_el_alarm_text">Alarm — tekst</string>
+    <string name="theme_el_alarm_text_desc">Kolor godziny i treści</string>
+    <string name="theme_el_alarm_snooze">Alarm — przycisk Drzemka</string>
+    <string name="theme_el_alarm_snooze_desc">Zielony / dowolny kolor</string>
+    <string name="theme_el_alarm_dismiss">Alarm — przycisk Wyłącz</string>
+    <string name="theme_el_alarm_dismiss_desc">Czerwony / dowolny kolor</string>
+
+    <!-- Navigation drawer -->
+    <string name="nav_header_subtitle">Budzik z przypomnieniami</string>
+    <string name="nav_group_customize">Personalizacja</string>
+    <string name="nav_group_more">Więcej</string>
+
+    <string name="section_permissions">Uprawnienia</string>
+
+    <string name="perm_notif_title">Powiadomienia</string>
+    <string name="perm_notif_desc">Android 13+ wymaga osobnej zgody na powiadomienia. Bez niej alarm się nie pojawi.</string>
+
+    <string name="perm_exact_title">Dokładne alarmy</string>
+    <string name="perm_exact_desc">Żeby alarm uruchomił się dokładnie o wybranej godzinie, a nie za kilka minut.</string>
+
+    <string name="perm_fullscreen_title">Alarm na pełnym ekranie</string>
+    <string name="perm_fullscreen_desc">Android 14+ wymaga zgody, żeby aplikacja mogła pokazać się na całym ekranie przy dzwoniącym alarmie.</string>
+
+    <string name="perm_overlay_title">Wyświetlanie nad innymi aplikacjami</string>
+    <string name="perm_overlay_desc">Żeby alarm pokazał się nawet gdy używasz innej aplikacji lub gier.</string>
+
+    <string name="perm_battery_title">Wyłącz oszczędzanie baterii</string>
+    <string name="perm_battery_desc">Android bez tego może zamknąć aplikację w tle — alarm wtedy nie zadzwoni.</string>
+
+    <string name="perm_location_title">Lokalizacja</string>
+    <string name="perm_location_desc">Wymagane tylko dla przypomnień uruchamianych po wejściu w określone miejsce (np. „kup mleko w Biedronce\").</string>
+
+    <string name="perm_mic_title">Mikrofon</string>
+    <string name="perm_mic_desc">Wymagane tylko dla funkcji dyktowania treści przypomnień.</string>
+
+    <!-- Export / Import / Backup -->
+    <string name="section_data">Dane</string>
+    <string name="export_data">Eksportuj dane</string>
+    <string name="import_data">Importuj dane</string>
+    <string name="export_success">Dane wyeksportowane pomyślnie</string>
+    <string name="export_failed">Błąd podczas eksportu</string>
+    <string name="import_success">Zaimportowano: %1$d przypomnień, %2$d projektów, %3$d tagów</string>
+    <string name="import_failed">Błąd importu — sprawdź format pliku</string>
+    <string name="last_backup">Ostatnia kopia automatyczna:</string>
+    <string name="backup_never">brak</string>
+    <string name="backup_auto_info">Kopia tworzona automatycznie przy każdym uruchomieniu aplikacji (maks. 5 plików, przechowywane lokalnie).</string>
+    <string name="backup_external_title">Zewnętrzny folder kopii</string>
+    <string name="backup_external_info">Wybierz folder, do którego aplikacja będzie zapisywać kopie zapasowe. Dzięki temu przetrwają odinstalowanie aplikacji. Jeśli masz zainstalowanego Dysk Google, możesz wybrać folder z Dysku w systemowym oknie wyboru.</string>
+    <string name="backup_folder_label">Folder:</string>
+    <string name="backup_folder_none">nie wybrano</string>
+    <string name="pick_backup_folder">Wybierz folder</string>
+    <string name="clear">Wyczyść</string>
+    <string name="backup_folder_saved">Folder zapisany — kopia utworzona</string>
+    <string name="backup_folder_cleared">Folder wyczyszczony</string>
+
+    <!-- Share target -->
+    <string name="share_target_label">Dodaj jako przypomnienie</string>
+
+    <!-- Color picker -->
+    <string name="color_presets">Gotowe kolory</string>
+    <string name="color_favorites">Ulubione</string>
+    <string name="color_favorites_empty">Brak ulubionych. Wybierz kolor i kliknij „+ Dodaj\".</string>
+    <string name="color_fav_add">+ Dodaj</string>
+    <string name="color_fav_added">Dodano do ulubionych</string>
+    <string name="color_fav_removed">Usunięto z ulubionych</string>
+    <string name="color_fav_longpress_hint">Przytrzymaj ulubiony kolor, aby go usunąć.</string>
+    <string name="color_harmony">Pasujące kolory</string>
+    <string name="color_harmony_hint">Kliknij dowolny, aby go użyć</string>
+    <string name="color_fine_tune">Dopracuj (odcień / nasycenie / jasność)</string>
+    <string name="harmony_complementary">Komplement</string>
+    <string name="harmony_analogous">Analogiczne</string>
+    <string name="harmony_triadic">Triada</string>
+</resources>

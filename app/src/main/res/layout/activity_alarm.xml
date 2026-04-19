@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/alarmRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0D1B2A">
+
+    <!-- The full-screen photo. Stays hidden unless the reminder has an image. -->
+    <ImageView
+        android:id="@+id/alarmImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/image_optional"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+
+    <!-- Dark scrim so white text stays readable over arbitrary photos. -->
+    <View
+        android:id="@+id/alarmScrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99000000"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/alarmContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="32dp">
+
+        <TextView
+            android:id="@+id/alarmHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/alarm_ringing"
+            android:textColor="#9DB4D0"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/alarmTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textColor="#FFFFFF"
+            android:textSize="72sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/alarmLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/alarmNotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:textColor="#B8D0E7"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <Space
+            android:id="@+id/alarmSpacer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/btnSnooze"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginBottom="12dp"
+            android:text="@string/snooze_btn" />
+
+        <Button
+            android:id="@+id/btnDismiss"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:backgroundTint="#E63946"
+            android:text="@string/dismiss"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+</FrameLayout>

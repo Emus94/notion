@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_templates"
+            android:title="@string/templates_title" />
+        <item
+            android:id="@+id/nav_projects"
+            android:title="@string/projects_title" />
+        <item
+            android:id="@+id/nav_tags"
+            android:title="@string/tags_title" />
+        <item
+            android:id="@+id/nav_places"
+            android:title="@string/places_title" />
+    </group>
+
+    <item android:title="@string/nav_group_customize">
+        <menu>
+            <item
+                android:id="@+id/nav_theme_editor"
+                android:title="@string/theme_editor_title" />
+            <item
+                android:id="@+id/nav_theme"
+                android:title="@string/theme_title" />
+            <item
+                android:id="@+id/nav_mode"
+                android:title="@string/mode_title" />
+            <item
+                android:id="@+id/nav_stats"
+                android:title="@string/stats_title" />
+        </menu>
+    </item>
+
+    <item android:title="@string/nav_group_more">
+        <menu>
+            <item
+                android:id="@+id/nav_settings"
+                android:title="@string/settings_title" />
+            <item
+                android:id="@+id/nav_welcome"
+                android:title="@string/welcome_reopen" />
+        </menu>
+    </item>
+
+</menu>

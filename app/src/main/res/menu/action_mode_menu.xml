@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_bulk_complete"
+        android:icon="@android:drawable/checkbox_on_background"
+        android:title="@string/bulk_complete"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_bulk_delete"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:title="@string/bulk_delete"
+        app:showAsAction="ifRoom" />
+
+</menu>

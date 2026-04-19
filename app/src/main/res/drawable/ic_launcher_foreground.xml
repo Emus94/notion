@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!--
+      Forget-me-not flower: five round circular petals arranged
+      symmetrically around a golden centre. Petals are simple circles
+      positioned at 72-degree intervals, giving the characteristic
+      puffy 5-petal look from the reference icon.
+      Centre at (54, 48), petal radius 13, distance from centre 13.
+    -->
+
+    <!-- Petal 1 — top -->
+    <path
+        android:fillColor="#5BBFE8"
+        android:pathData="M54,35 m-13,0 a13,13 0,1,1 26,0 a13,13 0,1,1 -26,0" />
+
+    <!-- Petal 2 — top right -->
+    <path
+        android:fillColor="#4AAFE0"
+        android:pathData="M66.4,44 m-13,0 a13,13 0,1,1 26,0 a13,13 0,1,1 -26,0" />
+
+    <!-- Petal 3 — bottom right -->
+    <path
+        android:fillColor="#5BBFE8"
+        android:pathData="M61.6,58.5 m-13,0 a13,13 0,1,1 26,0 a13,13 0,1,1 -26,0" />
+
+    <!-- Petal 4 — bottom left -->
+    <path
+        android:fillColor="#4AAFE0"
+        android:pathData="M46.4,58.5 m-13,0 a13,13 0,1,1 26,0 a13,13 0,1,1 -26,0" />
+
+    <!-- Petal 5 — top left -->
+    <path
+        android:fillColor="#5BBFE8"
+        android:pathData="M41.6,44 m-13,0 a13,13 0,1,1 26,0 a13,13 0,1,1 -26,0" />
+
+    <!-- Golden centre — outer ring -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M54,48 m-7,0 a7,7 0,1,1 14,0 a7,7 0,1,1 -14,0" />
+
+    <!-- Small yellow petals around centre (decorative detail) -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M54,41.5 m-2,0 a2,2 0,1,1 4,0 a2,2 0,1,1 -4,0" />
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M60,45.5 m-2,0 a2,2 0,1,1 4,0 a2,2 0,1,1 -4,0" />
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M58,52 m-2,0 a2,2 0,1,1 4,0 a2,2 0,1,1 -4,0" />
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M50,52 m-2,0 a2,2 0,1,1 4,0 a2,2 0,1,1 -4,0" />
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M48,45.5 m-2,0 a2,2 0,1,1 4,0 a2,2 0,1,1 -4,0" />
+
+    <!-- Orange inner dot -->
+    <path
+        android:fillColor="#FF8F00"
+        android:pathData="M54,48 m-3,0 a3,3 0,1,1 6,0 a3,3 0,1,1 -6,0" />
+</vector>

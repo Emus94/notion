@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_search"
+        android:icon="@android:drawable/ic_menu_search"
+        android:iconTint="@android:color/white"
+        android:title="@string/search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="collapseActionView|ifRoom" />
+    <item
+        android:id="@+id/action_sort"
+        android:title="@string/sort"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_projects"
+        android:title="@string/projects_title"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_tags"
+        android:title="@string/tags_title"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_templates"
+        android:title="@string/templates_title"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_places"
+        android:title="@string/places_title"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_stats"
+        android:title="@string/stats_title"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_theme"
+        android:title="@string/theme"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_mode"
+        android:title="@string/mode_title"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/settings_title"
+        app:showAsAction="never" />
+</menu>
