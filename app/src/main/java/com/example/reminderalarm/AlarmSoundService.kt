@@ -177,12 +177,20 @@ class AlarmSoundService : Service() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
+        val notes = reminder?.notes?.takeIf { it.isNotBlank() }
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle(title)
             .setContentText(getString(R.string.alarm_ringing))
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .setBigContentTitle(title)
+                    .bigText(notes ?: getString(R.string.alarm_ringing))
+            )
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setFullScreenIntent(openPi, true)
             .setContentIntent(openPi)
